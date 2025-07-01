@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* Customizações globais, se necessário */
+/* Você pode remover o @apply do body se preferir usar a classe no HTML */
+html, body {
+  overflow-x: hidden;
+}
