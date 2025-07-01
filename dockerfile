@@ -9,8 +9,9 @@ COPY tailwind.config.js ./
 COPY postcss.config.js ./
 COPY . .
 
-# As variáveis VITE_ já estão no ambiente do build via Easypanel!
 RUN npm install
+# Corrige permissões dos binários
+RUN find node_modules/.bin -type f -exec chmod +x {} \;
 RUN npm run build
 
 FROM nginx:1.25-alpine
