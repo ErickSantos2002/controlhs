@@ -3,32 +3,32 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copia os arquivos de dependência e configs
+# Copia configs e dependências primeiro (melhora cache)
 COPY package*.json ./
 COPY vite.config.ts ./
 COPY tsconfig.json ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
 
-# Instala as dependências
+# Instala dependências
 RUN npm install
 
-# Copia o restante do projeto (src, public etc)
+# Copia todo o restante do projeto (inclui src/ e public/)
 COPY . .
 
-# Corrige permissões dos binários
+# Corrige permissões dos binários (opcional)
 RUN find node_modules/.bin -type f -exec chmod +x {} \;
 
-# Build do projeto (gera a pasta dist)
+# Build do projeto Vite (gera dist/)
 RUN npm run build
 
-# Etapa final com Nginx
+# Etapa de produção
 FROM nginx:1.25-alpine
 
-# Copia os arquivos buildados para a pasta do Nginx
+# Copia o build gerado
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Habilita o fallback para SPA (React Router)
+# SPA fallback (React Router)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
