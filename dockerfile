@@ -1,9 +1,10 @@
 # Etapa de build
 FROM node:20-alpine AS builder
 
+# Diretório de trabalho
 WORKDIR /app
 
-# Copia configs e dependências primeiro (melhora cache)
+# Copia apenas os arquivos de configuração e dependências
 COPY package*.json ./
 COPY vite.config.ts ./
 COPY tsconfig.json ./
@@ -13,24 +14,26 @@ COPY postcss.config.js ./
 # Instala dependências
 RUN npm install
 
-# Copia todo o restante do projeto (inclui src/ e public/)
+# Copia o restante do projeto (src/, index.html, public/, etc)
 COPY . .
 
-# Corrige permissões dos binários (opcional)
+# Corrige permissões para Alpine (opcional, mas bom)
 RUN find node_modules/.bin -type f -exec chmod +x {} \;
 
-# Build do projeto Vite (gera dist/)
+# Build do projeto Vite (gera /dist)
 RUN npm run build
 
-# Etapa de produção
+# Etapa final: Nginx para servir os arquivos
 FROM nginx:1.25-alpine
 
-# Copia o build gerado
+# Copia o build final da etapa anterior
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# SPA fallback (React Router)
+# Substitui o arquivo de configuração do Nginx (SPA fallback para React Router)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Expõe a porta 80 para acesso HTTP
 EXPOSE 80
 
+# Comando de inicialização do Nginx
 CMD ["nginx", "-g", "daemon off;"]
