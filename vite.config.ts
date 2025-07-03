@@ -7,9 +7,13 @@ export default defineConfig({
   server: {
     port: 5173,
   },
-  build: {
-    rollupOptions: {
-      input: path.resolve(__dirname, 'public/index.html'),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
     },
+  },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
   },
 });
