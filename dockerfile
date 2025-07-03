@@ -7,6 +7,11 @@ COPY vite.config.ts ./
 COPY tsconfig.json ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
+
+# Copia a pasta public (com o index.html)
+COPY public ./public
+
+# Copia o restante do projeto
 COPY . .
 
 RUN npm install
@@ -18,7 +23,7 @@ FROM nginx:1.25-alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# (Opcional) Se quiser rotas SPA:
+# Descomente se precisar de SPA fallback
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
