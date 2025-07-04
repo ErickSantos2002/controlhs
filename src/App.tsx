@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
+import "./styles/index.css"; // Importa o Tailwind e estilos globais
 import AppRoutes from "./router";
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";

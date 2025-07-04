@@ -19,7 +19,7 @@ const Header: React.FC = () => {
     <header className="bg-white shadow flex items-center justify-between px-6 py-3">
       <div className="flex items-center gap-2">
         {/* Seu logo ou nome do sistema */}
-        <span className="font-bold text-xl text-blue-700 tracking-wide">ControlHS</span>
+        <span className="font-bold text-xl text-blue-700 tracking-wide">DataCoreHS</span>
       </div>
       <div className="flex items-center gap-4">
         <span className="text-gray-700">

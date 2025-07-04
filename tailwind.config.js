@@ -1,16 +1,14 @@
-/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: ['bg-white', 'bg-red-500', 'bg-blue-500'],
   theme: {
     extend: {
-      // Aqui você pode customizar cores, fontes, etc.
       colors: {
-        // Exemplo de cor customizada
         primary: {
-          DEFAULT: "#2563eb", // Azul padrão do Tailwind (você pode trocar depois)
+          DEFAULT: "#2563eb",
         },
       },
     },
