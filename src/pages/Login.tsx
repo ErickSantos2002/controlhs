@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react"
 import { useAuth } from "../hooks/useAuth"
 import { useNavigate } from "react-router-dom"
 import logo from "../assets/logo.png"
-import fundo from "../assets/fundo.png"
+import fundo from "../assets/fundo.jpeg"
 
 const Login: React.FC = () => {
   const { login, loading, error, user } = useAuth()

@@ -3,16 +3,23 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
+    label: "Início",
+    to: "/inicio",
+    icon: (
+      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" />
+      </svg>
+    ),
+  },
+  {
     label: "Dashboard",
     to: "/dashboard",
     icon: (
-      // Exemplo de ícone SVG, pode trocar ou adicionar outros itens depois
       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 13h4v-2H3v2zm6 8h2v-2h-2v2zm0-18v2h2V3h-2zm12 7v2h-2v-2h2zm-8-4V3h-2v2h2zm-2 14v2h2v-2h-2zm4-2v2h2v-2h-2z" />
       </svg>
     ),
   },
-  // Adicione mais itens de menu conforme necessário
 ];
 
 const Sidebar: React.FC = () => {
