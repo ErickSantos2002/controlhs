@@ -7,6 +7,14 @@ export default defineConfig({
   root: ".", // garante que a raiz é o diretório atual (opcional, só para evitar erros)
   server: {
     port: 5173,
+    proxy: {
+      '/api': {
+        target: 'https://tinyapi.healthsafetytech.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: path => path.replace(/^\/api/, ''),
+      }
+    }
   },
   resolve: {
     alias: {

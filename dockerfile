@@ -32,8 +32,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Substitui o arquivo de configuração do Nginx (SPA fallback para React Router)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expõe a porta 80 para acesso HTTP
-EXPOSE 80
+# Expõe a porta 60 para acesso HTTP
+EXPOSE 60
 
 # Comando de inicialização do Nginx
 CMD ["nginx", "-g", "daemon off;"]

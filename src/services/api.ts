@@ -1,17 +1,10 @@
-// src/services/api.ts
-
 import axios from "axios";
 
-// Usar variável de ambiente para baseURL, para facilitar deploy e ambientes distintos
 const baseURL = import.meta.env.VITE_API_URL || "https://authapi.healthsafetytech.com";
 
-// Cria uma instância do axios já configurada
-const api = axios.create({
-  baseURL,
-});
+const authApi = axios.create({ baseURL });
 
-// Interceptor: adiciona o Authorization com Bearer token se houver token no localStorage
-api.interceptors.request.use(
+authApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("access_token");
     if (token && config.headers) {
@@ -22,4 +15,16 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export default api;
+export async function updateUserPassword(userId: number, novaSenha: string) {
+  try {
+    const response = await axios.put(`${baseURL}/users/${userId}`, {
+      password: novaSenha,
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Erro ao atualizar senha:", error);
+    throw error;
+  }
+}
+
+export default authApi;
