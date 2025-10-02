@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://tinyapi.healthsafetytech.com',
+        target: 'https://authapicontrolhs.healthsafetytech.com',
         changeOrigin: true,
         secure: true,
         rewrite: path => path.replace(/^\/api/, ''),

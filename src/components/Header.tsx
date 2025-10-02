@@ -70,7 +70,7 @@ const Header: React.FC = () => {
               alt="Logo"
               className="w-6 h-6 transition-transform duration-500 group-hover:rotate-[360deg]"
             />
-            <span>DataCoreHS</span>
+            <span>ControlHS</span>
           </Link>
         </div>
 

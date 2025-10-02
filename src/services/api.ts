@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL || "https://authapi.healthsafetytech.com";
+const baseURL = import.meta.env.VITE_API_URL || "https://authapicontrolhs.healthsafetytech.com";
 
 const authApi = axios.create({ baseURL });
 
