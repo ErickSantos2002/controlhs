@@ -6,7 +6,7 @@ const Bloqueio: React.FC = () => {
     <div className="p-6 h-full bg-gray-50 dark:bg-[#0f172a] flex flex-col items-center justify-center text-center transition-colors">
 
       <Helmet>
-        <title>Acesso negado | ControlHS</title>
+        <title>Acesso negado | DataCoreHS</title>
       </Helmet>
 
       <h1 className="

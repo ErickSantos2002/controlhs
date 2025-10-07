@@ -9,34 +9,37 @@ const Home: React.FC = () => {
 
   return (
     <div className="p-6">
-      {/* Card do título e boas-vindas */}
-      <div className="bg-white dark:bg-[#0f172a] shadow-sm rounded-xl p-6 mb-6 transition-colors">
-        <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-yellow-400">
+      {/* 🏠 Card do título e boas-vindas */}
+      <div className="bg-white dark:bg-mediumGray shadow-sm rounded-xl p-6 mb-6 transition-colors border border-gray-200 dark:border-accentGray">
+        <h1 className="text-3xl font-bold mb-4 text-gray-800 dark:text-lightGray">
           Início
         </h1>
 
-        <p className="mb-2 text-gray-700 dark:text-gray-200">
-          Seja bem-vindo ao sistema ControlHS,{" "}
-          <span className="font-semibold">{user?.username}</span>!
+        <p className="mb-2 text-gray-700 dark:text-gray-300">
+          Seja bem-vindo ao sistema DataCoreHS,{" "}
+          <span className="font-semibold text-gray-900 dark:text-white">
+            {user?.username}
+          </span>
+          !
         </p>
 
         <p className="text-gray-600 dark:text-gray-300">
           Sua permissão:{" "}
-          <span className="inline-block rounded bg-blue-100 dark:bg-blue-900 px-2 py-1 text-blue-800 dark:text-blue-200">
+          <span className="inline-block rounded bg-blue-100 dark:bg-accentGray/50 px-2 py-1 text-blue-800 dark:text-lightGray">
             {user?.role}
           </span>
         </p>
       </div>
 
-      {/* Card secundário de status */}
-      <div className="p-6 rounded-xl bg-white dark:bg-[#0f172a] shadow transition-colors mb-6">
-        <span className="text-gray-500 dark:text-gray-300">
+      {/* 📊 Card secundário de status */}
+      <div className="p-6 rounded-xl bg-white dark:bg-mediumGray shadow transition-colors mb-6 border border-gray-200 dark:border-accentGray">
+        <span className="text-gray-600 dark:text-gray-300">
           Você está autenticado. Agora você pode visualizar os módulos e dashboards do sistema!
         </span>
       </div>
 
-      {/* Novo card de troca de senha (mesmo estilo dos outros) */}
-      <div className="p-6 rounded-xl bg-white dark:bg-[#0f172a] shadow transition-colors">
+      {/* 🔐 Card de troca de senha */}
+      <div className="p-6 rounded-xl bg-white dark:bg-mediumGray shadow transition-colors border border-gray-200 dark:border-accentGray">
         <p className="text-gray-700 dark:text-gray-200 font-medium">
           Deseja mais segurança? Troque sua senha clicando{" "}
           <button
@@ -48,7 +51,7 @@ const Home: React.FC = () => {
         </p>
       </div>
 
-      {/* Modal de trocar senha */}
+      {/* 🧩 Modal de troca de senha */}
       <ModalTrocarSenha
         isOpen={modalAberta}
         onClose={() => setModalAberta(false)}

@@ -2,67 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* 1) preencher a viewport inteira */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+/* 2) fundo padrão (claro) no body e no #root */
+body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
-
-  /* 🔥 fundo padrão (modo claro) */
-  @apply bg-white text-black transition-colors;
+  /* 🌞 Claro */
+  @apply bg-gray-100 text-black transition-colors;
 }
 
-.dark body {
-  /* 🔥 fundo modo noturno */
-  @apply bg-darkBlue text-white;
+/* 3) mesmo fundo no modo escuro para body, html e #root */
+.dark html,
+.dark body,
+.dark #root {
+  /* 🌚 Escuro (tema cinza) */
+  @apply bg-darkGray text-lightGray transition-colors;
 }
 
-/* Scrollbar customizado */
+/* 🔹 Scrollbar customizado */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: transparent; /* fundo do track */
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background-color: #4b5563; /* cinza médio */
   border-radius: 6px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #2563eb; /* azul mais vivo no hover */
+  background-color: #2563eb; /* azul no hover */
 }
-
-/* Dark mode */
+/* 🌑 Scrollbar no dark */
 .dark ::-webkit-scrollbar-thumb {
-  background-color: #6b7280; /* cinza claro no dark */
+  background-color: #6b7280;
 }
-
 .dark ::-webkit-scrollbar-thumb:hover {
-  background-color: #3b82f6; /* azul no hover no dark */
+  background-color: #525252;
 }
 
+/* 📊 Variáveis base */
 @layer base {
   :root {
-    --chart-text: #000000;   /* cor padrão para texto de gráfico */
-    --chart-axis: #475569;   /* cor padrão das linhas dos eixos */
+    --chart-text: #000000;
+    --chart-axis: #475569;
   }
-
   .dark {
-    --chart-text: #e2e8f0;   /* texto claro no dark */
-    --chart-axis: #94a3b8;   /* eixo mais claro no dark */
+    --chart-text: #e0e0e0;
+    --chart-axis: #a3a3a3;
+
+    /* 🎨 Paleta adicional para componentes */
+    --bg-primary: #1e1e1e;   /* fundo principal */
+    --bg-secondary: #2a2a2a; /* cards */
+    --text-primary: #d1d1d1; /* texto */
+    --border-color: #3a3a3a; /* bordas */
   }
 }
-@layer base {
-  :root {
-    --chart-text: #000000;   /* cor padrão para texto de gráfico */
-    --chart-axis: #475569;   /* cor padrão das linhas dos eixos */
-  }
 
-  .dark {
-    --chart-text: #e2e8f0;   /* texto claro no dark */
-    --chart-axis: #94a3b8;   /* eixo mais claro no dark */
-  }
+/* Exemplo opcional:
+.dark .card {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
+*/

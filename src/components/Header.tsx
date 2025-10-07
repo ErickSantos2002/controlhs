@@ -52,18 +52,20 @@ const Header: React.FC = () => {
   return (
     <>
       {/* HEADER FIXO */}
-      <header className="sticky top-0 inset-x-0 z-50 bg-white/80 dark:bg-[#0a192f]/90 backdrop-blur-md shadow flex items-center justify-between px-4 py-3 transition-colors">
+      <header className="sticky top-0 inset-x-0 z-50 bg-white dark:bg-mediumGray backdrop-blur-sm shadow-sm flex items-center justify-between px-4 py-3 transition-colors border-b border-gray-200 dark:border-accentGray">
         <div className="flex items-center gap-4">
+          {/* Botão menu mobile */}
           <button
             onClick={abrirMenu}
-            className="block lg:hidden text-gray-700 dark:text-gray-200 text-2xl focus:outline-none"
+            className="block lg:hidden text-gray-700 dark:text-lightGray text-2xl focus:outline-none"
           >
             ☰
           </button>
 
+          {/* Logo + título */}
           <Link
             to="/inicio"
-            className="hidden lg:flex items-center gap-2 font-bold text-xl text-blue-700 dark:text-blue-400 hover:scale-105 transition no-underline group"
+            className="hidden lg:flex items-center gap-2 font-bold text-xl text-blue-700 dark:text-lightGray hover:scale-105 transition no-underline group"
           >
             <img
               src={logo}
@@ -74,6 +76,7 @@ const Header: React.FC = () => {
           </Link>
         </div>
 
+        {/* Infos e botão sair */}
         <div className="flex items-center gap-4 text-sm">
           <span className="text-gray-700 dark:text-gray-300 max-w-[160px] truncate">
             {user?.username}{" "}
@@ -82,7 +85,7 @@ const Header: React.FC = () => {
           {!menuVisivel && (
             <button
               onClick={handleLogout}
-              className="bg-blue-600 text-white px-3 py-1 rounded-lg font-semibold hover:bg-blue-700"
+              className="bg-blue-600 text-white px-3 py-1 rounded-lg font-semibold hover:bg-blue-700 transition"
             >
               Sair
             </button>
@@ -99,15 +102,15 @@ const Header: React.FC = () => {
           />
           <div
             ref={menuRef}
-            className={`fixed inset-y-0 left-0 w-[70vw] bg-white dark:bg-[#0a192f] z-50 shadow-lg px-6 pb-6 flex flex-col transform transition-transform duration-300 ${
+            className={`fixed inset-y-0 left-0 w-[70vw] bg-white dark:bg-mediumGray z-50 shadow-lg px-6 pb-6 flex flex-col transform transition-transform duration-300 ${
               menuAnimado ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            <div className="flex items-center justify-between py-3 mb-3">
+            {/* Cabeçalho do menu */}
+            <div className="flex items-center justify-between py-3 mb-3 border-b border-gray-200 dark:border-accentGray">
               <div className="flex items-center gap-2">
                 <img src={logo} alt="Logo" className="w-6 h-6 object-contain" />
-
-                <span className="font-bold text-lg text-blue-700 dark:text-blue-400">
+                <span className="font-bold text-lg text-blue-700 dark:text-lightGray">
                   Menu
                 </span>
               </div>
@@ -121,20 +124,68 @@ const Header: React.FC = () => {
 
             {/* Navegação */}
             <nav className="flex flex-col gap-4">
-              <Link to="/inicio" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Início</Link>
-              <Link to="/dashboard" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Dashboard</Link>
-              <Link to="/vendas" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Vendas</Link>
-              <Link to="/servicos" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Serviços</Link>
-              <Link to="/clientes" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Clientes</Link>
-              <Link to="/vendedores" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Vendedores</Link>
-              <Link to="/estoque" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Estoque</Link>
+              <Link
+                to="/inicio"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Início
+              </Link>
+              <Link
+                to="/dashboard"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/vendas"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Vendas
+              </Link>
+              <Link
+                to="/servicos"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Serviços
+              </Link>
+              <Link
+                to="/clientes"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Clientes
+              </Link>
+              <Link
+                to="/vendedores"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Vendedores
+              </Link>
+              <Link
+                to="/estoque"
+                onClick={fecharMenu}
+                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+              >
+                Estoque
+              </Link>
               {user?.role === "admin" && (
-                <Link to="/configuracoes" onClick={fecharMenu} className="text-gray-700 dark:text-gray-200 font-medium">Configurações</Link>
+                <Link
+                  to="/configuracoes"
+                  onClick={fecharMenu}
+                  className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
+                >
+                  Configurações
+                </Link>
               )}
             </nav>
 
             {/* Rodapé do menu mobile */}
-            <div className="mt-auto flex flex-col gap-3">
+            <div className="mt-auto flex flex-col gap-3 border-t border-gray-200 dark:border-accentGray pt-4">
               {/* Switch modo noturno */}
               <div className="flex items-center justify-between font-medium text-gray-700 dark:text-gray-200 py-2">
                 <div className="flex items-center gap-2">
@@ -151,7 +202,6 @@ const Header: React.FC = () => {
                       className="w-5 h-5"
                     />
                   )}
-                  <span>{darkMode ? "" : ""}</span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
@@ -177,9 +227,7 @@ const Header: React.FC = () => {
                 />
                 <span className="ml-2">Sair</span>
               </button>
-
             </div>
-
           </div>
         </>
       )}

@@ -85,7 +85,7 @@ const AppRoutes: React.FC = () => (
         </ProtectedRoute>
       }
     />
-
+    
     <Route
       path="/configuracoes"
       element={

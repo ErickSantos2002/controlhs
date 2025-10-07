@@ -1,3 +1,4 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class", // 🔥 habilita suporte ao modo escuro baseado em classe
   content: [
@@ -8,18 +9,24 @@ module.exports = {
     "bg-white",
     "bg-red-500",
     "bg-blue-500",
-    "dark:bg-darkBlue",
-    "dark:text-gray-200",
-    "dark:hover:bg-blue-700",
+    "dark:bg-darkGray",
+    "dark:text-lightGray",
+    "dark:hover:bg-accentGray",
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#2563eb",
+          DEFAULT: "#2563eb", // azul principal (mantido)
         },
-        darkBlue: "#1e3a8a", // 🔥 cor principal do modo noturno
+
+        // 🎨 Paleta de tons de cinza para o modo escuro
+        darkGray: "#1e1e1e",    // fundo principal (substitui o darkBlue)
+        mediumGray: "#2a2a2a",  // painéis / cards
+        lightGray: "#d1d1d1",   // texto claro
+        accentGray: "#3a3a3a",  // bordas, hover, divisores
       },
+
       keyframes: {
         blinkLight: {
           "0%, 100%": { color: "#000000" }, // preto
@@ -30,6 +37,7 @@ module.exports = {
           "50%": { color: "#dc2626" }, // vermelho
         },
       },
+
       animation: {
         blinkLight: "blinkLight 1s infinite",
         blinkDark: "blinkDark 1s infinite",

@@ -47,7 +47,9 @@ const Configuracoes: React.FC = () => {
       </div>
 
       {/* Lista de configurações */}
+      <div className="bg-white dark:bg-[#0f172a] rounded-xl shadow p-4 transition-colors">
       
+      </div>
     </div>
   );
 };
