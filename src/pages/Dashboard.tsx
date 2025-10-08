@@ -424,7 +424,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
                   ].map((header, idx) => (
                     <th
                       key={idx}
-                      className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200"
+                      className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200"
                     >
                       {header}
                     </th>
@@ -480,34 +480,34 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
                                 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
                                 ${index % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-gray-50 dark:bg-[#252525]"}`}
                   >
-                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">
                       {bem.nome}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
                       {bem.categoria}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
                       {bem.responsavel}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
                       {bem.local}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
                       {new Date(bem.dataAquisicao).toLocaleDateString("pt-BR")}
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-blue-500 dark:text-blue-400">
+                    <td className="px-4 py-3 text-sm font-semibold text-blue-500 dark:text-blue-400 text-center">
                       {bem.valorAtual.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
                     </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-orange-500 dark:text-orange-400">
+                    <td className="px-4 py-3 text-sm font-semibold text-orange-500 dark:text-orange-400 text-center">
                       {bem.valorDepreciado.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-center">
                       <span
                         className={`inline-flex justify-center items-center text-center whitespace-nowrap px-2 py-1 text-xs font-semibold rounded-full ${
                           bem.situacao === "Ativo"
