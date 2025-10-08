@@ -18,7 +18,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100 dark:bg-darkGray text-gray-900 dark:text-lightGray transition-colors">
+    <div className="h-screen flex flex-col bg-gray-100 dark:bg-darkGray text-gray-900 dark:text-lightGray transition-colors">
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
