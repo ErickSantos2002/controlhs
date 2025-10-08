@@ -30,7 +30,7 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#0a192f]">
+    <div className="fixed inset-0 flex items-center justify-center gray-600">
       {/* Card vidro fosco */}
       <div className="relative w-full max-w-[360px] bg-white/10 backdrop-blur-md border border-white/20 
                       rounded-[20px] px-8 pt-14 pb-8 text-center 
@@ -38,7 +38,7 @@ const Login: React.FC = () => {
         
         {/* Ícone de usuário no topo */}
         <div className="absolute -top-10 left-1/2 transform -translate-x-1/2">
-          <div className="w-20 h-20 rounded-full bg-[#0f172a] flex items-center justify-center 
+          <div className="w-20 h-20 rounded-full bg-[#2d2e2e] flex items-center justify-center 
                           shadow-lg border-2 border-white/30">
             <img
               src="https://img.icons8.com/?size=100&id=84020&format=png&color=ffffff"
