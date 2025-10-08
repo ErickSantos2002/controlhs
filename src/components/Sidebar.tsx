@@ -42,61 +42,6 @@ const Sidebar: React.FC = () => {
         />
       ),
     },
-    {
-      label: "Vendas",
-      to: "/vendas",
-      icon: (isActive: boolean) => (
-        <img
-          src={`https://img.icons8.com/?size=100&id=js1Qz0RqXlSO&format=png&color=${getColor(isActive)}`}
-          alt="Vendas"
-          className={iconBaseClass}
-        />
-      ),
-    },
-    {
-      label: "Serviços",
-      to: "/servicos",
-      icon: (isActive: boolean) => (
-        <img
-          src={`https://img.icons8.com/?size=100&id=30379&format=png&color=${getColor(isActive)}`}
-          alt="Serviços"
-          className={iconBaseClass}
-        />
-      ),
-    },
-    {
-      label: "Clientes",
-      to: "/clientes",
-      icon: (isActive: boolean) => (
-        <img
-          src={`https://img.icons8.com/?size=100&id=59220&format=png&color=${getColor(isActive)}`}
-          alt="Clientes"
-          className={iconBaseClass}
-        />
-      ),
-    },
-    {
-      label: "Vendedores",
-      to: "/vendedores",
-      icon: (isActive: boolean) => (
-        <img
-          src={`https://img.icons8.com/?size=100&id=JWjVwvCeYGIZ&format=png&color=${getColor(isActive)}`}
-          alt="Vendedores"
-          className={iconBaseClass}
-        />
-      ),
-    },
-    {
-      label: "Estoque",
-      to: "/estoque",
-      icon: (isActive: boolean) => (
-        <img
-          src={`https://img.icons8.com/?size=100&id=392&format=png&color=${getColor(isActive)}`}
-          alt="Estoque"
-          className={iconBaseClass}
-        />
-      ),
-    },
     ...(user?.role === "admin"
       ? [
           {

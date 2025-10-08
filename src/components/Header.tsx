@@ -138,41 +138,6 @@ const Header: React.FC = () => {
               >
                 Dashboard
               </Link>
-              <Link
-                to="/vendas"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Vendas
-              </Link>
-              <Link
-                to="/servicos"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Serviços
-              </Link>
-              <Link
-                to="/clientes"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Clientes
-              </Link>
-              <Link
-                to="/vendedores"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Vendedores
-              </Link>
-              <Link
-                to="/estoque"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Estoque
-              </Link>
               {user?.role === "admin" && (
                 <Link
                   to="/configuracoes"

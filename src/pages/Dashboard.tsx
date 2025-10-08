@@ -89,8 +89,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
         </div>
 
         {/* Filtros */}
-        <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 mt-6 mb-6 transition-colors border border-gray-200 dark:border-accentGray max-w-[1100px] mx-auto">
-          {/* Cabeçalho */}
+        <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 mt-6 mb-6 transition-colors border border-gray-200 dark:border-accentGray">
           <div className="flex items-center mb-6">
             <Filter className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-300" />
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -99,9 +98,9 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
           </div>
 
           {/* Grid principal */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 place-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Categoria */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Categoria
               </label>
@@ -121,7 +120,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
 
             {/* Setor */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Setor
               </label>
@@ -140,7 +139,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
 
             {/* Situação */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Situação
               </label>
@@ -159,7 +158,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
 
             {/* Responsável */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Responsável
               </label>
@@ -180,7 +179,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
           {/* Linha com 3 filtros centralizados */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 place-items-center">
             {/* Aquisição - Início */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Aquisição - Início
               </label>
@@ -193,7 +192,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
 
             {/* Aquisição - Fim */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Aquisição - Fim
               </label>
@@ -206,7 +205,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
 
             {/* Filtros Personalizados */}
-            <div className="w-full max-w-[250px]">
+            <div className="w-full">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Filtros Personalizados
               </label>
