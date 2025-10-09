@@ -52,7 +52,13 @@ const Header: React.FC = () => {
   return (
     <>
       {/* HEADER FIXO */}
-      <header className="sticky top-0 inset-x-0 z-50 bg-white dark:bg-mediumGray backdrop-blur-sm shadow-sm flex items-center justify-between px-4 py-3 transition-colors border-b border-gray-200 dark:border-accentGray">
+      <header className="sticky top-0 inset-x-0 z-50 
+      bg-white/95 dark:bg-[#1e1e1e]/95 
+      backdrop-blur-sm shadow-md 
+      flex items-center justify-between px-4 py-3 
+      transition-colors border-b border-gray-200 dark:border-[#2d2d2d] 
+      rounded-b-xl"
+     >
         <div className="flex items-center gap-4">
           {/* Botão menu mobile */}
           <button
@@ -102,7 +108,7 @@ const Header: React.FC = () => {
           />
           <div
             ref={menuRef}
-            className={`fixed inset-y-0 left-0 w-[70vw] bg-white dark:bg-mediumGray z-50 shadow-lg px-6 pb-6 flex flex-col transform transition-transform duration-300 ${
+            className={`fixed inset-y-0 left-0 w-[70vw] bg-white/95 dark:bg-[#1e1e1e] z-50 shadow-lg px-6 pb-6 flex flex-col transform transition-transform duration-300 ${
               menuAnimado ? "translate-x-0" : "-translate-x-full"
             }`}
           >
@@ -183,7 +189,7 @@ const Header: React.FC = () => {
               {/* Botão sair */}
               <button
                 onClick={handleLogout}
-                className="flex items-center w-full text-left text-red-600 font-medium hover:text-red-800 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 transition"
+                className="flex items-center w-full text-left text-red-600 font-medium hover:text-red-800 py-2 rounded-lg transition"
               >
                 <img
                   src="https://img.icons8.com/?size=100&id=59781&format=png&color=FF0000"
