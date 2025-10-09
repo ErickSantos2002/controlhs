@@ -30,7 +30,7 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center gray-600">
+    <div className="fixed inset-0 flex items-center justify-center dark bg-darkGray">
       {/* Card vidro fosco */}
       <div className="relative w-full max-w-[360px] bg-white/10 backdrop-blur-md border border-white/20 
                       rounded-[20px] px-8 pt-14 pb-8 text-center 
