@@ -21,7 +21,7 @@ module.exports = {
         },
 
         // 🎨 Paleta de tons de cinza para o modo escuro
-        darkGray: "#1e1e1e",    // fundo principal (substitui o darkBlue)
+        darkGray: "#121212",    // fundo principal (substitui o darkBlue)
         mediumGray: "#2a2a2a",  // painéis / cards
         lightGray: "#d1d1d1",   // texto claro
         accentGray: "#3a3a3a",  // bordas, hover, divisores

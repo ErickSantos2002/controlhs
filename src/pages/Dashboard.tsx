@@ -11,7 +11,7 @@ const DashboardPatrimonio: React.FC = () => {
   const [localSelecionado, setLocalSelecionado] = useState("todas");
   const [situacaoSelecionada, setSituacaoSelecionada] = useState("todas");
 
-  const CORES_GRAFICO = ["#2563eb", "#16a34a", "#f59e0b", "#ef4444", "#8b5cf6"];
+  const CORES_GRAFICO = ["#3b82f6", "#22c55e", "#facc15", "#ef4444", "#a855f7"];
 
   const kpis = {
     totalItens: 1240,
@@ -71,12 +71,12 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
 
   // ========================= COMPONENTE =========================
   return (
-    <div className="min-h-full bg-gray-50 dark:bg-darkGray transition-colors">
+    <div className="min-h-full bg-gray-100 dark:bg-[#121212] transition-colors">
       <div className="p-6">
         {/* Cabeçalho */}
-        <div className="bg-white dark:bg-mediumGray shadow-sm border border-gray-200 dark:border-accentGray rounded-xl transition-colors">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md transition-colors">
           <div className="px-6 py-4">
-            <h1 className="text-3xl font-bold text-gray-800 dark:text-yellow-400">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
               Patrimônio - Dashboard
             </h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
@@ -89,7 +89,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
         </div>
 
         {/* Filtros */}
-        <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 mt-6 mb-6 transition-colors border border-gray-200 dark:border-accentGray">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 mt-6 mb-6 transition-colors">
           <div className="flex items-center mb-6">
             <Filter className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-300" />
             <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -225,24 +225,24 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Total de Itens</p>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">
+                <p className="text-sm text-gray-700 dark:text-gray-400">Total de Itens</p>
+                <p className="text-3xl font-semibold text-blue-500 dark:text-blue-300 mt-2 tracking-tight">
                   {kpis.totalItens}
                 </p>
               </div>
-              <div className="bg-blue-100 dark:bg-blue-900/40 p-3 rounded-full">
+              <div className="bg-blue-100/70 dark:bg-blue-900/50 p-3 rounded-full">
                 <Home className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Valor Total</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">Valor Total</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
                   R$ {kpis.valorTotal.toLocaleString("pt-BR")}
                 </p>
@@ -253,10 +253,10 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
           </div>
 
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Depreciação Acumulada</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">Depreciação Acumulada</p>
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">
                   R$ {kpis.depreciacaoAcumulada.toLocaleString("pt-BR")}
                 </p>
@@ -267,10 +267,10 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
           </div>
 
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Bens Ativos</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">Bens Ativos</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-2">
                   {kpis.ativos}
                 </p>
@@ -285,7 +285,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Valor por Categoria */}
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição de Valor por Categoria
             </h3>
@@ -302,7 +302,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
           </div>
 
           {/* Distribuição por setor */}
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição por Setor
             </h3>
@@ -319,7 +319,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
           </div>
 
           {/* Depreciação por Categoria */}
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Depreciação por Categoria
             </h3>
@@ -332,20 +332,19 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#f9fafb", // fundo claro em ambos os temas
-                    color: "#000",              // texto preto visível
+                    color: "#f9fafb",              // texto preto visível
                     borderRadius: "8px",
                     border: "1px solid #d1d5db",
                   }}
                   itemStyle={{ color: "#000" }} // mantém os labels legíveis
                   labelStyle={{ color: "#f59e0b", fontWeight: 600 }}
                 />
-
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Distribuição de Valor por Responsável */}
-          <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray">
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição de Valor por Responsável
             </h3>
@@ -358,7 +357,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
                 <Tooltip
                   contentStyle={{
                     backgroundColor: "#f9fafb", // fundo claro em ambos os temas
-                    color: "#000",              // texto preto visível
+                    color: "#f9fafb",              // texto preto visível
                     borderRadius: "8px",
                     border: "1px solid #d1d5db",
                   }}
@@ -371,7 +370,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
         </div>
 
         {/* TABELA DE BENS PATRIMONIAIS */}
-        <div className="bg-white dark:bg-mediumGray rounded-xl shadow-sm p-6 transition-colors border border-gray-200 dark:border-accentGray mt-6">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 mt-6 mb-6 transition-colors">
           {/* Cabeçalho */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 md:mb-0">
@@ -397,9 +396,11 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
               {/* Botão Exportar */}
               <button
                 className="flex items-center justify-center px-4 py-2 
-                          bg-green-600 text-white rounded-lg 
-                          hover:bg-green-700 dark:hover:bg-green-500 
-                          transition-colors"
+                bg-gradient-to-r from-green-500 to-emerald-600 
+                text-white font-medium rounded-lg shadow-md
+                hover:from-green-400 hover:to-emerald-500 
+                dark:hover:from-green-600 dark:hover:to-green-500
+                transition-all duration-300"
               >
                 Exportar Excel
               </button>
@@ -410,7 +411,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-[#1e1e1e]">
+                <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
                   {[
                     "Nome",
                     "Categoria",
@@ -477,7 +478,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
                     key={index}
                     className={`border-b border-gray-100 dark:border-gray-700 
                                 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
-                                ${index % 2 === 0 ? "bg-white dark:bg-[#1e1e1e]" : "bg-gray-50 dark:bg-[#252525]"}`}
+                                ${index % 2 === 0 ? "bg-white dark:bg-[#1b1b1b]" : "bg-gray-50 dark:bg-[#222222]"}`}
                   >
                     <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">
                       {bem.nome}

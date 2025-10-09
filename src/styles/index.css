@@ -21,8 +21,10 @@ body, #root {
 .dark html,
 .dark body,
 .dark #root {
-  /* 🌚 Escuro (tema cinza) */
-  @apply bg-darkGray text-lightGray transition-colors;
+  /* 🌚 Escuro (tema cinza moderno) */
+  background-color: #121212;
+  color: #d1d1d1;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* 🔹 Scrollbar customizado */
