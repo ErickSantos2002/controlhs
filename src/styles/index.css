@@ -27,6 +27,11 @@ body, #root {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Ícone do calendário branco no modo escuro */
+.dark input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* 🔹 Scrollbar customizado */
 ::-webkit-scrollbar {
   width: 8px;
