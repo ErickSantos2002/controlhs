@@ -18,11 +18,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100 dark:bg-[#121212] text-gray-900 dark:text-lightGray transition-colors">
+    <div className="h-screen flex flex-col bg-[#121212] text-lightGray transition-colors">
       <Header />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-auto p-6 bg-gray-100 dark:bg-[#121212] transition-colors">
+        <main className="flex-1 overflow-auto p-6 bg-[#121212] transition-colors">
           <AppRoutes />
         </main>
       </div>
