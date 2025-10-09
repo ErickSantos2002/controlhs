@@ -11,7 +11,7 @@ interface LogItem {
   detalhes: any;
 }
 
-const Configuracoes: React.FC = () => {
+const Logs: React.FC = () => {
   const { user, loading } = useAuth();
   const [modalAberto, setModalAberto] = useState(false);
   const [detalheSelecionado, setDetalheSelecionado] = useState<any>(null);
@@ -252,4 +252,4 @@ const Configuracoes: React.FC = () => {
   );
 };
 
-export default Configuracoes;
+export default Logs;

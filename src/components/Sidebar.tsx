@@ -45,8 +45,8 @@ const Sidebar: React.FC = () => {
     ...(user?.role === "admin"
       ? [
           {
-            label: "Configurações",
-            to: "/configuracoes",
+            label: "Log de Auditoria",
+            to: "/Logs",
             icon: (isActive: boolean) => (
               <img
                 src={`https://img.icons8.com/?size=100&id=2969&format=png&color=${getColor(isActive)}`}

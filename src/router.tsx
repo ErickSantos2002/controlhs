@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
-import Configuracoes from "./pages/Configuracoes";
+import Logs from "./pages/Logs";
 import Home from "./pages/Home";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -87,11 +87,11 @@ const AppRoutes: React.FC = () => (
     />
     
     <Route
-      path="/configuracoes"
+      path="/logs"
       element={
         <ProtectedRoute>
           <RequireAdmin>
-            <Configuracoes />
+            <Logs />
           </RequireAdmin>
         </ProtectedRoute>
       }
