@@ -18,8 +18,8 @@ const Login: React.FC = () => {
       // ✅ Ativa via contexto (não manualmente)
       setDarkModeOnLogin()
 
-      if (location.pathname !== "/inicio") {
-        navigate("/inicio", { replace: true })
+      if (location.pathname !== "/dashboard") {
+        navigate("/dashboard", { replace: true })
       }
     }
   }, [user, navigate, location.pathname, setDarkModeOnLogin])

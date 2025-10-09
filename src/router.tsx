@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Logs from "./pages/Logs";
-import Home from "./pages/Home";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./hooks/useAuth";
@@ -67,15 +66,6 @@ const RequireVendedores: React.FC<{ children: React.ReactNode }> = ({ children }
 const AppRoutes: React.FC = () => (
   <Routes>
     <Route path="/login" element={<Login />} />
-
-    <Route
-      path="/inicio"
-      element={
-        <ProtectedRoute>
-          <Home />
-        </ProtectedRoute>
-      }
-    />
 
     <Route
       path="/dashboard"

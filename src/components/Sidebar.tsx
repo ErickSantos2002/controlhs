@@ -21,17 +21,6 @@ const Sidebar: React.FC = () => {
 
   const menuItems = [
     {
-      label: "Início",
-      to: "/inicio",
-      icon: (isActive: boolean) => (
-        <img
-          src={`https://img.icons8.com/?size=100&id=83326&format=png&color=${getColor(isActive)}`}
-          alt="Início"
-          className={iconBaseClass}
-        />
-      ),
-    },
-    {
       label: "Dashboard",
       to: "/dashboard",
       icon: (isActive: boolean) => (

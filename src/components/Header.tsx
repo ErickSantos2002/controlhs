@@ -3,12 +3,14 @@ import { useAuth } from "../hooks/useAuth";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import logo from "../assets/HS2.ico";
+import ModalTrocarSenha from "../components/ModalTrocarSenha"; // 🔹 certifique-se de ajustar o caminho
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
   const [menuVisivel, setMenuVisivel] = useState(false);
   const [menuAnimado, setMenuAnimado] = useState(false);
+  const [modalSenhaAberta, setModalSenhaAberta] = useState(false); // 🔹 novo estado
   const navigate = useNavigate();
   const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -49,16 +51,22 @@ const Header: React.FC = () => {
     };
   }, [menuVisivel]);
 
+  const handleConfirmarSenha = (novaSenha: string) => {
+    console.log("Nova senha:", novaSenha);
+    // 🔹 Aqui você pode adicionar a lógica para atualizar a senha via API
+  };
+
   return (
     <>
       {/* HEADER FIXO */}
-      <header className="sticky top-0 inset-x-0 z-50 
-      bg-white/95 dark:bg-[#1e1e1e]/95 
-      backdrop-blur-sm shadow-md 
-      flex items-center justify-between px-4 py-3 
-      transition-colors border-b border-gray-200 dark:border-[#2d2d2d] 
-      rounded-b-xl"
-     >
+      <header
+        className="sticky top-0 inset-x-0 z-50 
+        bg-white/95 dark:bg-[#1e1e1e]/95 
+        backdrop-blur-sm shadow-md 
+        flex items-center justify-between px-4 py-3 
+        transition-colors border-b border-gray-200 dark:border-[#2d2d2d] 
+        rounded-b-xl"
+      >
         <div className="flex items-center gap-4">
           {/* Botão menu mobile */}
           <button
@@ -70,7 +78,7 @@ const Header: React.FC = () => {
 
           {/* Logo + título */}
           <Link
-            to="/inicio"
+            to="/dashboard"
             className="hidden lg:flex items-center gap-2 font-bold text-xl text-blue-700 dark:text-lightGray hover:scale-105 transition no-underline group"
           >
             <img
@@ -84,10 +92,18 @@ const Header: React.FC = () => {
 
         {/* Infos e botão sair */}
         <div className="flex items-center gap-4 text-sm">
-          <span className="text-gray-700 dark:text-gray-300 max-w-[160px] truncate">
-            {user?.username}{" "}
-            <span className="text-xs text-gray-400">({user?.role})</span>
-          </span>
+          <button
+            onClick={() => setModalSenhaAberta(true)}
+            className="group text-gray-700 dark:text-gray-300 underline underline-offset-4 transition hover:text-blue-600 dark:hover:text-blue-400"
+          >
+            <span>
+              {user?.username}{" "}
+              <span className="text-xs text-gray-400 group-hover:text-blue-400 transition">
+                ({user?.role})
+              </span>
+            </span>
+          </button>
+
           {!menuVisivel && (
             <button
               onClick={handleLogout}
@@ -113,7 +129,7 @@ const Header: React.FC = () => {
             }`}
           >
             {/* Cabeçalho do menu */}
-            <div className="flex items-center justify-between py-3 mb-3 border-b border-gray-200 dark:border-accentGray">
+            <div className="flex items-center justify-between py-3 mb-3 border-b border-gray-200 dark:border-[#2d2d2d]">
               <div className="flex items-center gap-2">
                 <img src={logo} alt="Logo" className="w-6 h-6 object-contain" />
                 <span className="font-bold text-lg text-blue-700 dark:text-lightGray">
@@ -130,13 +146,6 @@ const Header: React.FC = () => {
 
             {/* Navegação */}
             <nav className="flex flex-col gap-4">
-              <Link
-                to="/inicio"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Início
-              </Link>
               <Link
                 to="/dashboard"
                 onClick={fecharMenu}
@@ -156,8 +165,7 @@ const Header: React.FC = () => {
             </nav>
 
             {/* Rodapé do menu mobile */}
-            <div className="mt-auto flex flex-col gap-3 border-t border-gray-200 dark:border-accentGray pt-4">
-              {/* Switch modo noturno */}
+            <div className="mt-auto flex flex-col gap-3 border-t border-gray-200 dark:border-[#2d2d2d] pt-4">
               <div className="flex items-center justify-between font-medium text-gray-700 dark:text-gray-200 py-2">
                 <div className="flex items-center gap-2">
                   {darkMode ? (
@@ -181,12 +189,11 @@ const Header: React.FC = () => {
                     onChange={toggleDarkMode}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:bg-blue-600 transition"></div>
+                  <div className="w-11 h-6 bg-gray-300 rounded-full peer dark:bg-gray-600 peer-checked:bg-blue-600 transition"></div>
                   <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full border transition peer-checked:translate-x-5"></div>
                 </label>
               </div>
 
-              {/* Botão sair */}
               <button
                 onClick={handleLogout}
                 className="flex items-center w-full text-left text-red-600 font-medium hover:text-red-800 py-2 rounded-lg transition"
@@ -202,6 +209,13 @@ const Header: React.FC = () => {
           </div>
         </>
       )}
+
+      {/* 🔹 Modal de Trocar Senha */}
+      <ModalTrocarSenha
+        isOpen={modalSenhaAberta}
+        onClose={() => setModalSenhaAberta(false)}
+        onConfirm={handleConfirmarSenha}
+      />
     </>
   );
 };
