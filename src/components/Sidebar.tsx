@@ -54,7 +54,7 @@ const Sidebar: React.FC = () => {
       text-gray-900 dark:text-lightGray 
       shadow-md sticky top-0 flex-col 
       border-r border-gray-200 dark:border-[#2d2d2d] 
-      transition-colors rounded-r-xl"
+      transition-colors"
     >
       <nav className="flex-1 py-6">
         <ul className="space-y-2">

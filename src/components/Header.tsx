@@ -64,8 +64,7 @@ const Header: React.FC = () => {
         bg-white/95 dark:bg-[#1e1e1e]/95 
         backdrop-blur-sm shadow-md 
         flex items-center justify-between px-4 py-3 
-        transition-colors border-b border-gray-200 dark:border-[#2d2d2d] 
-        rounded-b-xl"
+        transition-colors border-b border-gray-200 dark:border-[#2d2d2d]"
       >
         <div className="flex items-center gap-4">
           {/* Botão menu mobile */}
