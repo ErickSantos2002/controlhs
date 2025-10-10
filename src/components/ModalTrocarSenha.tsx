@@ -27,14 +27,21 @@ const ModalTrocarSenha: React.FC<ModalTrocarSenhaProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 transition-opacity">
-      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-xl p-6 max-w-md w-full transition-colors">
+      {/* 🔧 Ajuste principal: padding e espaçamento idêntico à modal dos logs */}
+      <div
+        className="bg-white/95 dark:bg-[#1e1e1e]/95 
+                   border border-gray-200 dark:border-[#2d2d2d] 
+                   rounded-xl shadow-xl p-8 sm:p-6 
+                   max-w-md w-[90%] sm:w-full 
+                   mx-4 sm:mx-0 transition-colors"
+      >
         {/* Cabeçalho */}
         <h2 className="text-xl font-bold mb-6 text-center text-gray-900 dark:text-[#facc15] tracking-tight">
           Trocar Senha
         </h2>
 
         {/* Campos */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Nova senha:
@@ -71,7 +78,7 @@ const ModalTrocarSenha: React.FC<ModalTrocarSenhaProps> = ({
         </div>
 
         {/* Botões */}
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-8 flex justify-end gap-3">
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-lg font-medium
