@@ -222,6 +222,7 @@ const Logs: React.FC = () => {
 
       {/* Logs de Auditoria */}
       <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
+        {/* Cabeçalho */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 md:mb-0">
             Logs de Auditoria
@@ -250,14 +251,7 @@ const Logs: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
-                {[
-                  "Ação",
-                  "Entidade",
-                  "ID Entidade",
-                  "Usuário",
-                  "Data",
-                  "Detalhes",
-                ].map((header, idx) => (
+                {["Ação", "Entidade", "ID Entidade", "Usuário", "Data", "Detalhes"].map((header, idx) => (
                   <th
                     key={idx}
                     className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200"
@@ -294,8 +288,8 @@ const Logs: React.FC = () => {
                     <button
                       onClick={() => abrirModal(log.detalhes)}
                       className="px-3 py-1 text-sm font-medium rounded-md 
-                                 bg-blue-600 hover:bg-blue-700 
-                                 text-white transition-colors"
+                                bg-blue-600 hover:bg-blue-700 
+                                text-white transition-colors"
                     >
                       Ver Detalhes
                     </button>
@@ -306,105 +300,106 @@ const Logs: React.FC = () => {
           </table>
         </div>
 
-        {/* Paginação (estática/visual) */}
-          <div className="mt-4">
+        {/* Paginação */}
+        <div className="mt-4 flex flex-col items-center">
+          {/* Linha superior com texto e paginação */}
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full max-w-5xl px-2 text-sm text-gray-600 dark:text-gray-300">
             {/* Texto de registros */}
-            <div className="text-sm text-gray-600 dark:text-gray-300 mb-2 md:mb-0">
+            <span className="mb-2 md:mb-0 text-center md:text-left">
               Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
-            </div>
+            </span>
 
-            {/* Desktop */}
-            <div className="hidden md:flex justify-between items-center">
-              <div></div>{/* placeholder só pra alinhar */}
-              <div className="flex gap-2">
-                {/* Botão Anterior (só visual) */}
-                <button
-                  disabled={PAGINA_ATUAL === 1}
-                  className="px-3 py-1 border rounded-lg
-                    bg-white dark:bg-[#1f1f1f]
-                    border-gray-300 dark:border-gray-600
-                    text-gray-700 dark:text-gray-300
-                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    transition-colors"
-                >
-                  Anterior
-                </button>
-
-                {/* Números de página (só visual) */}
-                <div className="flex gap-1">
-                  {PAGES.map((page) => (
-                    <button
-                      key={page}
-                      className={`px-3 py-1 border rounded-lg transition-colors ${
-                        PAGINA_ATUAL === page
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]"
-                      }`}
-                      aria-current={PAGINA_ATUAL === page ? "page" : undefined}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Botão Próximo (só visual) */}
-                <button
-                  disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
-                  className="px-3 py-1 border rounded-lg
-                    bg-white dark:bg-[#1f1f1f]
-                    border-gray-300 dark:border-gray-600
-                    text-gray-700 dark:text-gray-300
-                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    transition-colors"
-                >
-                  Próximo
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile */}
-            <div className="flex md:hidden justify-center gap-2 items-center mt-2">
+            {/* Paginação */}
+            <div className="flex justify-center gap-2">
+              {/* Botão Anterior */}
               <button
                 disabled={PAGINA_ATUAL === 1}
                 className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
+                          bg-white dark:bg-[#1f1f1f]
+                          border-gray-300 dark:border-gray-600
+                          text-gray-700 dark:text-gray-300
+                          hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          transition-colors"
               >
-                {"<"}
+                Anterior
               </button>
 
-              <span
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  text-gray-700 dark:text-gray-300
-                  border-gray-300 dark:border-gray-600"
-              >
-                {PAGINA_ATUAL}
-              </span>
+              {/* Números de página */}
+              <div className="flex gap-1">
+                {PAGES.map((page) => (
+                  <button
+                    key={page}
+                    className={`px-3 py-1 border rounded-lg transition-colors ${
+                      PAGINA_ATUAL === page
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]"
+                    }`}
+                    aria-current={PAGINA_ATUAL === page ? "page" : undefined}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
 
+              {/* Botão Próximo */}
               <button
                 disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
                 className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
+                          bg-white dark:bg-[#1f1f1f]
+                          border-gray-300 dark:border-gray-600
+                          text-gray-700 dark:text-gray-300
+                          hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          transition-colors"
               >
-                {">"}
+                Próximo
               </button>
             </div>
           </div>
 
-        <div className="text-sm text-gray-600 dark:text-gray-300 mt-3 text-center">
-          Exibindo os 6 registros mais recentes
+          {/* Texto inferior centralizado */}
+          <div className="mt-3 text-sm text-gray-600 dark:text-gray-300 text-center">
+            Exibindo os 10 registros mais recentes
+          </div>
+        </div>
+
+        {/* Mobile (pagina simples) */}
+        <div className="flex md:hidden justify-center gap-2 items-center mt-2">
+          <button
+            disabled={PAGINA_ATUAL === 1}
+            className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      border-gray-300 dark:border-gray-600
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-colors"
+          >
+            {"<"}
+          </button>
+
+          <span
+            className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      text-gray-700 dark:text-gray-300
+                      border-gray-300 dark:border-gray-600"
+          >
+            {PAGINA_ATUAL}
+          </span>
+
+          <button
+            disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
+            className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      border-gray-300 dark:border-gray-600
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-colors"
+          >
+            {">"}
+          </button>
         </div>
       </div>
 
@@ -420,13 +415,13 @@ const Logs: React.FC = () => {
               {JSON.stringify(detalheSelecionado, null, 2)}
             </pre>
 
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex justify-end">
               <button
                 onClick={fecharModal}
                 className="px-4 py-2 rounded-lg font-medium 
-                           bg-gray-300 hover:bg-gray-400 
-                           dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 
-                           transition-colors"
+                          bg-gray-300 hover:bg-gray-400 
+                          dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 
+                          transition-colors"
               >
                 Fechar
               </button>
