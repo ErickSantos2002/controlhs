@@ -221,9 +221,7 @@ const Logs: React.FC = () => {
       </div>
 
       {/* Logs de Auditoria */}
-      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d]
-             rounded-xl shadow-md p-6 transition-colors flex flex-col
-             h-[calc(100vh-300px)]">
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 md:mb-0">
             Logs de Auditoria
@@ -248,7 +246,7 @@ const Logs: React.FC = () => {
         </div>
 
         {/* Tabela sem scroll */}
-        <div className="flex-1 overflow-y-auto overflow-x-auto rounded-lg border border-gray-200 dark:border-[#2a2a2a]">
+        <div className="overflow-x-auto overflow-y-auto rounded-lg max-h-screen-md border border-gray-200 dark:border-[#2a2a2a]">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
@@ -309,7 +307,7 @@ const Logs: React.FC = () => {
         </div>
 
         {/* Paginação (estática/visual) */}
-          <div className="mt-4 flex-shrink-0">
+          <div className="mt-4">
             {/* Texto de registros */}
             <div className="text-sm text-gray-600 dark:text-gray-300 mb-2 md:mb-0">
               Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
