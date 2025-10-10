@@ -154,11 +154,11 @@ const Header: React.FC = () => {
               </Link>
               {user?.role === "admin" && (
                 <Link
-                  to="/configuracoes"
+                  to="/logs"
                   onClick={fecharMenu}
                   className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
                 >
-                  Configurações
+                  Logs de Auditoria
                 </Link>
               )}
             </nav>

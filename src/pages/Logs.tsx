@@ -301,26 +301,26 @@ const Logs: React.FC = () => {
         </div>
 
         {/* Paginação */}
-        <div className="mt-4 flex flex-col items-center">
-          {/* Linha superior com texto e paginação */}
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full max-w-5xl px-2 text-sm text-gray-600 dark:text-gray-300">
+        <div className="mt-4">
+          {/* Desktop */}
+          <div className="hidden md:flex justify-between items-center w-full">
             {/* Texto de registros */}
-            <span className="mb-2 md:mb-0 text-center md:text-left">
+            <div className="text-sm text-gray-600 dark:text-gray-300">
               Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
-            </span>
+            </div>
 
             {/* Paginação */}
-            <div className="flex justify-center gap-2">
+            <div className="flex gap-2">
               {/* Botão Anterior */}
               <button
                 disabled={PAGINA_ATUAL === 1}
                 className="px-3 py-1 border rounded-lg
-                          bg-white dark:bg-[#1f1f1f]
-                          border-gray-300 dark:border-gray-600
-                          text-gray-700 dark:text-gray-300
-                          hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          transition-colors"
+                  bg-white dark:bg-[#1f1f1f]
+                  border-gray-300 dark:border-gray-600
+                  text-gray-700 dark:text-gray-300
+                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-colors"
               >
                 Anterior
               </button>
@@ -346,14 +346,58 @@ const Logs: React.FC = () => {
               <button
                 disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
                 className="px-3 py-1 border rounded-lg
-                          bg-white dark:bg-[#1f1f1f]
-                          border-gray-300 dark:border-gray-600
-                          text-gray-700 dark:text-gray-300
-                          hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          transition-colors"
+                  bg-white dark:bg-[#1f1f1f]
+                  border-gray-300 dark:border-gray-600
+                  text-gray-700 dark:text-gray-300
+                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-colors"
               >
                 Próximo
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile */}
+          <div className="flex md:hidden flex-col items-center mt-2 gap-2 text-center">
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
+            </div>
+
+            <div className="flex justify-center gap-1">
+              <button
+                disabled={PAGINA_ATUAL === 1}
+                className="px-3 py-1 border rounded-lg
+                  bg-white dark:bg-[#1f1f1f]
+                  border-gray-300 dark:border-gray-600
+                  text-gray-700 dark:text-gray-300
+                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-colors"
+              >
+                {"<"}
+              </button>
+
+              <span
+                className="px-3 py-1 border rounded-lg
+                  bg-white dark:bg-[#1f1f1f]
+                  text-gray-700 dark:text-gray-300
+                  border-gray-300 dark:border-gray-600"
+              >
+                {PAGINA_ATUAL}
+              </span>
+
+              <button
+                disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
+                className="px-3 py-1 border rounded-lg
+                  bg-white dark:bg-[#1f1f1f]
+                  border-gray-300 dark:border-gray-600
+                  text-gray-700 dark:text-gray-300
+                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-colors"
+              >
+                {">"}
               </button>
             </div>
           </div>
@@ -362,44 +406,6 @@ const Logs: React.FC = () => {
           <div className="mt-3 text-sm text-gray-600 dark:text-gray-300 text-center">
             Exibindo os 10 registros mais recentes
           </div>
-        </div>
-
-        {/* Mobile (pagina simples) */}
-        <div className="flex md:hidden justify-center gap-2 items-center mt-2">
-          <button
-            disabled={PAGINA_ATUAL === 1}
-            className="px-3 py-1 border rounded-lg
-                      bg-white dark:bg-[#1f1f1f]
-                      border-gray-300 dark:border-gray-600
-                      text-gray-700 dark:text-gray-300
-                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      transition-colors"
-          >
-            {"<"}
-          </button>
-
-          <span
-            className="px-3 py-1 border rounded-lg
-                      bg-white dark:bg-[#1f1f1f]
-                      text-gray-700 dark:text-gray-300
-                      border-gray-300 dark:border-gray-600"
-          >
-            {PAGINA_ATUAL}
-          </span>
-
-          <button
-            disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
-            className="px-3 py-1 border rounded-lg
-                      bg-white dark:bg-[#1f1f1f]
-                      border-gray-300 dark:border-gray-600
-                      text-gray-700 dark:text-gray-300
-                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      transition-colors"
-          >
-            {">"}
-          </button>
         </div>
       </div>
 
