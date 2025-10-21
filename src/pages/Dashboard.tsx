@@ -157,7 +157,7 @@ const DashboardPatrimonio: React.FC = () => {
   const getStatusDisplay = (status: string) => {
     const statusMap: Record<string, string> = {
       'ativo': 'Ativo',
-      'manutencao': 'Em Manutenção',
+      'manutencao': 'Manutenção',
       'baixado': 'Baixado'
     };
     return statusMap[status] || status;
@@ -225,7 +225,12 @@ const DashboardPatrimonio: React.FC = () => {
             </div>
             <button
               onClick={refreshData}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+              className="px-2 py-1 text-sm font-medium rounded-lg
+                        text-white 
+                        bg-blue-600 hover:bg-blue-700 
+                        dark:bg-blue-500 dark:hover:bg-blue-600
+                        shadow-sm hover:shadow-md
+                        transition-all duration-200"
             >
               Atualizar Dados
             </button>
@@ -288,7 +293,7 @@ const DashboardPatrimonio: React.FC = () => {
               >
                 <option value="todas">Todas</option>
                 <option value="ativos">Ativos</option>
-                <option value="manutencao">Em Manutenção</option>
+                <option value="manutencao">Manutenção</option>
                 <option value="baixados">Baixados</option>
               </select>
             </div>
@@ -425,7 +430,7 @@ const DashboardPatrimonio: React.FC = () => {
                   {kpis.ativos.toLocaleString('pt-BR')}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {kpis.manutencao > 0 && `${kpis.manutencao} em manutenção`}
+                  {kpis.manutencao > 0 && `${kpis.manutencao} Manutenção`}
                   {kpis.baixados > 0 && ` | ${kpis.baixados} baixados`}
                 </p>
               </div>
@@ -881,7 +886,12 @@ const DashboardPatrimonio: React.FC = () => {
                   });
                   setBuscaLocal('');
                 }}
-                className="mt-4 px-4 py-2 text-blue-600 dark:text-blue-400 hover:underline"
+                className="mt-2 px-2 py-1 text-sm font-medium rounded-lg
+                          text-white 
+                          bg-blue-600 hover:bg-blue-700 
+                          dark:bg-blue-500 dark:hover:bg-blue-600
+                          shadow-sm hover:shadow-md
+                          transition-all duration-200"
               >
                 Limpar filtros
               </button>
