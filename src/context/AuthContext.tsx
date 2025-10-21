@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import api from "../services/api";
+import { login as apiLogin, getMe } from "../services/controlapi"; // ✅ Mudança aqui
 
 type AuthContextType = {
   user: { id: number; username: string; role: string } | null;
@@ -38,19 +38,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      const res = await api.post("/login", { username, password });
-      const { access_token } = res.data;
+      // ✅ Agora usa a função do controlapi que já salva o token
+      const loginData = await apiLogin(username, password);
+      const { access_token } = loginData;
 
-      // salva token
-      localStorage.setItem("access_token", access_token);
       setToken(access_token);
 
-      // busca dados do usuário logado
-      const me = await api.get("/me", {
-        headers: { Authorization: `Bearer ${access_token}` },
-      });
+      // ✅ Busca dados do usuário logado (o token já está configurado)
+      const me = await getMe();
 
-      const { id, username: userNameFromAPI, role } = me.data;
+      const { id, username: userNameFromAPI, role } = me;
       const roleName = typeof role === "string" ? role : role?.name || "";
 
       // salva no localStorage

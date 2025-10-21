@@ -195,14 +195,6 @@ const Logs: React.FC = () => {
     );
   }
 
-  if (!user || user.role !== "admin") {
-    return (
-      <div className="p-6 text-red-600 dark:text-red-400 text-center font-semibold">
-        Acesso negado. Esta página é restrita a administradores.
-      </div>
-    );
-  }
-
   return (
     <div className="p-6">
       {/* Card título */}

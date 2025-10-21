@@ -1,75 +1,199 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { 
+  Filter, 
+  Home, 
+  Activity, 
+  DollarSign, 
+  PieChart, 
+  Search,
+  Download,
+  AlertCircle,
+  Loader2
+} from "lucide-react";
+import { 
+  ResponsiveContainer, 
+  PieChart as RChart, 
+  Pie, 
+  Cell, 
+  Tooltip, 
+  BarChart, 
+  Bar, 
+  CartesianGrid, 
+  XAxis, 
+  YAxis,
+  Legend
+} from "recharts";
+import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../hooks/useAuth";
-import { Filter, Home, Activity, DollarSign, PieChart, MapPin } from "lucide-react";
-import { ResponsiveContainer, PieChart as RChart, Pie, Cell, Tooltip, BarChart, Bar, CartesianGrid, XAxis, YAxis } from "recharts";
 
 const DashboardPatrimonio: React.FC = () => {
   const { user } = useAuth();
+  const {
+    patrimonios,
+    categorias,
+    setores,
+    usuarios,
+    filtros,
+    setFiltros,
+    loading,
+    error,
+    patrimoniosFiltrados,
+    kpis,
+    refreshData
+  } = useDashboard();
 
-  // ========================= MOCKS =========================
-  const [categoriaSelecionada, setCategoriaSelecionada] = useState("todas");
-  const [localSelecionado, setLocalSelecionado] = useState("todas");
-  const [situacaoSelecionada, setSituacaoSelecionada] = useState("todas");
+  // Estados locais para paginação
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [buscaLocal, setBuscaLocal] = useState("");
+  const itensPorPagina = 10;
 
   const CORES_GRAFICO = ["#3b82f6", "#22c55e", "#facc15", "#ef4444", "#a855f7"];
 
-  const kpis = {
-    totalItens: 1240,
-    valorTotal: 2150000,
-    depreciacaoAcumulada: 450000,
-    ativos: 1100,
-    manutencao: 100,
-    baixados: 40,
+  // Atualiza busca no contexto com debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiltros({ ...filtros, busca: buscaLocal });
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [buscaLocal]);
+
+  // Dados para gráficos
+  const dadosGraficos = useMemo(() => {
+    // Distribuição por Categoria
+    const distribuicaoCategoria = categorias.map(cat => {
+      const patrimoniosCategoria = patrimoniosFiltrados.filter(p => p.categoria_id === cat.id);
+      const valor = patrimoniosCategoria.reduce((sum, p) => sum + p.valor_atual, 0);
+      return {
+        name: cat.nome,
+        value: valor
+      };
+    }).filter(item => item.value > 0);
+
+    // Distribuição por Setor
+    const distribuicaoSetor = setores.map(setor => {
+      const patrimoniosSetor = patrimoniosFiltrados.filter(p => p.setor_id === setor.id);
+      return {
+        name: setor.nome,
+        value: patrimoniosSetor.length
+      };
+    }).filter(item => item.value > 0);
+
+    // Depreciação por Categoria
+    const depreciacaoCategoria = categorias.map(cat => {
+      const patrimoniosCategoria = patrimoniosFiltrados.filter(p => p.categoria_id === cat.id);
+      const depreciacao = patrimoniosCategoria.reduce(
+        (sum, p) => sum + (p.valor_aquisicao - p.valor_atual), 
+        0
+      );
+      return {
+        categoria: cat.nome,
+        valor: depreciacao
+      };
+    }).filter(item => item.valor > 0);
+
+    // Valor por Responsável
+    const valorResponsavel = usuarios.map(user => {
+      const patrimoniosUser = patrimoniosFiltrados.filter(p => p.responsavel_id === user.id);
+      const valor = patrimoniosUser.reduce((sum, p) => sum + p.valor_atual, 0);
+      return {
+        responsavel: user.username,
+        valor: valor
+      };
+    }).filter(item => item.valor > 0)
+      .sort((a, b) => b.valor - a.valor)
+      .slice(0, 10); // Top 10 responsáveis
+
+    return {
+      distribuicaoCategoria,
+      distribuicaoSetor,
+      depreciacaoCategoria,
+      valorResponsavel
+    };
+  }, [patrimoniosFiltrados, categorias, setores, usuarios]);
+
+  // Paginação
+  const dadosPaginados = useMemo(() => {
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    return patrimoniosFiltrados.slice(inicio, fim);
+  }, [patrimoniosFiltrados, paginaAtual]);
+
+  const totalPaginas = Math.ceil(patrimoniosFiltrados.length / itensPorPagina);
+  const inicio = (paginaAtual - 1) * itensPorPagina + 1;
+  const fim = Math.min(paginaAtual * itensPorPagina, patrimoniosFiltrados.length);
+
+  // Páginas visíveis na navegação
+  const paginasVisiveis = useMemo(() => {
+    const window = Math.min(5, totalPaginas);
+    let start = 1;
+    if (totalPaginas > 5) {
+      if (paginaAtual <= 3) start = 1;
+      else if (paginaAtual >= totalPaginas - 2) start = totalPaginas - 4;
+      else start = paginaAtual - 2;
+    }
+    return Array.from({ length: window }, (_, i) => start + i);
+  }, [paginaAtual, totalPaginas]);
+
+  // Handlers
+  const handleFiltroChange = useCallback((campo: string, valor: string) => {
+    setFiltros({ ...filtros, [campo]: valor });
+    setPaginaAtual(1); // Reset página ao filtrar
+  }, [filtros, setFiltros]);
+
+  const handleExportarExcel = useCallback(() => {
+    // Implementar exportação
+    console.log('Exportando', patrimoniosFiltrados.length, 'registros');
+    // TODO: Implementar lógica de exportação real
+  }, [patrimoniosFiltrados]);
+
+  // Função auxiliar para obter nome por ID
+  const getNomeCategoria = (id: number) => categorias.find(c => c.id === id)?.nome || 'N/A';
+  const getNomeSetor = (id: number) => setores.find(s => s.id === id)?.nome || 'N/A';
+  const getNomeUsuario = (id: number) => usuarios.find(u => u.id === id)?.username || 'N/A';
+
+  // Mapear status para exibição
+  const getStatusDisplay = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'ativo': 'Ativo',
+      'manutencao': 'Em Manutenção',
+      'baixado': 'Baixado'
+    };
+    return statusMap[status] || status;
   };
 
-  const distribuicaoCategoria = [
-    { name: "Equipamentos", value: 40 },
-    { name: "Veículos", value: 30 },
-    { name: "Móveis e Utensílios", value: 20 },
-    { name: "Outros", value: 10 },
-  ];
-
-  const distribuicaoLocalizacao = [
-    { name: "Matriz", value: 60 },
-    { name: "Filial Recife", value: 25 },
-    { name: "Filial SP", value: 15 },
-  ];
-
-  const depreciacaoPorCategoria = [
-    { categoria: "Equipamentos", valor: 150000 },
-    { categoria: "Veículos", valor: 120000 },
-    { categoria: "Móveis", valor: 80000 },
-    { categoria: "Outros", valor: 50000 },
-  ];
-
-  const valorPorResponsavel = [
-    { responsavel: "Welton", valor: 520000 },
-    { responsavel: "Erick", valor: 480000 },
-    { responsavel: "Djalma", valor: 390000 },
-    { responsavel: "Gabriel", valor: 260000 },
-  ];
-
-  // --- Paginação ESTÁTICA (somente visual) ---
-const PAGINA_ATUAL = 1;         // mude aqui pra simular outra página
-const ITENS_POR_PAGINA = 10;    // tamanho da página (visual)
-const TOTAL_REGISTROS = 48;     // total mockado
-
-const TOTAL_PAGINAS = Math.ceil(TOTAL_REGISTROS / ITENS_POR_PAGINA);
-const INICIO = (PAGINA_ATUAL - 1) * ITENS_POR_PAGINA + 1;
-const FIM = Math.min(PAGINA_ATUAL * ITENS_POR_PAGINA, TOTAL_REGISTROS);
-
-// janelinha de até 5 páginas
-const WINDOW = Math.min(5, TOTAL_PAGINAS);
-  let start = 1;
-  if (TOTAL_PAGINAS > 5) {
-    if (PAGINA_ATUAL <= 3) start = 1;
-    else if (PAGINA_ATUAL >= TOTAL_PAGINAS - 2) start = TOTAL_PAGINAS - 4;
-    else start = PAGINA_ATUAL - 2;
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-300">Carregando dados do patrimônio...</p>
+        </div>
+      </div>
+    );
   }
-const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
 
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center">
+        <div className="text-center bg-white dark:bg-[#1e1e1e] rounded-xl p-8 shadow-lg max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Erro ao carregar dados
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">{error}</p>
+          <button
+            onClick={refreshData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // ========================= COMPONENTE =========================
   return (
     <div className="min-h-full bg-gray-100 dark:bg-[#121212] transition-colors">
       <div className="p-6">
@@ -90,63 +214,73 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
 
         {/* Filtros */}
         <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 mt-6 mb-6 transition-colors">
-          <div className="flex items-center mb-6">
-            <Filter className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-300" />
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-              Filtros
-            </h2>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Filter className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-300" />
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                Filtros
+              </h2>
+            </div>
+            <button
+              onClick={refreshData}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Atualizar Dados
+            </button>
           </div>
 
-          {/* Grid principal */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Categoria */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Categoria
               </label>
               <select
-                value={categoriaSelecionada}
-                onChange={(e) => setCategoriaSelecionada(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.categoria}
+                onChange={(e) => handleFiltroChange('categoria', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="todas">Todas</option>
-                <option value="equipamentos">Equipamentos</option>
-                <option value="veiculos">Veículos</option>
-                <option value="moveis">Móveis e Utensílios</option>
-                <option value="outros">Outros</option>
+                {categorias.map(cat => (
+                  <option key={cat.id} value={cat.nome.toLowerCase()}>
+                    {cat.nome}
+                  </option>
+                ))}
               </select>
             </div>
 
             {/* Setor */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Setor
               </label>
               <select
-                value={localSelecionado}
-                onChange={(e) => setLocalSelecionado(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.setor}
+                onChange={(e) => handleFiltroChange('setor', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
-                <option value="todas">Todas</option>
-                <option value="matriz">Matriz</option>
-                <option value="recife">Filial Recife</option>
-                <option value="sp">Filial SP</option>
+                <option value="todos">Todos</option>
+                {setores.map(setor => (
+                  <option key={setor.id} value={setor.nome.toLowerCase()}>
+                    {setor.nome}
+                  </option>
+                ))}
               </select>
             </div>
 
             {/* Situação */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Situação
               </label>
               <select
-                value={situacaoSelecionada}
-                onChange={(e) => setSituacaoSelecionada(e.target.value)}
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.situacao}
+                onChange={(e) => handleFiltroChange('situacao', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
@@ -158,59 +292,67 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             </div>
 
             {/* Responsável */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Responsável
               </label>
               <select
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.responsavel}
+                onChange={(e) => handleFiltroChange('responsavel', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="todos">Todos</option>
-                <option value="Welton">Welton</option>
-                <option value="Erick">Erick</option>
-                <option value="Djalma">Djalma</option>
-                <option value="Gabriel">Gabriel</option>
+                {usuarios.map(user => (
+                  <option key={user.id} value={user.username.toLowerCase()}>
+                    {user.username}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
-          {/* Linha com 3 filtros centralizados */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 place-items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
             {/* Aquisição - Início */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Aquisição - Início
               </label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.dataInicio || ''}
+                onChange={(e) => handleFiltroChange('dataInicio', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               />
             </div>
 
             {/* Aquisição - Fim */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Aquisição - Fim
               </label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.dataFim || ''}
+                onChange={(e) => handleFiltroChange('dataFim', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               />
             </div>
 
             {/* Filtros Personalizados */}
-            <div className="w-full">
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Filtros Personalizados
               </label>
               <select
-                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-darkGray
+                value={filtros.filtroPersonalizado}
+                onChange={(e) => handleFiltroChange('filtroPersonalizado', e.target.value)}
+                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
@@ -230,7 +372,7 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
               <div>
                 <p className="text-sm text-gray-700 dark:text-gray-400">Total de Itens</p>
                 <p className="text-3xl font-semibold text-blue-500 dark:text-blue-300 mt-2 tracking-tight">
-                  {kpis.totalItens}
+                  {kpis.totalItens.toLocaleString('pt-BR')}
                 </p>
               </div>
               <div className="bg-blue-100/70 dark:bg-blue-900/50 p-3 rounded-full">
@@ -244,7 +386,10 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
               <div>
                 <p className="text-sm text-gray-700 dark:text-gray-400">Valor Total</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
-                  R$ {kpis.valorTotal.toLocaleString("pt-BR")}
+                  {kpis.valorTotal.toLocaleString('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL' 
+                  })}
                 </p>
               </div>
               <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-full">
@@ -258,7 +403,10 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
               <div>
                 <p className="text-sm text-gray-700 dark:text-gray-400">Depreciação Acumulada</p>
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">
-                  R$ {kpis.depreciacaoAcumulada.toLocaleString("pt-BR")}
+                  {kpis.depreciacaoAcumulada.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                  })}
                 </p>
               </div>
               <div className="bg-yellow-100 dark:bg-yellow-900/40 p-3 rounded-full">
@@ -272,7 +420,11 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
               <div>
                 <p className="text-sm text-gray-700 dark:text-gray-400">Bens Ativos</p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-2">
-                  {kpis.ativos}
+                  {kpis.ativos.toLocaleString('pt-BR')}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {kpis.manutencao > 0 && `${kpis.manutencao} em manutenção`}
+                  {kpis.baixados > 0 && ` | ${kpis.baixados} baixados`}
                 </p>
               </div>
               <div className="bg-purple-100 dark:bg-purple-900/40 p-3 rounded-full">
@@ -284,38 +436,76 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
 
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Valor por Categoria */}
+          {/* Distribuição de Valor por Categoria */}
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição de Valor por Categoria
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <RChart>
-                <Pie data={distribuicaoCategoria} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                  {distribuicaoCategoria.map((entry, i) => (
-                    <Cell key={i} fill={CORES_GRAFICO[i % CORES_GRAFICO.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RChart>
-            </ResponsiveContainer>
+            {dadosGraficos.distribuicaoCategoria.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <RChart>
+                  <Pie 
+                    data={dadosGraficos.distribuicaoCategoria} 
+                    cx="50%" 
+                    cy="50%" 
+                    outerRadius={80} 
+                    dataKey="value" 
+                    label={({name, value}) => value ? `${name}: ${(value/1000).toFixed(0)}k` : name}
+                  >
+                    {dadosGraficos.distribuicaoCategoria.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={CORES_GRAFICO[index % CORES_GRAFICO.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => value.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    })}
+                  />
+                  <Legend />
+                </RChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+                Sem dados para exibir
+              </div>
+            )}
           </div>
 
-          {/* Distribuição por setor */}
+          {/* Distribuição por Setor */}
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição por Setor
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <RChart>
-                <Pie data={distribuicaoLocalizacao} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                  {distribuicaoLocalizacao.map((entry, i) => (
-                    <Cell key={i} fill={CORES_GRAFICO[i % CORES_GRAFICO.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </RChart>
-            </ResponsiveContainer>
+            {dadosGraficos.distribuicaoSetor.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <RChart>
+                  <Pie 
+                    data={dadosGraficos.distribuicaoSetor} 
+                    cx="50%" 
+                    cy="50%" 
+                    outerRadius={80} 
+                    dataKey="value" 
+                    label={({name, value}) => {
+                      if (typeof value === 'number') {
+                        return `${name}: ${value}`;
+                      }
+                      return name;
+                    }}
+                  >
+                    {dadosGraficos.distribuicaoSetor.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CORES_GRAFICO[index % CORES_GRAFICO.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </RChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+                Sem dados para exibir
+              </div>
+            )}
           </div>
 
           {/* Depreciação por Categoria */}
@@ -323,69 +513,86 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Depreciação por Categoria
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={depreciacaoPorCategoria} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                <XAxis type="number" />
-                <YAxis dataKey="categoria" type="category" width={120} />
-                <Bar dataKey="valor" fill="#f59e0b" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#f9fafb", // fundo claro em ambos os temas
-                    color: "#f9fafb",              // texto preto visível
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                  }}
-                  itemStyle={{ color: "#000" }} // mantém os labels legíveis
-                  labelStyle={{ color: "#f59e0b", fontWeight: 600 }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {dadosGraficos.depreciacaoCategoria.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dadosGraficos.depreciacaoCategoria} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                  <XAxis type="number" tickFormatter={(value) => `${(value/1000).toFixed(0)}k`} />
+                  <YAxis dataKey="categoria" type="category" width={120} />
+                  <Bar dataKey="valor" fill="#f59e0b" />
+                  <Tooltip
+                    formatter={(value: number) => value.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    })}
+                    contentStyle={{
+                      backgroundColor: "#1e1e1e",
+                      border: "1px solid #2d2d2d",
+                      borderRadius: "8px",
+                    }}
+                    labelStyle={{ color: "#f59e0b", fontWeight: 600 }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+                Sem dados para exibir
+              </div>
+            )}
           </div>
 
           {/* Distribuição de Valor por Responsável */}
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              Distribuição de Valor por Responsável
+              Top 10 - Valor por Responsável
             </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={valorPorResponsavel} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                <XAxis type="number" />
-                <YAxis dataKey="responsavel" type="category" width={100} />
-                <Bar dataKey="valor" fill="#2563eb" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#f9fafb", // fundo claro em ambos os temas
-                    color: "#f9fafb",              // texto preto visível
-                    borderRadius: "8px",
-                    border: "1px solid #d1d5db",
-                  }}
-                  itemStyle={{ color: "#000" }} // mantém os labels legíveis
-                  labelStyle={{ color: "#2563eb", fontWeight: 600 }}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            {dadosGraficos.valorResponsavel.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dadosGraficos.valorResponsavel} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
+                  <XAxis type="number" tickFormatter={(value) => `${(value/1000).toFixed(0)}k`} />
+                  <YAxis dataKey="responsavel" type="category" width={100} />
+                  <Bar dataKey="valor" fill="#2563eb" />
+                  <Tooltip
+                    formatter={(value: number) => value.toLocaleString('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL'
+                    })}
+                    contentStyle={{
+                      backgroundColor: "#1e1e1e",
+                      border: "1px solid #2d2d2d",
+                      borderRadius: "8px",
+                    }}
+                    labelStyle={{ color: "#2563eb", fontWeight: 600 }}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500 dark:text-gray-400">
+                Sem dados para exibir
+              </div>
+            )}
           </div>
         </div>
 
-        {/* TABELA DE BENS PATRIMONIAIS */}
-        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 mt-6 mb-6 transition-colors">
-          {/* Cabeçalho */}
+        {/* Tabela de Bens Patrimoniais */}
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2 md:mb-0">
               Bens Patrimoniais
             </h3>
 
             <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-              {/* Pesquisa */}
               <div className="relative flex-1 md:flex-initial">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   placeholder="Pesquisar bem..."
-                  className="pl-3 pr-3 py-2 w-full md:w-64 rounded-lg border 
+                  value={buscaLocal}
+                  onChange={(e) => setBuscaLocal(e.target.value)}
+                  className="pl-10 pr-3 py-2 w-full md:w-64 rounded-lg border 
                             focus:outline-none focus:ring-2 focus:ring-blue-500
-                            bg-white dark:bg-darkGray
+                            bg-white dark:bg-[#2a2a2a]
                             text-gray-800 dark:text-gray-200
                             border-gray-300 dark:border-gray-600
                             placeholder-gray-400 dark:placeholder-gray-500
@@ -393,237 +600,239 @@ const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
                 />
               </div>
 
-              {/* Botão Exportar */}
               <button
-                className="flex items-center justify-center px-4 py-2 
-                bg-gradient-to-r from-green-500 to-emerald-600 
-                text-white font-medium rounded-lg shadow-md
-                hover:from-green-400 hover:to-emerald-500 
-                dark:hover:from-green-600 dark:hover:to-green-500
-                transition-all duration-300"
+                onClick={handleExportarExcel}
+                className="flex items-center justify-center gap-2 px-4 py-2 
+                          bg-gradient-to-r from-green-500 to-emerald-600 
+                          text-white font-medium rounded-lg shadow-md
+                          hover:from-green-400 hover:to-emerald-500 
+                          dark:hover:from-green-600 dark:hover:to-green-500
+                          transition-all duration-300"
               >
+                <Download className="w-4 h-4" />
                 Exportar Excel
               </button>
             </div>
           </div>
 
-          {/* Corpo da Tabela */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
-                  {[
-                    "Nome",
-                    "Categoria",
-                    "Responsável",
-                    "Localização",
-                    "Data de Aquisição",
-                    "Valor Atual (R$)",
-                    "Depreciação (R$)",
-                    "Situação",
-                  ].map((header, idx) => (
-                    <th
-                      key={idx}
-                      className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200"
-                    >
-                      {header}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  {
-                    nome: "Impressora HP LaserJet",
-                    categoria: "Equipamento",
-                    responsavel: "Erick",
-                    local: "Matriz",
-                    dataAquisicao: "2021-03-15",
-                    valorAtual: 4200.0,
-                    valorDepreciado: 1800.0,
-                    situacao: "Ativo",
-                  },
-                  {
-                    nome: "Veículo Strada",
-                    categoria: "Veículo",
-                    responsavel: "Gabriel",
-                    local: "Filial Recife",
-                    dataAquisicao: "2019-11-10",
-                    valorAtual: 58000.0,
-                    valorDepreciado: 22000.0,
-                    situacao: "Em Manutenção",
-                  },
-                  {
-                    nome: "Notebook Dell",
-                    categoria: "Equipamento",
-                    responsavel: "Welton",
-                    local: "Matriz",
-                    dataAquisicao: "2023-01-05",
-                    valorAtual: 6500.0,
-                    valorDepreciado: 500.0,
-                    situacao: "Ativo",
-                  },
-                  {
-                    nome: "Mesa Reunião 3m",
-                    categoria: "Móveis e Utensílios",
-                    responsavel: "Djalma",
-                    local: "Filial SP",
-                    dataAquisicao: "2020-08-22",
-                    valorAtual: 1800.0,
-                    valorDepreciado: 900.0,
-                    situacao: "Baixado",
-                  },
-                ].map((bem, index) => (
-                  <tr
-                    key={index}
-                    className={`border-b border-gray-100 dark:border-gray-700 
-                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
-                                ${index % 2 === 0 ? "bg-white dark:bg-[#1b1b1b]" : "bg-gray-50 dark:bg-[#222222]"}`}
-                  >
-                    <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">
-                      {bem.nome}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                      {bem.categoria}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                      {bem.responsavel}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                      {bem.local}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                      {new Date(bem.dataAquisicao).toLocaleDateString("pt-BR")}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-blue-500 dark:text-blue-400 text-center">
-                      {bem.valorAtual.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-sm font-semibold text-orange-500 dark:text-orange-400 text-center">
-                      {bem.valorDepreciado.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span
-                        className={`inline-flex justify-center items-center text-center whitespace-nowrap px-2 py-1 text-xs font-semibold rounded-full ${
-                          bem.situacao === "Ativo"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400"
-                            : bem.situacao === "Em Manutenção"
-                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400"
-                            : "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400"
-                        }`}
-                      >
-                        {bem.situacao}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Paginação (estática/visual) */}
-          <div className="mt-4">
-            {/* Texto de registros */}
-            <div className="text-sm text-gray-600 dark:text-gray-300 mb-2 md:mb-0">
-              Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
-            </div>
-
-            {/* Desktop */}
-            <div className="hidden md:flex justify-between items-center">
-              <div></div>{/* placeholder só pra alinhar */}
-              <div className="flex gap-2">
-                {/* Botão Anterior (só visual) */}
-                <button
-                  disabled={PAGINA_ATUAL === 1}
-                  className="px-3 py-1 border rounded-lg
-                    bg-white dark:bg-[#1f1f1f]
-                    border-gray-300 dark:border-gray-600
-                    text-gray-700 dark:text-gray-300
-                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    transition-colors"
-                >
-                  Anterior
-                </button>
-
-                {/* Números de página (só visual) */}
-                <div className="flex gap-1">
-                  {PAGES.map((page) => (
-                    <button
-                      key={page}
-                      className={`px-3 py-1 border rounded-lg transition-colors ${
-                        PAGINA_ATUAL === page
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]"
-                      }`}
-                      aria-current={PAGINA_ATUAL === page ? "page" : undefined}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Botão Próximo (só visual) */}
-                <button
-                  disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
-                  className="px-3 py-1 border rounded-lg
-                    bg-white dark:bg-[#1f1f1f]
-                    border-gray-300 dark:border-gray-600
-                    text-gray-700 dark:text-gray-300
-                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                    disabled:opacity-50 disabled:cursor-not-allowed
-                    transition-colors"
-                >
-                  Próximo
-                </button>
+          {/* Tabela */}
+          {patrimoniosFiltrados.length > 0 ? (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#181818]">
+                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Nome
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Categoria
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Responsável
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Localização
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Data de Aquisição
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Valor Atual
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Depreciação
+                      </th>
+                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+                        Situação
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dadosPaginados.map((bem, index) => {
+                      const depreciacao = (bem.valor_aquisicao || 0) - (bem.valor_atual || 0);
+                      return (
+                        <tr
+                          key={bem.id}
+                          className={`border-b border-gray-100 dark:border-gray-700 
+                                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
+                                    ${index % 2 === 0 ? 'bg-white dark:bg-[#1b1b1b]' : 'bg-gray-50 dark:bg-[#222222]'}`}
+                        >
+                          <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                            {bem.nome}
+                            {bem.numero_serie && (
+                              <span className="block text-xs text-gray-500 dark:text-gray-400">
+                                SN: {bem.numero_serie}
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                            {getNomeCategoria(bem.categoria_id)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                            {getNomeUsuario(bem.responsavel_id)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                            {getNomeSetor(bem.setor_id)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                            {bem.data_aquisicao ? new Date(bem.data_aquisicao).toLocaleDateString('pt-BR') : 'N/A'}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-blue-600 dark:text-blue-400">
+                            {(bem.valor_atual || 0).toLocaleString('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            })}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-orange-600 dark:text-orange-400">
+                            {((bem.valor_aquisicao || 0) - (bem.valor_atual || 0)).toLocaleString('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL'
+                            })}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span
+                              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                ${bem.status === 'ativo'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
+                                  : bem.status === 'manutencao'
+                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                                }`}
+                            >
+                              {getStatusDisplay(bem.status)}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            </div>
 
-            {/* Mobile */}
-            <div className="flex md:hidden justify-center gap-2 items-center mt-2">
+              {/* Paginação */}
+              {totalPaginas > 1 && (
+                <div className="mt-4">
+                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                  </div>
+
+                  {/* Desktop */}
+                  <div className="hidden md:flex justify-between items-center">
+                    <div />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                        disabled={paginaAtual === 1}
+                        className="px-3 py-1 border rounded-lg
+                                  bg-white dark:bg-[#1f1f1f]
+                                  border-gray-300 dark:border-gray-600
+                                  text-gray-700 dark:text-gray-300
+                                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                  disabled:opacity-50 disabled:cursor-not-allowed
+                                  transition-colors"
+                      >
+                        Anterior
+                      </button>
+
+                      <div className="flex gap-1">
+                        {paginasVisiveis.map(page => (
+                          <button
+                            key={page}
+                            onClick={() => setPaginaAtual(page)}
+                            className={`px-3 py-1 border rounded-lg transition-colors
+                              ${paginaAtual === page
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                              }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                        disabled={paginaAtual === totalPaginas}
+                        className="px-3 py-1 border rounded-lg
+                                  bg-white dark:bg-[#1f1f1f]
+                                  border-gray-300 dark:border-gray-600
+                                  text-gray-700 dark:text-gray-300
+                                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                  disabled:opacity-50 disabled:cursor-not-allowed
+                                  transition-colors"
+                      >
+                        Próximo
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Mobile */}
+                  <div className="flex md:hidden justify-center gap-2 items-center">
+                    <button
+                      onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                      disabled={paginaAtual === 1}
+                      className="px-3 py-1 border rounded-lg
+                                bg-white dark:bg-[#1f1f1f]
+                                border-gray-300 dark:border-gray-600
+                                text-gray-700 dark:text-gray-300
+                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                transition-colors"
+                    >
+                      {"<"}
+                    </button>
+
+                    <span className="px-3 py-1 border rounded-lg
+                                    bg-white dark:bg-[#1f1f1f]
+                                    text-gray-700 dark:text-gray-300
+                                    border-gray-300 dark:border-gray-600">
+                      {paginaAtual}
+                    </span>
+
+                    <button
+                      onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                      disabled={paginaAtual === totalPaginas}
+                      className="px-3 py-1 border rounded-lg
+                                bg-white dark:bg-[#1f1f1f]
+                                border-gray-300 dark:border-gray-600
+                                text-gray-700 dark:text-gray-300
+                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                transition-colors"
+                    >
+                      {">"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <p className="text-gray-500 dark:text-gray-400 text-lg">
+                Nenhum bem encontrado com os filtros selecionados
+              </p>
               <button
-                disabled={PAGINA_ATUAL === 1}
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
+                onClick={() => {
+                  setFiltros({
+                    categoria: 'todas',
+                    setor: 'todos',
+                    situacao: 'todas',
+                    responsavel: 'todos',
+                    dataInicio: undefined,
+                    dataFim: undefined,
+                    filtroPersonalizado: 'nenhum',
+                    busca: ''
+                  });
+                  setBuscaLocal('');
+                }}
+                className="mt-4 px-4 py-2 text-blue-600 dark:text-blue-400 hover:underline"
               >
-                {"<"}
-              </button>
-
-              <span
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  text-gray-700 dark:text-gray-300
-                  border-gray-300 dark:border-gray-600"
-              >
-                {PAGINA_ATUAL}
-              </span>
-
-              <button
-                disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
-              >
-                {">"}
+                Limpar filtros
               </button>
             </div>
-          </div>
+          )}
         </div>
-
       </div>
     </div>
   );

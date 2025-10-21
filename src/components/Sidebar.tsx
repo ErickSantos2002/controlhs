@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
         />
       ),
     },
-    ...(user?.role === "admin"
+    ...(user?.role === "Administrador"
       ? [
           {
             label: "Log de Auditoria",

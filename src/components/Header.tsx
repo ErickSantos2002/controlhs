@@ -152,7 +152,7 @@ const Header: React.FC = () => {
               >
                 Dashboard
               </Link>
-              {user?.role === "admin" && (
+              {user?.role === "Administrador" && (
                 <Link
                   to="/logs"
                   onClick={fecharMenu}
