@@ -25,6 +25,8 @@ import {
 } from "recharts";
 import { useDashboard } from "../context/DashboardContext";
 import { useAuth } from "../hooks/useAuth";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const DashboardPatrimonio: React.FC = () => {
   const { user } = useAuth();
@@ -143,10 +145,49 @@ const DashboardPatrimonio: React.FC = () => {
   }, [filtros, setFiltros]);
 
   const handleExportarExcel = useCallback(() => {
-    // Implementar exportação
-    console.log('Exportando', patrimoniosFiltrados.length, 'registros');
-    // TODO: Implementar lógica de exportação real
-  }, [patrimoniosFiltrados]);
+    if (patrimoniosFiltrados.length === 0) {
+      alert("Nenhum dado para exportar!");
+      return;
+    }
+
+    // Monta os dados que vão pro Excel
+    const dados = patrimoniosFiltrados.map((bem) => ({
+      Nome: bem.nome,
+      Categoria: categorias.find((c) => c.id === bem.categoria_id)?.nome || "N/A",
+      Responsavel: usuarios.find((u) => u.id === bem.responsavel_id)?.username || "N/A",
+      Setor: setores.find((s) => s.id === bem.setor_id)?.nome || "N/A",
+      "Data de Aquisição": bem.data_aquisicao
+        ? new Date(bem.data_aquisicao).toLocaleDateString("pt-BR")
+        : "N/A",
+      "Valor Atual (R$)": bem.valor_atual?.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }),
+      "Depreciação (R$)": ((bem.valor_aquisicao || 0) - (bem.valor_atual || 0)).toLocaleString(
+        "pt-BR",
+        {
+          style: "currency",
+          currency: "BRL",
+        }
+      ),
+      Situação:
+        bem.status === "ativo"
+          ? "Ativo"
+          : bem.status === "manutencao"
+          ? "Manutenção"
+          : "Baixado",
+    }));
+
+    // Cria o workbook e a planilha
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(dados);
+    XLSX.utils.book_append_sheet(wb, ws, "Patrimonios");
+
+    // Converte para blob e baixa
+    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([wbout], { type: "application/octet-stream" });
+    saveAs(blob, `Patrimonios_ControlHS_${new Date().toISOString().split("T")[0]}.xlsx`);
+  }, [patrimoniosFiltrados, categorias, setores, usuarios]);
 
   // Função auxiliar para obter nome por ID
   const getNomeCategoria = (id: number) => categorias.find(c => c.id === id)?.nome || 'N/A';
