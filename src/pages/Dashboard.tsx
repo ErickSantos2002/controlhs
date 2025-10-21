@@ -110,6 +110,8 @@ const DashboardPatrimonio: React.FC = () => {
       valorResponsavel
     };
   }, [patrimoniosFiltrados, categorias, setores, usuarios]);
+  
+  const isMobile = window.innerWidth < 768;
 
   // Paginação
   const dadosPaginados = useMemo(() => {
@@ -441,28 +443,46 @@ const DashboardPatrimonio: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição de Valor por Categoria
             </h3>
+
             {dadosGraficos.distribuicaoCategoria.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <RChart>
-                  <Pie 
-                    data={dadosGraficos.distribuicaoCategoria} 
-                    cx="50%" 
-                    cy="50%" 
-                    outerRadius={80} 
-                    dataKey="value" 
-                    label={({name, value}) => value ? `${name}: ${(value/1000).toFixed(0)}k` : name}
+                  <Pie
+                    data={dadosGraficos.distribuicaoCategoria}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80} // tamanho original restaurado
+                    dataKey="value"
+                    label={({ name, value }) =>
+                      value ? `${name}: ${(value / 1000).toFixed(0)}k` : name
+                    }
                   >
                     {dadosGraficos.distribuicaoCategoria.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={CORES_GRAFICO[index % CORES_GRAFICO.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={CORES_GRAFICO[index % CORES_GRAFICO.length]}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => value.toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    })}
+
+                  <Tooltip
+                    formatter={(value: number) =>
+                      value.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })
+                    }
                   />
-                  <Legend />
+
+                  {/* Legenda com espaçamento refinado e fonte menor */}
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{
+                      marginTop: 10,
+                      fontSize: "12px", // fonte um pouco menor para não pesar
+                    }}
+                  />
                 </RChart>
               </ResponsiveContainer>
             ) : (
@@ -477,28 +497,48 @@ const DashboardPatrimonio: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Distribuição por Setor
             </h3>
+
             {dadosGraficos.distribuicaoSetor.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <RChart>
-                  <Pie 
-                    data={dadosGraficos.distribuicaoSetor} 
-                    cx="50%" 
-                    cy="50%" 
-                    outerRadius={80} 
-                    dataKey="value" 
-                    label={({name, value}) => {
-                      if (typeof value === 'number') {
+                  <Pie
+                    data={dadosGraficos.distribuicaoSetor}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80} // mantém o tamanho original do gráfico
+                    dataKey="value"
+                    label={({ name, value }) => {
+                      if (typeof value === "number") {
                         return `${name}: ${value}`;
                       }
                       return name;
                     }}
                   >
                     {dadosGraficos.distribuicaoSetor.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={CORES_GRAFICO[index % CORES_GRAFICO.length]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={CORES_GRAFICO[index % CORES_GRAFICO.length]}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+
+                  <Tooltip
+                    formatter={(value: number) =>
+                      typeof value === "number"
+                        ? value.toLocaleString("pt-BR")
+                        : value
+                    }
+                  />
+
+                  {/* Legenda com mesmo ajuste visual do outro gráfico */}
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{
+                      marginTop: 10,
+                      fontSize: "12px",
+                    }}
+                  />
                 </RChart>
               </ResponsiveContainer>
             ) : (
@@ -721,13 +761,12 @@ const DashboardPatrimonio: React.FC = () => {
               {/* Paginação */}
               {totalPaginas > 1 && (
                 <div className="mt-4">
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
-                  </div>
-
                   {/* Desktop */}
-                  <div className="hidden md:flex justify-between items-center">
-                    <div />
+                  <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div>
+                      Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                    </div>
+
                     <div className="flex gap-2">
                       <button
                         onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
@@ -775,8 +814,15 @@ const DashboardPatrimonio: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Mobile */}
-                  <div className="flex md:hidden justify-center gap-2 items-center">
+                {/* Mobile */}
+                <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-600 dark:text-gray-300">
+                  {/* Texto de registros */}
+                  <div className="mb-2">
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                  </div>
+
+                  {/* Botões de paginação */}
+                  <div className="flex justify-center gap-2 items-center">
                     <button
                       onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
                       disabled={paginaAtual === 1}
@@ -813,6 +859,7 @@ const DashboardPatrimonio: React.FC = () => {
                     </button>
                   </div>
                 </div>
+              </div>
               )}
             </>
           ) : (
