@@ -521,15 +521,19 @@ const DashboardPatrimonio: React.FC = () => {
                   <YAxis dataKey="categoria" type="category" width={120} />
                   <Bar dataKey="valor" fill="#f59e0b" />
                   <Tooltip
-                    formatter={(value: number) => value.toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    })}
+                    formatter={(value: number) =>
+                      value.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })
+                    }
                     contentStyle={{
-                      backgroundColor: "#1e1e1e",
-                      border: "1px solid #2d2d2d",
+                      backgroundColor: "#f9fafb", 
+                      color: "#000",              
                       borderRadius: "8px",
+                      border: "1px solid #d1d5db",
                     }}
+                    itemStyle={{ color: "#000" }} 
                     labelStyle={{ color: "#f59e0b", fontWeight: 600 }}
                   />
                 </BarChart>
@@ -554,15 +558,19 @@ const DashboardPatrimonio: React.FC = () => {
                   <YAxis dataKey="responsavel" type="category" width={100} />
                   <Bar dataKey="valor" fill="#2563eb" />
                   <Tooltip
-                    formatter={(value: number) => value.toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL'
-                    })}
+                    formatter={(value: number) =>
+                      value.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      })
+                    }
                     contentStyle={{
-                      backgroundColor: "#1e1e1e",
-                      border: "1px solid #2d2d2d",
+                      backgroundColor: "#f9fafb", 
+                      color: "#000",              
                       borderRadius: "8px",
+                      border: "1px solid #d1d5db",
                     }}
+                    itemStyle={{ color: "#000" }} 
                     labelStyle={{ color: "#2563eb", fontWeight: 600 }}
                   />
                 </BarChart>
