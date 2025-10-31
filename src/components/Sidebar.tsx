@@ -31,6 +31,17 @@ const Sidebar: React.FC = () => {
         />
       ),
     },
+    {
+      label: "Patrimônios",
+      to: "/patrimonios",
+      icon: (isActive: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=6Hg4kZMTQf5S&format=png&color=${getColor(isActive)}`}
+          alt="Patrimônios"
+          className={iconBaseClass}
+        />
+      ),
+    },
     ...(user?.role === "Administrador"
       ? [
           {

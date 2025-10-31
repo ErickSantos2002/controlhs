@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import Patrimonios from "./pages/Patrimonios";
 import NotFound from "./pages/NotFound";
 import Logs from "./pages/Logs";
 
@@ -36,6 +37,15 @@ const AppRoutes: React.FC = () => (
       element={
         <ProtectedRoute>
           <Dashboard />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/patrimonios"
+      element={
+        <ProtectedRoute>
+          <Patrimonios />
         </ProtectedRoute>
       }
     />
