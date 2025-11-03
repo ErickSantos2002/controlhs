@@ -12,7 +12,10 @@ import {
   Loader2,
   AlertCircle,
   RefreshCw,
-  X
+  X,
+  Package,
+  TrendingUp,
+  DollarSign
 } from 'lucide-react';
 import { PatrimoniosProvider, usePatrimonios } from '../context/PatrimoniosContext';
 import PatrimonioModal from '../components/PatrimonioModal';
@@ -22,9 +25,7 @@ import type {
   Patrimonio,
   FiltrosPatrimonio,
   OrdenacaoPatrimonio,
-  PatrimonioExportData,
-  ITEMS_PER_PAGE_OPTIONS,
-  STATUS_LABELS
+  PatrimonioExportData
 } from '../types/patrimonios.types';
 
 // ========================================
@@ -58,13 +59,14 @@ const PatrimoniosContent: React.FC = () => {
   
   // Paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [itensPorPagina, setItensPorPagina] = useState(10);
+  const itensPorPagina = 10;
   
   // Busca local (com debounce)
   const [buscaLocal, setBuscaLocal] = useState('');
   
   // Estados UI
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   // ========================================
   // PERMISSÕES
@@ -83,7 +85,7 @@ const PatrimoniosContent: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setFiltros({ ...filtros, busca: buscaLocal });
-      setPaginaAtual(1); // Reset página ao buscar
+      setPaginaAtual(1);
     }, 300);
     return () => clearTimeout(timer);
   }, [buscaLocal]);
@@ -92,6 +94,25 @@ const PatrimoniosContent: React.FC = () => {
   useEffect(() => {
     setPaginaAtual(1);
   }, [filtros.categoria, filtros.setor, filtros.status, filtros.responsavel, filtros.dataInicio, filtros.dataFim]);
+
+  // ========================================
+  // KPIs CALCULADOS
+  // ========================================
+  
+  const kpis = useMemo(() => {
+    const total = patrimoniosFiltrados.length;
+    const valorTotal = patrimoniosFiltrados.reduce((sum, p) => sum + (p.valor_atual || 0), 0);
+    const depreciacaoTotal = patrimoniosFiltrados.reduce(
+      (sum, p) => sum + ((p.valor_aquisicao || 0) - (p.valor_atual || 0)), 
+      0
+    );
+    
+    return {
+      total,
+      valorTotal,
+      depreciacaoTotal
+    };
+  }, [patrimoniosFiltrados]);
 
   // ========================================
   // PAGINAÇÃO
@@ -150,10 +171,8 @@ const PatrimoniosContent: React.FC = () => {
     try {
       await deletePatrimonio(showDeleteConfirm.id);
       setShowDeleteConfirm(null);
-      // Toast de sucesso seria disparado aqui
     } catch (err) {
       console.error('Erro ao excluir patrimônio:', err);
-      // Toast de erro seria disparado aqui
     } finally {
       setDeletingId(null);
     }
@@ -213,101 +232,201 @@ const PatrimoniosContent: React.FC = () => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
   };
 
-  const formatDate = (date?: string) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('pt-BR');
+  const getStatusDisplay = (status?: string) => {
+    if (status === 'ativo') return 'Ativo';
+    if (status === 'manutencao') return 'Em Manutenção';
+    if (status === 'baixado') return 'Baixado';
+    return 'N/A';
+  };
+
+  const OrdenacaoIcon = ({ campo }: { campo: string }) => {
+    if (ordenacao.campo !== campo) return null;
+    return ordenacao.direcao === 'asc' ? 
+      <ChevronUp className="w-4 h-4" /> : 
+      <ChevronDown className="w-4 h-4" />;
   };
 
   // ========================================
   // RENDER
   // ========================================
-  
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center p-6 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+          <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Erro ao carregar dados
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={() => refreshData()}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#121212]">
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="space-y-6 p-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Gestão de Patrimônios
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Gerencie todos os bens patrimoniais da organização
+          </p>
+        </div>
         
-        {/* Header */}
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => refreshData()}
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+              text-gray-700 dark:text-gray-300
+              bg-white dark:bg-[#1f1f1f]
+              border border-gray-300 dark:border-gray-600
+              hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+              disabled:opacity-50 disabled:cursor-not-allowed
+              shadow-sm hover:shadow-md
+              transition-all duration-200"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </button>
+
+          <button
+            onClick={handleExportarExcel}
+            disabled={loading || patrimoniosFiltrados.length === 0}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+              text-gray-700 dark:text-gray-300
+              bg-white dark:bg-[#1f1f1f]
+              border border-gray-300 dark:border-gray-600
+              hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+              disabled:opacity-50 disabled:cursor-not-allowed
+              shadow-sm hover:shadow-md
+              transition-all duration-200"
+          >
+            <Download className="w-4 h-4" />
+            Exportar
+          </button>
+
+          {canCreate && (
+            <button
+              onClick={() => setModalMode('create')}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                text-white 
+                bg-blue-600 hover:bg-blue-700 
+                dark:bg-blue-500 dark:hover:bg-blue-600
+                shadow-sm hover:shadow-md
+                transition-all duration-200"
+            >
+              <Plus className="w-4 h-4" />
+              Novo Patrimônio
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Cards de KPIs */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total de Patrimônios */}
+        <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                Gestão de Patrimônios
-              </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Cadastre, consulte e gerencie todos os bens patrimoniais da empresa
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                Total de Patrimônios
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {kpis.total}
               </p>
             </div>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={refreshData}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                  text-gray-700 dark:text-gray-300
-                  bg-white dark:bg-[#2a2a2a]
-                  border border-gray-300 dark:border-gray-600
-                  rounded-lg hover:bg-gray-50 dark:hover:bg-[#333333]
-                  transition-colors"
-              >
-                <RefreshCw className="w-4 h-4" />
-                Atualizar
-              </button>
-              
-              <button
-                onClick={handleExportarExcel}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                  text-gray-700 dark:text-gray-300
-                  bg-white dark:bg-[#2a2a2a]
-                  border border-gray-300 dark:border-gray-600
-                  rounded-lg hover:bg-gray-50 dark:hover:bg-[#333333]
-                  transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
-              
-              {canCreate && (
-                <button
-                  onClick={() => {
-                    setPatrimonioSelecionado(null);
-                    setModalMode('create');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                    bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
-                    rounded-lg shadow-sm hover:shadow-md
-                    transition-all duration-200"
-                >
-                  <Plus className="w-4 h-4" />
-                  Novo Patrimônio
-                </button>
-              )}
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          {/* Busca */}
-          <div className="mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={buscaLocal}
-                onChange={(e) => setBuscaLocal(e.target.value)}
-                placeholder="Buscar por nome, descrição ou número de série..."
-                className="w-full pl-10 pr-3 py-2 border rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
-                  text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  placeholder-gray-400 dark:placeholder-gray-500
-                  transition-colors"
-              />
+        {/* Valor Total */}
+        <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                Valor Total Atual
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {formatCurrency(kpis.valorTotal)}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
+        </div>
 
-          {/* Filtros em Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Depreciação Total */}
+        <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                Depreciação Total
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {formatCurrency(kpis.depreciacaoTotal)}
+              </p>
+            </div>
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filtros e Busca */}
+      <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+        {/* Linha de Busca e Toggle de Filtros */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          {/* Campo de Busca */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por nome, descrição ou número de série..."
+              value={buscaLocal}
+              onChange={(e) => setBuscaLocal(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg
+                bg-white dark:bg-[#2a2a2a]
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-gray-600
+                placeholder-gray-400 dark:placeholder-gray-500
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                transition-all"
+            />
+          </div>
+
+          {/* Botão de Toggle Filtros */}
+          <button
+            onClick={() => setMostrarFiltros(!mostrarFiltros)}
+            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+              bg-white dark:bg-[#2a2a2a]
+              text-gray-700 dark:text-gray-300
+              border border-gray-300 dark:border-gray-600
+              hover:bg-gray-50 dark:hover:bg-[#333333]
+              transition-colors"
+          >
+            <Filter className="w-4 h-4" />
+            {mostrarFiltros ? 'Ocultar' : 'Filtros'}
+          </button>
+        </div>
+
+        {/* Painel de Filtros (Expansível) */}
+        {mostrarFiltros && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
             {/* Categoria */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -316,18 +435,15 @@ const PatrimoniosContent: React.FC = () => {
               <select
                 value={filtros.categoria}
                 onChange={(e) => setFiltros({ ...filtros, categoria: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg
+                className="w-full px-3 py-2 rounded-lg
                   bg-white dark:bg-[#2a2a2a]
                   text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  transition-colors"
+                  border border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todas">Todas</option>
                 {categorias.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.nome}
-                  </option>
+                  <option key={cat.id} value={cat.id}>{cat.nome}</option>
                 ))}
               </select>
             </div>
@@ -340,18 +456,15 @@ const PatrimoniosContent: React.FC = () => {
               <select
                 value={filtros.setor}
                 onChange={(e) => setFiltros({ ...filtros, setor: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg
+                className="w-full px-3 py-2 rounded-lg
                   bg-white dark:bg-[#2a2a2a]
                   text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  transition-colors"
+                  border border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
                 {setores.map(setor => (
-                  <option key={setor.id} value={setor.id}>
-                    {setor.nome}
-                  </option>
+                  <option key={setor.id} value={setor.id}>{setor.nome}</option>
                 ))}
               </select>
             </div>
@@ -364,12 +477,11 @@ const PatrimoniosContent: React.FC = () => {
               <select
                 value={filtros.status}
                 onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg
+                className="w-full px-3 py-2 rounded-lg
                   bg-white dark:bg-[#2a2a2a]
                   text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  transition-colors"
+                  border border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
                 <option value="ativo">Ativo</option>
@@ -386,355 +498,307 @@ const PatrimoniosContent: React.FC = () => {
               <select
                 value={filtros.responsavel}
                 onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg
+                className="w-full px-3 py-2 rounded-lg
                   bg-white dark:bg-[#2a2a2a]
                   text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  transition-colors"
+                  border border-gray-300 dark:border-gray-600
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
                 {usuarios.map(user => (
-                  <option key={user.id} value={user.id}>
-                    {user.username}
-                  </option>
+                  <option key={user.id} value={user.id}>{user.username}</option>
                 ))}
               </select>
             </div>
 
-            {/* Data Início */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Data Aquisição (Início)
-              </label>
-              <input
-                type="date"
-                value={filtros.dataInicio || ''}
-                onChange={(e) => setFiltros({ ...filtros, dataInicio: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg
+            {/* Botão Limpar Filtros */}
+            <div className="flex items-end">
+              <button
+                onClick={limparFiltros}
+                className="w-full px-3 py-2 text-sm font-medium rounded-lg
+                  text-gray-700 dark:text-gray-300
                   bg-white dark:bg-[#2a2a2a]
-                  text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  border border-gray-300 dark:border-gray-600
+                  hover:bg-gray-50 dark:hover:bg-[#333333]
                   transition-colors"
-              />
-            </div>
-
-            {/* Data Fim */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Data Aquisição (Fim)
-              </label>
-              <input
-                type="date"
-                value={filtros.dataFim || ''}
-                onChange={(e) => setFiltros({ ...filtros, dataFim: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
-                  text-gray-900 dark:text-gray-100
-                  border-gray-300 dark:border-gray-600
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                  transition-colors"
-              />
+              >
+                <X className="w-4 h-4 inline mr-1" />
+                Limpar
+              </button>
             </div>
           </div>
+        )}
+      </div>
 
-          {/* Ações dos filtros */}
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Exibindo {patrimoniosFiltrados.length} de {patrimoniosFiltrados.length} patrimônios
+      {/* Tabela */}
+      <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
+          </div>
+        ) : patrimoniosFiltrados.length > 0 ? (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-gray-700">
+                  <tr>
+                    <th 
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333]"
+                      onClick={() => handleOrdenar('nome')}
+                    >
+                      <div className="flex items-center gap-1">
+                        Nome
+                        <OrdenacaoIcon campo="nome" />
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Categoria
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Responsável
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Setor
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333]"
+                      onClick={() => handleOrdenar('data_aquisicao')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        Data Aquisição
+                        <OrdenacaoIcon campo="data_aquisicao" />
+                      </div>
+                    </th>
+                    <th 
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333]"
+                      onClick={() => handleOrdenar('valor_atual')}
+                    >
+                      <div className="flex items-center justify-center gap-1">
+                        Valor Atual
+                        <OrdenacaoIcon campo="valor_atual" />
+                      </div>
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Depreciação
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Ações
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {dadosPaginados.map((patrimonio) => (
+                    <tr 
+                      key={patrimonio.id}
+                      className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
+                    >
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {patrimonio.nome}
+                        {patrimonio.numero_serie && (
+                          <span className="block text-xs text-gray-500 dark:text-gray-400">
+                            SN: {patrimonio.numero_serie}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                        {getCategoriaNome(patrimonio.categoria_id)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                        {getResponsavelNome(patrimonio.responsavel_id)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                        {getSetorNome(patrimonio.setor_id)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                        {patrimonio.data_aquisicao ? 
+                          new Date(patrimonio.data_aquisicao).toLocaleDateString('pt-BR') : 
+                          'N/A'
+                        }
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center font-semibold text-blue-600 dark:text-blue-400">
+                        {formatCurrency(patrimonio.valor_atual)}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-center font-semibold text-orange-600 dark:text-orange-400">
+                        {formatCurrency((patrimonio.valor_aquisicao || 0) - (patrimonio.valor_atual || 0))}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                            ${patrimonio.status === 'ativo'
+                              ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
+                              : patrimonio.status === 'manutencao'
+                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
+                              : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                            }`}
+                        >
+                          {getStatusDisplay(patrimonio.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleView(patrimonio)}
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            title="Visualizar"
+                          >
+                            <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          </button>
+                          
+                          {canEdit && (
+                            <button
+                              onClick={() => handleEdit(patrimonio)}
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              title="Editar"
+                            >
+                              <Edit className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+                            </button>
+                          )}
+                          
+                          {canDelete && (
+                            <button
+                              onClick={() => handleDeleteClick(patrimonio)}
+                              disabled={deletingId === patrimonio.id}
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                              title="Excluir"
+                            >
+                              {deletingId === patrimonio.id ? (
+                                <Loader2 className="w-4 h-4 text-red-600 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginação */}
+            {totalPaginas > 1 && (
+              <div className="mt-4 px-4 pb-4">
+                {/* Desktop */}
+                <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                  <div>
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                      disabled={paginaAtual === 1}
+                      className="px-3 py-1 border rounded-lg
+                                bg-white dark:bg-[#1f1f1f]
+                                border-gray-300 dark:border-gray-600
+                                text-gray-700 dark:text-gray-300
+                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                transition-colors"
+                    >
+                      Anterior
+                    </button>
+
+                    <div className="flex gap-1">
+                      {paginasVisiveis.map(page => (
+                        <button
+                          key={page}
+                          onClick={() => setPaginaAtual(page)}
+                          className={`px-3 py-1 border rounded-lg transition-colors
+                            ${paginaAtual === page
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                            }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                      disabled={paginaAtual === totalPaginas}
+                      className="px-3 py-1 border rounded-lg
+                                bg-white dark:bg-[#1f1f1f]
+                                border-gray-300 dark:border-gray-600
+                                text-gray-700 dark:text-gray-300
+                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                transition-colors"
+                    >
+                      Próximo
+                    </button>
+                  </div>
+                </div>
+
+                {/* Mobile */}
+                <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="mb-2">
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                  </div>
+
+                  <div className="flex justify-center gap-2 items-center">
+                    <button
+                      onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                      disabled={paginaAtual === 1}
+                      className="px-3 py-1 border rounded-lg
+                                bg-white dark:bg-[#1f1f1f]
+                                border-gray-300 dark:border-gray-600
+                                text-gray-700 dark:text-gray-300
+                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                transition-colors"
+                    >
+                      {"<"}
+                    </button>
+
+                    <span className="px-3 py-1 border rounded-lg
+                                    bg-white dark:bg-[#1f1f1f]
+                                    text-gray-700 dark:text-gray-300
+                                    border-gray-300 dark:border-gray-600">
+                      {paginaAtual}
+                    </span>
+
+                    <button
+                      onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                      disabled={paginaAtual === totalPaginas}
+                      className="px-3 py-1 border rounded-lg
+                                bg-white dark:bg-[#1f1f1f]
+                                border-gray-300 dark:border-gray-600
+                                text-gray-700 dark:text-gray-300
+                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                                disabled:opacity-50 disabled:cursor-not-allowed
+                                transition-colors"
+                    >
+                      {">"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="py-12 text-center">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              Nenhum patrimônio encontrado com os filtros selecionados
             </p>
             <button
               onClick={limparFiltros}
-              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+              className="mt-2 px-2 py-1 text-sm font-medium rounded-lg
+                        text-white 
+                        bg-blue-600 hover:bg-blue-700 
+                        dark:bg-blue-500 dark:hover:bg-blue-600
+                        shadow-sm hover:shadow-md
+                        transition-all duration-200"
             >
-              Limpar Filtros
+              Limpar filtros
             </button>
           </div>
-        </div>
-
-        {/* Tabela */}
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          {loading && !patrimoniosFiltrados.length ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-            </div>
-          ) : error ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <AlertCircle className="w-12 h-12 text-red-500 mb-3" />
-              <p className="text-gray-600 dark:text-gray-400">{error}</p>
-              <button
-                onClick={refreshData}
-                className="mt-3 text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Tentar novamente
-              </button>
-            </div>
-          ) : dadosPaginados.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <p className="text-gray-500 dark:text-gray-400 text-lg mb-3">
-                Nenhum patrimônio encontrado
-              </p>
-              <button
-                onClick={limparFiltros}
-                className="px-4 py-2 text-sm font-medium text-white
-                  bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
-                  rounded-lg shadow-sm hover:shadow-md
-                  transition-all duration-200"
-              >
-                Limpar filtros
-              </button>
-            </div>
-          ) : (
-            <>
-              {/* Tabela */}
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th
-                        onClick={() => handleOrdenar('id')}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      >
-                        <div className="flex items-center gap-1">
-                          ID
-                          {ordenacao.campo === 'id' && (
-                            ordenacao.direcao === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th
-                        onClick={() => handleOrdenar('nome')}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      >
-                        <div className="flex items-center gap-1">
-                          Nome
-                          {ordenacao.campo === 'nome' && (
-                            ordenacao.direcao === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th
-                        onClick={() => handleOrdenar('numero_serie')}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      >
-                        <div className="flex items-center gap-1">
-                          N° Série
-                          {ordenacao.campo === 'numero_serie' && (
-                            ordenacao.direcao === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Categoria
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Setor
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Responsável
-                      </th>
-                      <th
-                        onClick={() => handleOrdenar('data_aquisicao')}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      >
-                        <div className="flex items-center gap-1">
-                          Aquisição
-                          {ordenacao.campo === 'data_aquisicao' && (
-                            ordenacao.direcao === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th
-                        onClick={() => handleOrdenar('valor_atual')}
-                        className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-200"
-                      >
-                        <div className="flex items-center gap-1">
-                          Valor Atual
-                          {ordenacao.campo === 'valor_atual' && (
-                            ordenacao.direcao === 'asc' ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />
-                          )}
-                        </div>
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Ações
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                    {dadosPaginados.map((patrimonio) => (
-                      <tr key={patrimonio.id} className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors">
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                          #{patrimonio.id}
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                            {patrimonio.nome.length > 40 
-                              ? `${patrimonio.nome.substring(0, 40)}...` 
-                              : patrimonio.nome
-                            }
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 font-mono">
-                          {patrimonio.numero_serie || '-'}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                          {getCategoriaNome(patrimonio.categoria_id)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                          {getSetorNome(patrimonio.setor_id)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                          {getResponsavelNome(patrimonio.responsavel_id)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                          {formatDate(patrimonio.data_aquisicao)}
-                        </td>
-                        <td className="px-4 py-3 text-sm font-semibold text-blue-600 dark:text-blue-400">
-                          {formatCurrency(patrimonio.valor_atual)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                            ${patrimonio.status === 'ativo'
-                              ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                              : patrimonio.status === 'manutencao'
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                              : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                            }`}
-                          >
-                            {patrimonio.status === 'ativo' ? 'Ativo' 
-                              : patrimonio.status === 'manutencao' ? 'Manutenção' 
-                              : 'Baixado'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              onClick={() => handleView(patrimonio)}
-                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                              title="Visualizar"
-                            >
-                              <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-                            </button>
-                            {canEdit && (
-                              <button
-                                onClick={() => handleEdit(patrimonio)}
-                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                title="Editar"
-                              >
-                                <Edit className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                              </button>
-                            )}
-                            {canDelete && (
-                              <button
-                                onClick={() => handleDeleteClick(patrimonio)}
-                                disabled={deletingId === patrimonio.id}
-                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                                title="Excluir"
-                              >
-                                {deletingId === patrimonio.id ? (
-                                  <Loader2 className="w-4 h-4 text-red-600 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Paginação */}
-              {totalPaginas > 1 && (
-                <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    {/* Seletor de itens por página */}
-                    <div className="flex items-center gap-2">
-                      <label className="text-sm text-gray-600 dark:text-gray-400">
-                        Itens por página:
-                      </label>
-                      <select
-                        value={itensPorPagina}
-                        onChange={(e) => {
-                          setItensPorPagina(Number(e.target.value));
-                          setPaginaAtual(1);
-                        }}
-                        className="px-2 py-1 border rounded
-                          bg-white dark:bg-[#2a2a2a]
-                          text-gray-900 dark:text-gray-100
-                          border-gray-300 dark:border-gray-600
-                          focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="10">10</option>
-                        <option value="25">25</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                      </select>
-                    </div>
-
-                    {/* Info de registros */}
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
-                    </div>
-
-                    {/* Botões de paginação */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
-                        disabled={paginaAtual === 1}
-                        className="px-3 py-1 border rounded
-                          bg-white dark:bg-[#1f1f1f]
-                          border-gray-300 dark:border-gray-600
-                          text-gray-700 dark:text-gray-300
-                          hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          transition-colors"
-                      >
-                        Anterior
-                      </button>
-
-                      <div className="flex gap-1">
-                        {paginasVisiveis.map(page => (
-                          <button
-                            key={page}
-                            onClick={() => setPaginaAtual(page)}
-                            className={`px-3 py-1 border rounded transition-colors
-                              ${paginaAtual === page
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
-                              }`}
-                          >
-                            {page}
-                          </button>
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
-                        disabled={paginaAtual === totalPaginas}
-                        className="px-3 py-1 border rounded
-                          bg-white dark:bg-[#1f1f1f]
-                          border-gray-300 dark:border-gray-600
-                          text-gray-700 dark:text-gray-300
-                          hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          transition-colors"
-                      >
-                        Próximo
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        )}
       </div>
 
       {/* Modais */}
