@@ -36,9 +36,10 @@ const Sidebar: React.FC = () => {
       to: "/patrimonios",
       icon: (isActive: boolean) => (
         <img
-          src={`https://img.icons8.com/?size=100&id=6Hg4kZMTQf5S&format=png&color=${getColor(isActive)}`}
+          src="https://img.icons8.com/?size=100&id=f6XnJbAyvoWg&format=png"
           alt="Patrimônios"
-          className={iconBaseClass}
+          className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'} 
+                  dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
         />
       ),
     },

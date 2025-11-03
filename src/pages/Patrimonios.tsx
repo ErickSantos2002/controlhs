@@ -272,116 +272,126 @@ const PatrimoniosContent: React.FC = () => {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Gestão de Patrimônios
-          </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Gerencie todos os bens patrimoniais da organização
-          </p>
-        </div>
-        
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => refreshData()}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
-              text-gray-700 dark:text-gray-300
-              bg-white dark:bg-[#1f1f1f]
-              border border-gray-300 dark:border-gray-600
-              hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-              disabled:opacity-50 disabled:cursor-not-allowed
-              shadow-sm hover:shadow-md
-              transition-all duration-200"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
-          </button>
+      {/* Cabeçalho - Padronizado com Dashboard */}
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          {/* Título e Descrição */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
+              Gestão de Patrimônios
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              Gerencie todos os bens patrimoniais da organização
+            </p>
+          </div>
 
-          <button
-            onClick={handleExportarExcel}
-            disabled={loading || patrimoniosFiltrados.length === 0}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
-              text-gray-700 dark:text-gray-300
-              bg-white dark:bg-[#1f1f1f]
-              border border-gray-300 dark:border-gray-600
-              hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-              disabled:opacity-50 disabled:cursor-not-allowed
-              shadow-sm hover:shadow-md
-              transition-all duration-200"
-          >
-            <Download className="w-4 h-4" />
-            Exportar
-          </button>
-
-          {canCreate && (
+          {/* Botões de Ação */}
+          <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setModalMode('create')}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
-                text-white 
-                bg-blue-600 hover:bg-blue-700 
-                dark:bg-blue-500 dark:hover:bg-blue-600
+              onClick={() => refreshData()}
+              disabled={loading}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+                text-gray-700 dark:text-gray-300
+                bg-white dark:bg-[#1f1f1f]
+                border border-gray-300 dark:border-gray-600
+                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                disabled:opacity-50 disabled:cursor-not-allowed
                 shadow-sm hover:shadow-md
                 transition-all duration-200"
             >
-              <Plus className="w-4 h-4" />
-              Novo Patrimônio
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar
             </button>
-          )}
+
+            <button
+              onClick={handleExportarExcel}
+              disabled={loading || patrimoniosFiltrados.length === 0}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+                text-gray-700 dark:text-gray-300
+                bg-white dark:bg-[#1f1f1f]
+                border border-gray-300 dark:border-gray-600
+                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-sm hover:shadow-md
+                transition-all duration-200"
+            >
+              <Download className="w-4 h-4" />
+              Exportar
+            </button>
+
+            {canCreate && (
+              <button
+                onClick={() => setModalMode('create')}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                  text-white 
+                  bg-blue-600 hover:bg-blue-700 
+                  dark:bg-blue-500 dark:hover:bg-blue-600
+                  shadow-sm hover:shadow-md
+                  transition-all duration-200"
+              >
+                <Plus className="w-4 h-4" />
+                Novo Patrimônio
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Cards de KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {/* Total de Patrimônios */}
-        <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
                 Total de Patrimônios
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {kpis.total}
+              <p className="text-3xl font-semibold text-blue-500 dark:text-blue-300 mt-2 tracking-tight">
+                {kpis.total.toLocaleString('pt-BR')}
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+            <div className="bg-blue-100/70 dark:bg-blue-900/50 p-3 rounded-full">
               <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
 
         {/* Valor Total */}
-        <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
-                Valor Total Atual
+              <p className="text-sm text-gray-700 dark:text-gray-400">
+                Valor Total
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {formatCurrency(kpis.valorTotal)}
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
+                {kpis.valorTotal.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
               </p>
             </div>
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+            <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-full">
               <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
 
         {/* Depreciação Total */}
-        <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
                 Depreciação Total
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {formatCurrency(kpis.depreciacaoTotal)}
+              <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">
+                {kpis.depreciacaoTotal.toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })}
               </p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div className="bg-yellow-100 dark:bg-yellow-900/40 p-3 rounded-full">
+              <TrendingUp className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
           </div>
         </div>
@@ -512,18 +522,21 @@ const PatrimoniosContent: React.FC = () => {
             </div>
 
             {/* Botão Limpar Filtros */}
-            <div className="flex items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Limpar filtros
+              </label>
               <button
                 onClick={limparFiltros}
-                className="w-full px-3 py-2 text-sm font-medium rounded-lg
-                  text-gray-700 dark:text-gray-300
+                title="Limpar filtros"
+                className="w-full flex items-center justify-center px-3 py-[11px] rounded-lg
                   bg-white dark:bg-[#2a2a2a]
+                  text-gray-700 dark:text-gray-300 text-[15px]
                   border border-gray-300 dark:border-gray-600
-                  hover:bg-gray-50 dark:hover:bg-[#333333]
-                  transition-colors"
+                  hover:bg-red-500 hover:text-white dark:hover:bg-red-600
+                  transition-all duration-200 shadow-sm hover:shadow-md"
               >
-                <X className="w-4 h-4 inline mr-1" />
-                Limpar
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
