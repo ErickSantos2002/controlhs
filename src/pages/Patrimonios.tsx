@@ -306,14 +306,13 @@ const PatrimoniosContent: React.FC = () => {
             <button
               onClick={handleExportarExcel}
               disabled={loading || patrimoniosFiltrados.length === 0}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
-                text-gray-700 dark:text-gray-300
-                bg-white dark:bg-[#1f1f1f]
-                border border-gray-300 dark:border-gray-600
-                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+              className="flex items-center justify-center gap-2 px-4 py-2 
+                bg-gradient-to-r from-green-500 to-emerald-600 
+                text-white font-medium rounded-lg shadow-md
+                hover:from-green-400 hover:to-emerald-500 
+                dark:hover:from-green-600 dark:hover:to-green-500
                 disabled:opacity-50 disabled:cursor-not-allowed
-                shadow-sm hover:shadow-md
-                transition-all duration-200"
+                transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Exportar
@@ -398,7 +397,7 @@ const PatrimoniosContent: React.FC = () => {
       </div>
 
       {/* Filtros e Busca */}
-      <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] p-5 shadow-md transition-colors">
         {/* Linha de Busca e Toggle de Filtros */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           {/* Campo de Busca */}
@@ -410,9 +409,9 @@ const PatrimoniosContent: React.FC = () => {
               value={buscaLocal}
               onChange={(e) => setBuscaLocal(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg
-                bg-white dark:bg-[#2a2a2a]
+                bg-white/95 dark:bg-[#2a2a2a]/95
                 text-gray-900 dark:text-gray-100
-                border border-gray-300 dark:border-gray-600
+                border border-gray-300 dark:border-[#3a3a3a]
                 placeholder-gray-400 dark:placeholder-gray-500
                 focus:ring-2 focus:ring-blue-500 focus:border-transparent
                 transition-all"
@@ -423,11 +422,11 @@ const PatrimoniosContent: React.FC = () => {
           <button
             onClick={() => setMostrarFiltros(!mostrarFiltros)}
             className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-              bg-white dark:bg-[#2a2a2a]
-              text-gray-700 dark:text-gray-300
-              border border-gray-300 dark:border-gray-600
-              hover:bg-gray-50 dark:hover:bg-[#333333]
-              transition-colors"
+              bg-white/95 dark:bg-[#2a2a2a]/95
+              text-gray-700 dark:text-gray-200
+              border border-gray-300 dark:border-[#3a3a3a]
+              hover:bg-gray-100 dark:hover:bg-[#333333]
+              transition-all shadow-sm"
           >
             <Filter className="w-4 h-4" />
             {mostrarFiltros ? 'Ocultar' : 'Filtros'}
@@ -436,7 +435,7 @@ const PatrimoniosContent: React.FC = () => {
 
         {/* Painel de Filtros (Expansível) */}
         {mostrarFiltros && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 pt-3 border-t border-gray-200 dark:border-[#2d2d2d]">
             {/* Categoria */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -446,14 +445,16 @@ const PatrimoniosContent: React.FC = () => {
                 value={filtros.categoria}
                 onChange={(e) => setFiltros({ ...filtros, categoria: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
+                  bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
-                  border border-gray-300 dark:border-gray-600
+                  border border-gray-300 dark:border-[#3a3a3a]
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todas">Todas</option>
-                {categorias.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                {categorias.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.nome}
+                  </option>
                 ))}
               </select>
             </div>
@@ -467,14 +468,16 @@ const PatrimoniosContent: React.FC = () => {
                 value={filtros.setor}
                 onChange={(e) => setFiltros({ ...filtros, setor: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
+                  bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
-                  border border-gray-300 dark:border-gray-600
+                  border border-gray-300 dark:border-[#3a3a3a]
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
-                {setores.map(setor => (
-                  <option key={setor.id} value={setor.id}>{setor.nome}</option>
+                {setores.map((setor) => (
+                  <option key={setor.id} value={setor.id}>
+                    {setor.nome}
+                  </option>
                 ))}
               </select>
             </div>
@@ -488,9 +491,9 @@ const PatrimoniosContent: React.FC = () => {
                 value={filtros.status}
                 onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
+                  bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
-                  border border-gray-300 dark:border-gray-600
+                  border border-gray-300 dark:border-[#3a3a3a]
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
@@ -509,14 +512,16 @@ const PatrimoniosContent: React.FC = () => {
                 value={filtros.responsavel}
                 onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
                 className="w-full px-3 py-2 rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
+                  bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
-                  border border-gray-300 dark:border-gray-600
+                  border border-gray-300 dark:border-[#3a3a3a]
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="todos">Todos</option>
-                {usuarios.map(user => (
-                  <option key={user.id} value={user.id}>{user.username}</option>
+                {usuarios.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.username}
+                  </option>
                 ))}
               </select>
             </div>
@@ -530,9 +535,9 @@ const PatrimoniosContent: React.FC = () => {
                 onClick={limparFiltros}
                 title="Limpar filtros"
                 className="w-full flex items-center justify-center px-3 py-[11px] rounded-lg
-                  bg-white dark:bg-[#2a2a2a]
+                  bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-700 dark:text-gray-300 text-[15px]
-                  border border-gray-300 dark:border-gray-600
+                  border border-gray-300 dark:border-[#3a3a3a]
                   hover:bg-red-500 hover:text-white dark:hover:bg-red-600
                   transition-all duration-200 shadow-sm hover:shadow-md"
               >
@@ -544,7 +549,7 @@ const PatrimoniosContent: React.FC = () => {
       </div>
 
       {/* Tabela */}
-      <div className="bg-white dark:bg-[#1f1f1f] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] shadow-md overflow-hidden transition-colors">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
@@ -553,10 +558,10 @@ const PatrimoniosContent: React.FC = () => {
           <>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-gray-700">
+                <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
                   <tr>
-                    <th 
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333]"
+                    <th
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
                       onClick={() => handleOrdenar('nome')}
                     >
                       <div className="flex items-center gap-1">
@@ -564,17 +569,17 @@ const PatrimoniosContent: React.FC = () => {
                         <OrdenacaoIcon campo="nome" />
                       </div>
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Categoria
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Responsável
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Setor
                     </th>
-                    <th 
-                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333]"
+                    <th
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
                       onClick={() => handleOrdenar('data_aquisicao')}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -582,8 +587,8 @@ const PatrimoniosContent: React.FC = () => {
                         <OrdenacaoIcon campo="data_aquisicao" />
                       </div>
                     </th>
-                    <th 
-                      className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333]"
+                    <th
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
                       onClick={() => handleOrdenar('valor_atual')}
                     >
                       <div className="flex items-center justify-center gap-1">
@@ -591,20 +596,21 @@ const PatrimoniosContent: React.FC = () => {
                         <OrdenacaoIcon campo="valor_atual" />
                       </div>
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Depreciação
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+
+                <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
                   {dadosPaginados.map((patrimonio) => (
-                    <tr 
+                    <tr
                       key={patrimonio.id}
                       className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
                     >
@@ -626,26 +632,28 @@ const PatrimoniosContent: React.FC = () => {
                         {getSetorNome(patrimonio.setor_id)}
                       </td>
                       <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
-                        {patrimonio.data_aquisicao ? 
-                          new Date(patrimonio.data_aquisicao).toLocaleDateString('pt-BR') : 
-                          'N/A'
-                        }
+                        {patrimonio.data_aquisicao
+                          ? new Date(patrimonio.data_aquisicao).toLocaleDateString('pt-BR')
+                          : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-sm text-center font-semibold text-blue-600 dark:text-blue-400">
                         {formatCurrency(patrimonio.valor_atual)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-center font-semibold text-orange-600 dark:text-orange-400">
-                        {formatCurrency((patrimonio.valor_aquisicao || 0) - (patrimonio.valor_atual || 0))}
+                      <td className="px-4 py-3 text-sm text-center font-semibold text-yellow-600 dark:text-yellow-400">
+                        {formatCurrency(
+                          (patrimonio.valor_aquisicao || 0) -
+                            (patrimonio.valor_atual || 0)
+                        )}
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                            ${patrimonio.status === 'ativo'
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            patrimonio.status === 'ativo'
                               ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
                               : patrimonio.status === 'manutencao'
                               ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
                               : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
-                            }`}
+                          }`}
                         >
                           {getStatusDisplay(patrimonio.status)}
                         </span>
@@ -654,27 +662,27 @@ const PatrimoniosContent: React.FC = () => {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => handleView(patrimonio)}
-                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
                             title="Visualizar"
                           >
                             <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           </button>
-                          
+
                           {canEdit && (
                             <button
                               onClick={() => handleEdit(patrimonio)}
-                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
                               title="Editar"
                             >
                               <Edit className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                             </button>
                           )}
-                          
+
                           {canDelete && (
                             <button
                               onClick={() => handleDeleteClick(patrimonio)}
                               disabled={deletingId === patrimonio.id}
-                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors disabled:opacity-50"
                               title="Excluir"
                             >
                               {deletingId === patrimonio.id ? (
@@ -695,7 +703,6 @@ const PatrimoniosContent: React.FC = () => {
             {/* Paginação */}
             {totalPaginas > 1 && (
               <div className="mt-4 px-4 pb-4">
-                {/* Desktop */}
                 <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
                   <div>
                     Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
@@ -703,29 +710,29 @@ const PatrimoniosContent: React.FC = () => {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                      onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
                       disabled={paginaAtual === 1}
                       className="px-3 py-1 border rounded-lg
-                                bg-white dark:bg-[#1f1f1f]
-                                border-gray-300 dark:border-gray-600
-                                text-gray-700 dark:text-gray-300
-                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                transition-colors"
+                        bg-white/95 dark:bg-[#1e1e1e]/95
+                        border-gray-300 dark:border-[#3a3a3a]
+                        text-gray-700 dark:text-gray-300
+                        hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        transition-colors"
                     >
                       Anterior
                     </button>
 
                     <div className="flex gap-1">
-                      {paginasVisiveis.map(page => (
+                      {paginasVisiveis.map((page) => (
                         <button
                           key={page}
                           onClick={() => setPaginaAtual(page)}
-                          className={`px-3 py-1 border rounded-lg transition-colors
-                            ${paginaAtual === page
+                          className={`px-3 py-1 border rounded-lg transition-colors ${
+                            paginaAtual === page
                               ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
-                            }`}
+                              : 'bg-white/95 dark:bg-[#1e1e1e]/95 border-gray-300 dark:border-[#3a3a3a] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]'
+                          }`}
                         >
                           {page}
                         </button>
@@ -733,61 +740,17 @@ const PatrimoniosContent: React.FC = () => {
                     </div>
 
                     <button
-                      onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                      onClick={() => setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))}
                       disabled={paginaAtual === totalPaginas}
                       className="px-3 py-1 border rounded-lg
-                                bg-white dark:bg-[#1f1f1f]
-                                border-gray-300 dark:border-gray-600
-                                text-gray-700 dark:text-gray-300
-                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                transition-colors"
+                        bg-white/95 dark:bg-[#1e1e1e]/95
+                        border-gray-300 dark:border-[#3a3a3a]
+                        text-gray-700 dark:text-gray-300
+                        hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        transition-colors"
                     >
                       Próximo
-                    </button>
-                  </div>
-                </div>
-
-                {/* Mobile */}
-                <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-600 dark:text-gray-300">
-                  <div className="mb-2">
-                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
-                  </div>
-
-                  <div className="flex justify-center gap-2 items-center">
-                    <button
-                      onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
-                      disabled={paginaAtual === 1}
-                      className="px-3 py-1 border rounded-lg
-                                bg-white dark:bg-[#1f1f1f]
-                                border-gray-300 dark:border-gray-600
-                                text-gray-700 dark:text-gray-300
-                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                transition-colors"
-                    >
-                      {"<"}
-                    </button>
-
-                    <span className="px-3 py-1 border rounded-lg
-                                    bg-white dark:bg-[#1f1f1f]
-                                    text-gray-700 dark:text-gray-300
-                                    border-gray-300 dark:border-gray-600">
-                      {paginaAtual}
-                    </span>
-
-                    <button
-                      onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
-                      disabled={paginaAtual === totalPaginas}
-                      className="px-3 py-1 border rounded-lg
-                                bg-white dark:bg-[#1f1f1f]
-                                border-gray-300 dark:border-gray-600
-                                text-gray-700 dark:text-gray-300
-                                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                                disabled:opacity-50 disabled:cursor-not-allowed
-                                transition-colors"
-                    >
-                      {">"}
                     </button>
                   </div>
                 </div>
@@ -801,12 +764,10 @@ const PatrimoniosContent: React.FC = () => {
             </p>
             <button
               onClick={limparFiltros}
-              className="mt-2 px-2 py-1 text-sm font-medium rounded-lg
-                        text-white 
-                        bg-blue-600 hover:bg-blue-700 
-                        dark:bg-blue-500 dark:hover:bg-blue-600
-                        shadow-sm hover:shadow-md
-                        transition-all duration-200"
+              className="mt-2 px-3 py-1.5 text-sm font-medium rounded-lg
+                text-white bg-blue-600 hover:bg-blue-700
+                dark:bg-blue-500 dark:hover:bg-blue-600
+                shadow-sm hover:shadow-md transition-all duration-200"
             >
               Limpar filtros
             </button>

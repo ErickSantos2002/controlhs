@@ -778,7 +778,7 @@ const DashboardPatrimonio: React.FC = () => {
                               currency: 'BRL'
                             })}
                           </td>
-                          <td className="px-4 py-3 text-sm text-center font-semibold text-orange-600 dark:text-orange-400">
+                          <td className="px-4 py-3 text-sm text-center font-semibold text-yellow-600 dark:text-yellow-400">
                             {((bem.valor_aquisicao || 0) - (bem.valor_atual || 0)).toLocaleString('pt-BR', {
                               style: 'currency',
                               currency: 'BRL'
