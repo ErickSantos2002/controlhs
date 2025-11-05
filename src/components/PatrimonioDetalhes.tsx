@@ -103,7 +103,7 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="flex min-h-full items-center justify-center">
         <div className="relative w-full max-w-2xl bg-white dark:bg-[#1e1e1e] rounded-lg shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
