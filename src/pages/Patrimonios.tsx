@@ -66,7 +66,6 @@ const PatrimoniosContent: React.FC = () => {
   
   // Estados UI
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
   // ========================================
   // PERMISSÕES
@@ -396,47 +395,49 @@ const PatrimoniosContent: React.FC = () => {
         </div>
       </div>
 
-      {/* Filtros e Busca */}
+      {/* Filtros e Busca (fixos) */}
       <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] p-5 shadow-md transition-colors">
-        {/* Linha de Busca e Toggle de Filtros */}
+        {/* Linha de Busca + Botão Limpar Filtros */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          {/* Campo de Busca */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por nome, descrição ou número de série..."
-              value={buscaLocal}
-              onChange={(e) => setBuscaLocal(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg
-                bg-white/95 dark:bg-[#2a2a2a]/95
-                text-gray-900 dark:text-gray-100
-                border border-gray-300 dark:border-[#3a3a3a]
-                placeholder-gray-400 dark:placeholder-gray-500
-                focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                transition-all"
-            />
-          </div>
+          {/* Container do input e botão juntos */}
+          <div className="flex w-full sm:w-auto flex-1">
+            {/* Campo de Busca */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome, descrição ou número de série..."
+                value={buscaLocal}
+                onChange={(e) => setBuscaLocal(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-l-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  placeholder-gray-400 dark:placeholder-gray-500
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  transition-all"
+              />
+            </div>
 
-          {/* Botão de Toggle Filtros */}
-          <button
-            onClick={() => setMostrarFiltros(!mostrarFiltros)}
-            className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-              bg-white/95 dark:bg-[#2a2a2a]/95
-              text-gray-700 dark:text-gray-200
-              border border-gray-300 dark:border-[#3a3a3a]
-              hover:bg-gray-100 dark:hover:bg-[#333333]
-              transition-all shadow-sm"
-          >
-            <Filter className="w-4 h-4" />
-            {mostrarFiltros ? 'Ocultar' : 'Filtros'}
-          </button>
+            {/* Botão "X" colado ao campo */}
+            <button
+              onClick={limparFiltros}
+              title="Limpar filtros"
+              className="flex items-center justify-center px-4 rounded-r-lg
+                border border-l-0 border-gray-300 dark:border-[#3a3a3a]
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-600 dark:text-gray-300
+                hover:bg-red-500 hover:text-white dark:hover:bg-red-600
+                transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Painel de Filtros (Expansível) */}
-        {mostrarFiltros && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 pt-3 border-t border-gray-200 dark:border-[#2d2d2d]">
-            {/* Categoria */}
+        {/* Painel de Filtros fixo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 pt-3 border-t border-gray-200 dark:border-[#2d2d2d]">
+        {/* Categoria */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Categoria
@@ -525,28 +526,8 @@ const PatrimoniosContent: React.FC = () => {
                 ))}
               </select>
             </div>
-
-            {/* Botão Limpar Filtros */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Limpar filtros
-              </label>
-              <button
-                onClick={limparFiltros}
-                title="Limpar filtros"
-                className="w-full flex items-center justify-center px-3 py-[11px] rounded-lg
-                  bg-white/95 dark:bg-[#2a2a2a]/95
-                  text-gray-700 dark:text-gray-300 text-[15px]
-                  border border-gray-300 dark:border-[#3a3a3a]
-                  hover:bg-red-500 hover:text-white dark:hover:bg-red-600
-                  transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
           </div>
-        )}
-      </div>
+        </div>
 
       {/* Tabela */}
       <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] shadow-md overflow-hidden transition-colors">
