@@ -48,7 +48,7 @@ const Sidebar: React.FC = () => {
       to: "/transferencias",
       icon: (isActive: boolean) => (
         <img
-          src="https://img.icons8.com/?size=100&id=f6XnJbAyvoWg&format=png"
+          src="https://img.icons8.com/?size=100&id=P1YG1sk94HiB&format=png&color="
           alt="Transferências"
           className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'} 
                   dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
