@@ -1,11 +1,14 @@
-import React from "react";
+import React from 'react';
 
 interface ModalObservacoesProps {
   observacoes: string | null;
   onClose: () => void;
 }
 
-const ModalObservacoes: React.FC<ModalObservacoesProps> = ({ observacoes, onClose }) => {
+const ModalObservacoes: React.FC<ModalObservacoesProps> = ({
+  observacoes,
+  onClose,
+}) => {
   if (!observacoes) return null;
 
   return (
