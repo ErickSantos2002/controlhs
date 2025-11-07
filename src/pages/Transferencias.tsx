@@ -275,22 +275,44 @@ const TransferenciasContent: React.FC = () => {
   // ========================================
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0a0a]">
-      <div className="container mx-auto px-4 py-8">
+      <div className="space-y-6 p-6">
         {/* Cabeçalho */}
-        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 backdrop-blur-sm rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+        <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md border border-gray-200 dark:border-[#2d2d2d] p-6 mb-6 transition-colors">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Título e descrição */}
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                <ArrowRightLeft className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
                 Gestão de Transferências
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
                 Controle completo das movimentações de patrimônio entre setores e responsáveis
               </p>
             </div>
-            
+
+            {/* Botões de ação */}
             <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => refreshData()}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300
+                  bg-white dark:bg-[#2a2a2a] border border-gray-300 dark:border-[#3a3a3a]
+                  hover:bg-gray-50 dark:hover:bg-[#333333]
+                  font-medium text-sm rounded-lg transition-all duration-200"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Atualizar
+              </button>
+
+              <button
+                onClick={handleExportarExcel}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700
+                  dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium text-sm
+                  rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <Download className="w-4 h-4" />
+                Exportar
+              </button>
+
               {canCreate && (
                 <button
                   onClick={() => setModalCriar(true)}
@@ -302,97 +324,76 @@ const TransferenciasContent: React.FC = () => {
                   Nova Transferência
                 </button>
               )}
-              
-              <button
-                onClick={handleExportarExcel}
-                className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#2a2a2a] 
-                  border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 
-                  hover:bg-gray-50 dark:hover:bg-[#333333] font-medium text-sm rounded-lg 
-                  transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Exportar Excel
-              </button>
-              
-              <button
-                onClick={() => refreshData()}
-                className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 
-                  hover:bg-gray-100 dark:hover:bg-gray-800 font-medium text-sm rounded-lg 
-                  transition-colors"
-                disabled={loading}
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Atualizar
-              </button>
             </div>
           </div>
         </div>
 
+
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white dark:bg-[#1e1e1e] rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
+          {/* Total de Transferências */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {kpis.total}
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Total de Transferências
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                  Total de transferências
+                <p className="text-3xl font-semibold text-blue-600 dark:text-blue-400 mt-2 tracking-tight">
+                  {kpis.total?.toLocaleString('pt-BR')}
                 </p>
               </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+              <div className="bg-blue-100/70 dark:bg-blue-900/40 p-3 rounded-full">
                 <ArrowRightLeft className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
+          {/* Pendentes */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pendentes</p>
-                <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">
-                  {kpis.pendentes}
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Pendentes
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                  Aguardando aprovação
+                <p className="text-3xl font-semibold text-yellow-600 dark:text-yellow-400 mt-2 tracking-tight">
+                  {kpis.pendentes?.toLocaleString('pt-BR')}
                 </p>
               </div>
-              <div className="p-3 bg-yellow-100 dark:bg-yellow-900/40 rounded-lg">
+              <div className="bg-yellow-100/70 dark:bg-yellow-900/40 p-3 rounded-full">
                 <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
+          {/* Aprovadas no Mês */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Aprovadas (Mês)</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
-                  {kpis.aprovadasMes}
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Aprovadas (Mês)
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                  Aprovadas no mês
+                <p className="text-3xl font-semibold text-green-600 dark:text-green-400 mt-2 tracking-tight">
+                  {kpis.aprovadasMes?.toLocaleString('pt-BR')}
                 </p>
               </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900/40 rounded-lg">
+              <div className="bg-green-100/70 dark:bg-green-900/40 p-3 rounded-full">
                 <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between">
+          {/* Rejeitadas no Mês */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
+            <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Rejeitadas (Mês)</p>
-                <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">
-                  {kpis.rejeitadasMes}
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Rejeitadas (Mês)
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                  Rejeitadas no mês
+                <p className="text-3xl font-semibold text-red-600 dark:text-red-400 mt-2 tracking-tight">
+                  {kpis.rejeitadasMes?.toLocaleString('pt-BR')}
                 </p>
               </div>
-              <div className="p-3 bg-red-100 dark:bg-red-900/40 rounded-lg">
+              <div className="bg-red-100/70 dark:bg-red-900/40 p-3 rounded-full">
                 <XCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
             </div>
@@ -400,168 +401,161 @@ const TransferenciasContent: React.FC = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          {/* Busca e Toggle Filtros */}
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={buscaLocal}
-                  onChange={(e) => setBuscaLocal(e.target.value)}
-                  placeholder="Buscar por patrimônio ou motivo..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                />
-              </div>
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] p-5 shadow-md mb-6 transition-colors">
+          {/* Linha de Busca + Botão Limpar Filtros */}
+          <div className="flex flex-nowrap items-center gap-3 mb-4">
+            {/* Campo de Busca */}
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar por patrimônio, motivo ou setor..."
+                value={buscaLocal}
+                onChange={(e) => setBuscaLocal(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  placeholder-gray-400 dark:placeholder-gray-500
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                  transition-all"
+              />
             </div>
-            
+
+            {/* Botão Limpar Filtros sempre ao lado */}
             <button
-              onClick={() => setMostrarFiltros(!mostrarFiltros)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 
-                hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 
-                font-medium text-sm rounded-lg transition-colors"
+              onClick={limparFiltros}
+              title="Limpar filtros"
+              className="flex-shrink-0 flex items-center justify-center w-[48px] h-[42px]
+                rounded-lg border border-gray-300 dark:border-[#3a3a3a]
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-600 dark:text-gray-300
+                hover:bg-red-500 hover:text-white dark:hover:bg-red-600
+                transition-all duration-200 shadow-sm hover:shadow-md"
             >
-              <Filter className="w-4 h-4" />
-              Filtros
-              {mostrarFiltros ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Painel de Filtros */}
-          {mostrarFiltros && (
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              {/* Status */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Status
-                </label>
-                <select
-                  value={filtros.status}
-                  onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                >
-                  <option value="todos">Todos</option>
-                  <option value="pendente">Pendente</option>
-                  <option value="aprovada">Aprovada</option>
-                  <option value="concluida">Concluída</option>
-                  <option value="rejeitada">Rejeitada</option>
-                </select>
-              </div>
-
-              {/* Setor Origem */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Setor Origem
-                </label>
-                <select
-                  value={filtros.setorOrigem}
-                  onChange={(e) => setFiltros({ ...filtros, setorOrigem: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                >
-                  <option value="todos">Todos</option>
-                  {setores.map(s => (
-                    <option key={s.id} value={s.id}>{s.nome}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Setor Destino */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Setor Destino
-                </label>
-                <select
-                  value={filtros.setorDestino}
-                  onChange={(e) => setFiltros({ ...filtros, setorDestino: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                >
-                  <option value="todos">Todos</option>
-                  {setores.map(s => (
-                    <option key={s.id} value={s.id}>{s.nome}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Patrimônio */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Patrimônio
-                </label>
-                <select
-                  value={filtros.patrimonio}
-                  onChange={(e) => setFiltros({ ...filtros, patrimonio: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                >
-                  <option value="todos">Todos</option>
-                  {patrimonios.map(p => (
-                    <option key={p.id} value={p.id}>
-                      {p.nome} {p.numero_serie ? `(${p.numero_serie})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Data Início */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Data Início
-                </label>
-                <input
-                  type="date"
-                  value={filtros.dataInicio || ''}
-                  onChange={(e) => setFiltros({ ...filtros, dataInicio: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                />
-              </div>
-
-              {/* Data Fim */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Data Fim
-                </label>
-                <input
-                  type="date"
-                  value={filtros.dataFim || ''}
-                  onChange={(e) => setFiltros({ ...filtros, dataFim: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 
-                    focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 
-                    focus:border-transparent transition-colors"
-                />
-              </div>
-
-              {/* Botão Limpar Filtros */}
-              <div className="flex items-end">
-                <button
-                  onClick={limparFiltros}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 
-                    hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 
-                    font-medium text-sm rounded-lg transition-colors"
-                >
-                  Limpar Filtros
-                </button>
-              </div>
+          {/* Painel de Filtros fixo */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-gray-200 dark:border-[#2d2d2d]">
+            {/* Linha 1 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Status
+              </label>
+              <select
+                value={filtros.status}
+                onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos</option>
+                <option value="pendente">Pendente</option>
+                <option value="aprovada">Aprovada</option>
+                <option value="concluida">Concluída</option>
+                <option value="rejeitada">Rejeitada</option>
+              </select>
             </div>
-          )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Setor Origem
+              </label>
+              <select
+                value={filtros.setorOrigem}
+                onChange={(e) => setFiltros({ ...filtros, setorOrigem: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos</option>
+                {setores.map((s) => (
+                  <option key={s.id} value={s.id}>{s.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Setor Destino
+              </label>
+              <select
+                value={filtros.setorDestino}
+                onChange={(e) => setFiltros({ ...filtros, setorDestino: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos</option>
+                {setores.map((s) => (
+                  <option key={s.id} value={s.id}>{s.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Linha 2 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Patrimônio
+              </label>
+              <select
+                value={filtros.patrimonio}
+                onChange={(e) => setFiltros({ ...filtros, patrimonio: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos</option>
+                {patrimonios.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nome} {p.numero_serie ? `(${p.numero_serie})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Data Início
+              </label>
+              <input
+                type="date"
+                value={filtros.dataInicio || ''}
+                onChange={(e) => setFiltros({ ...filtros, dataInicio: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Data Fim
+              </label>
+              <input
+                type="date"
+                value={filtros.dataFim || ''}
+                onChange={(e) => setFiltros({ ...filtros, dataFim: e.target.value })}
+                className="w-full px-3 py-2 rounded-lg
+                  bg-white/95 dark:bg-[#2a2a2a]/95
+                  text-gray-900 dark:text-gray-100
+                  border border-gray-300 dark:border-[#3a3a3a]
+                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
 
           {/* Contador de resultados */}
           <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
@@ -877,7 +871,7 @@ const TransferenciasContent: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
+      
 
       {/* Modais */}
       <TransferenciaModal
