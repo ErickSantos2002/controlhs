@@ -564,274 +564,289 @@ const TransferenciasContent: React.FC = () => {
         </div>
 
         {/* Tabela de Transferências */}
-        <div className="bg-white dark:bg-[#1e1e1e] rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] shadow-md overflow-hidden transition-colors">
           {loading ? (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
             </div>
           ) : error ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-center">
-                <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                <p className="text-gray-900 dark:text-gray-100 font-medium">Erro ao carregar dados</p>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">{error}</p>
-                <button
-                  onClick={() => refreshData()}
-                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 
-                    dark:hover:bg-blue-600 text-white font-medium text-sm rounded-lg 
-                    transition-colors"
-                >
-                  Tentar Novamente
-                </button>
-              </div>
+            <div className="flex flex-col items-center justify-center py-12">
+              <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+              <p className="text-gray-900 dark:text-gray-100 font-medium">Erro ao carregar dados</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{error}</p>
+              <button
+                onClick={refreshData}
+                className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 
+                  dark:hover:bg-blue-600 text-white font-medium text-sm rounded-lg 
+                  shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                Tentar Novamente
+              </button>
             </div>
           ) : dadosPaginados.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64">
+            <div className="flex flex-col items-center justify-center py-12">
               <ArrowRightLeft className="w-12 h-12 text-gray-400 mb-4" />
               <p className="text-gray-900 dark:text-gray-100 font-medium">
                 Nenhuma transferência encontrada
               </p>
               <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
-                {transferenciasFiltradas.length === 0 && filtros.busca === '' && filtros.status === 'todos' 
+                {transferenciasFiltradas.length === 0 && filtros.busca === '' && filtros.status === 'todos'
                   ? 'Clique em "Nova Transferência" para começar'
                   : 'Tente ajustar os filtros para ver mais resultados'}
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-gray-700">
-                  <tr>
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
-                      onClick={() => handleOrdenar('id')}
-                    >
-                      <div className="flex items-center gap-1">
-                        ID
-                        {ordenacao.campo === 'id' && (
-                          ordenacao.direcao === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                        )}
-                      </div>
-                    </th>
-                    
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
-                      onClick={() => handleOrdenar('patrimonio_nome')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Patrimônio
-                        {ordenacao.campo === 'patrimonio_nome' && (
-                          ordenacao.direcao === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                        )}
-                      </div>
-                    </th>
-                    
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      De → Para (Setor)
-                    </th>
-                    
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      De → Para (Responsável)
-                    </th>
-                    
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
-                      onClick={() => handleOrdenar('data_transferencia')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Data
-                        {ordenacao.campo === 'data_transferencia' && (
-                          ordenacao.direcao === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                        )}
-                      </div>
-                    </th>
-                    
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
-                      onClick={() => handleOrdenar('status')}
-                    >
-                      <div className="flex items-center gap-1">
-                        Status
-                        {ordenacao.campo === 'status' && (
-                          ordenacao.direcao === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-                        )}
-                      </div>
-                    </th>
-                    
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Aprovador
-                    </th>
-                    
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Ações
-                    </th>
-                  </tr>
-                </thead>
-                
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {dadosPaginados.map((transferencia) => (
-                    <tr key={transferencia.id} className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                        #{transferencia.id}
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                        {getPatrimonioNome(transferencia.patrimonio_id)}
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                        <div className="flex items-center gap-2">
-                          <span>{getSetorNome(transferencia.setor_origem_id)}</span>
-                          <ArrowRight className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                          <span>{getSetorNome(transferencia.setor_destino_id)}</span>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
+                    <tr>
+                      <th
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
+                        onClick={() => handleOrdenar('id')}
+                      >
+                        <div className="flex items-center gap-1">
+                          ID
+                          {ordenacao.campo === 'id' &&
+                            (ordenacao.direcao === 'asc' ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
                         </div>
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                        <div className="flex items-center gap-2">
-                          <span>{getUsuarioNome(transferencia.responsavel_origem_id)}</span>
-                          <ArrowRight className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-                          <span>{getUsuarioNome(transferencia.responsavel_destino_id)}</span>
+                      </th>
+
+                      <th
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
+                        onClick={() => handleOrdenar('patrimonio_nome')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Patrimônio
+                          {ordenacao.campo === 'patrimonio_nome' &&
+                            (ordenacao.direcao === 'asc' ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
                         </div>
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {formatDate(transferencia.data_transferencia)}
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[transferencia.status]}`}>
-                          {STATUS_LABELS[transferencia.status]}
-                        </span>
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {transferencia.aprovado_por ? getUsuarioNome(transferencia.aprovado_por) : '-'}
-                      </td>
-                      
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={() => handleView(transferencia)}
-                            className="p-1 text-blue-600 hover:bg-blue-50 dark:text-blue-400 
-                              dark:hover:bg-blue-900/20 rounded transition-colors"
-                            title="Visualizar"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
-                          
-                          {transferencia.status === 'pendente' && podeAprovar(transferencia) && (
-                            <>
-                              <button
-                                onClick={() => handleAprovar(transferencia)}
-                                className="p-1 text-green-600 hover:bg-green-50 dark:text-green-400 
-                                  dark:hover:bg-green-900/20 rounded transition-colors"
-                                title="Aprovar"
-                              >
-                                <Check className="w-4 h-4" />
-                              </button>
-                              
-                              <button
-                                onClick={() => handleRejeitar(transferencia)}
-                                className="p-1 text-red-600 hover:bg-red-50 dark:text-red-400 
-                                  dark:hover:bg-red-900/20 rounded transition-colors"
-                                title="Rejeitar"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                          
-                          {transferencia.status === 'aprovada' && podeEfetivar(transferencia) && (
-                            <button
-                              onClick={() => handleEfetivar(transferencia)}
-                              disabled={efetivandoId === transferencia.id}
-                              className="p-1 text-blue-600 hover:bg-blue-50 dark:text-blue-400 
-                                dark:hover:bg-blue-900/20 rounded transition-colors 
-                                disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="Efetivar Transferência"
-                            >
-                              {efetivandoId === transferencia.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <ArrowRightLeft className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
-                          
-                          {canDelete && transferencia.status !== 'concluida' && (
-                            <button
-                              onClick={() => handleDeleteClick(transferencia)}
-                              className="p-1 text-red-600 hover:bg-red-50 dark:text-red-400 
-                                dark:hover:bg-red-900/20 rounded transition-colors"
-                              title="Excluir"
-                              disabled={deletingId === transferencia.id}
-                            >
-                              {deletingId === transferencia.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                              ) : (
-                                <Trash2 className="w-4 h-4" />
-                              )}
-                            </button>
-                          )}
+                      </th>
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
+                        De → Para (Setor)
+                      </th>
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
+                        De → Para (Responsável)
+                      </th>
+
+                      <th
+                        className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
+                        onClick={() => handleOrdenar('data_transferencia')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          Data
+                          {ordenacao.campo === 'data_transferencia' &&
+                            (ordenacao.direcao === 'asc' ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
                         </div>
-                      </td>
+                      </th>
+
+                      <th
+                        className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
+                        onClick={() => handleOrdenar('status')}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          Status
+                          {ordenacao.campo === 'status' &&
+                            (ordenacao.direcao === 'asc' ? (
+                              <ChevronUp className="w-4 h-4" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4" />
+                            ))}
+                        </div>
+                      </th>
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
+                        Aprovador
+                      </th>
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
+                        Ações
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          
-          {/* Paginação */}
-          {dadosPaginados.length > 0 && (
-            <div className="px-6 py-4 bg-gray-50 dark:bg-[#2a2a2a] border-t border-gray-200 dark:border-gray-700">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="text-sm text-gray-700 dark:text-gray-300">
-                  Mostrando <span className="font-medium">{inicio}</span> até{' '}
-                  <span className="font-medium">{fim}</span> de{' '}
-                  <span className="font-medium">{transferenciasFiltradas.length}</span> resultados
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setPaginaAtual(Math.max(1, paginaAtual - 1))}
-                    disabled={paginaAtual === 1}
-                    className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 
-                      rounded-lg hover:bg-gray-100 dark:hover:bg-[#333333] 
-                      disabled:opacity-50 disabled:cursor-not-allowed transition-colors
-                      bg-white dark:bg-[#1e1e1e] text-gray-700 dark:text-gray-300"
-                  >
-                    Anterior
-                  </button>
-                  
-                  {paginasVisiveis.map(pagina => (
-                    <button
-                      key={pagina}
-                      onClick={() => setPaginaAtual(pagina)}
-                      className={`px-3 py-1 text-sm border rounded-lg transition-colors ${
-                        pagina === paginaAtual
-                          ? 'bg-blue-600 dark:bg-blue-500 text-white border-blue-600 dark:border-blue-500'
-                          : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-[#333333] bg-white dark:bg-[#1e1e1e] text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      {pagina}
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))}
-                    disabled={paginaAtual === totalPaginas}
-                    className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-600 
-                      rounded-lg hover:bg-gray-100 dark:hover:bg-[#333333] 
-                      disabled:opacity-50 disabled:cursor-not-allowed transition-colors
-                      bg-white dark:bg-[#1e1e1e] text-gray-700 dark:text-gray-300"
-                  >
-                    Próximo
-                  </button>
-                </div>
+                  </thead>
+
+                  <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
+                    {dadosPaginados.map((t) => (
+                      <tr
+                        key={t.id}
+                        className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
+                      >
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                          #{t.id}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                          {getPatrimonioNome(t.patrimonio_id)}
+                        </td>
+
+                        <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                          <div className="flex items-center justify-center gap-2">
+                            <span>{getSetorNome(t.setor_origem_id)}</span>
+                            <ArrowRight className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                            <span>{getSetorNome(t.setor_destino_id)}</span>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
+                          <div className="flex items-center justify-center gap-2">
+                            <span>{getUsuarioNome(t.responsavel_origem_id)}</span>
+                            <ArrowRight className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                            <span>{getUsuarioNome(t.responsavel_destino_id)}</span>
+                          </div>
+                        </td>
+
+                        <td className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                          {formatDate(t.data_transferencia)}
+                        </td>
+
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[t.status]}`}
+                          >
+                            {STATUS_LABELS[t.status]}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                          {t.aprovado_por ? getUsuarioNome(t.aprovado_por) : '-'}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleView(t)}
+                              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                              title="Visualizar"
+                            >
+                              <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            </button>
+
+                            {t.status === 'pendente' && podeAprovar(t) && (
+                              <>
+                                <button
+                                  onClick={() => handleAprovar(t)}
+                                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                                  title="Aprovar"
+                                >
+                                  <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                                </button>
+                                <button
+                                  onClick={() => handleRejeitar(t)}
+                                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                                  title="Rejeitar"
+                                >
+                                  <X className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                </button>
+                              </>
+                            )}
+
+                            {t.status === 'aprovada' && podeEfetivar(t) && (
+                              <button
+                                onClick={() => handleEfetivar(t)}
+                                disabled={efetivandoId === t.id}
+                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors disabled:opacity-50"
+                                title="Efetivar"
+                              >
+                                {efetivandoId === t.id ? (
+                                  <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />
+                                ) : (
+                                  <ArrowRightLeft className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                )}
+                              </button>
+                            )}
+
+                            {canDelete && t.status !== 'concluida' && (
+                              <button
+                                onClick={() => handleDeleteClick(t)}
+                                disabled={deletingId === t.id}
+                                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors disabled:opacity-50"
+                                title="Excluir"
+                              >
+                                {deletingId === t.id ? (
+                                  <Loader2 className="w-4 h-4 text-red-600 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
+
+              {/* Paginação */}
+              {totalPaginas > 1 && (
+                <div className="mt-4 px-4 pb-4">
+                  <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                    <div>
+                      Mostrando {inicio} a {fim} de {transferenciasFiltradas.length} registros
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setPaginaAtual(Math.max(1, paginaAtual - 1))}
+                        disabled={paginaAtual === 1}
+                        className="px-3 py-1 border rounded-lg
+                          bg-white/95 dark:bg-[#1e1e1e]/95
+                          border-gray-300 dark:border-[#3a3a3a]
+                          text-gray-700 dark:text-gray-300
+                          hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          transition-colors"
+                      >
+                        Anterior
+                      </button>
+
+                      <div className="flex gap-1">
+                        {paginasVisiveis.map((page) => (
+                          <button
+                            key={page}
+                            onClick={() => setPaginaAtual(page)}
+                            className={`px-3 py-1 border rounded-lg transition-colors ${
+                              paginaAtual === page
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white/95 dark:bg-[#1e1e1e]/95 border-gray-300 dark:border-[#3a3a3a] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))}
+                        disabled={paginaAtual === totalPaginas}
+                        className="px-3 py-1 border rounded-lg
+                          bg-white/95 dark:bg-[#1e1e1e]/95
+                          border-gray-300 dark:border-[#3a3a3a]
+                          text-gray-700 dark:text-gray-300
+                          hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                          disabled:opacity-50 disabled:cursor-not-allowed
+                          transition-colors"
+                      >
+                        Próximo
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
