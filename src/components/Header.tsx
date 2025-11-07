@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { useLocation, useNavigate, Link } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext";
-import logo from "../assets/HS2.ico";
-import ModalTrocarSenha from "../components/ModalTrocarSenha"; // 🔹 certifique-se de ajustar o caminho
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
+import logo from '../assets/HS2.ico';
+import ModalTrocarSenha from '../components/ModalTrocarSenha'; // 🔹 certifique-se de ajustar o caminho
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -15,11 +15,11 @@ const Header: React.FC = () => {
   const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
 
-  if (location.pathname === "/login") return null;
+  if (location.pathname === '/login') return null;
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   const abrirMenu = () => {
@@ -39,20 +39,20 @@ const Header: React.FC = () => {
       }
     };
     if (menuVisivel) {
-      document.addEventListener("mousedown", handleClickFora);
-      document.body.style.overflow = "hidden";
+      document.addEventListener('mousedown', handleClickFora);
+      document.body.style.overflow = 'hidden';
     } else {
-      document.removeEventListener("mousedown", handleClickFora);
-      document.body.style.overflow = "";
+      document.removeEventListener('mousedown', handleClickFora);
+      document.body.style.overflow = '';
     }
     return () => {
-      document.removeEventListener("mousedown", handleClickFora);
-      document.body.style.overflow = "";
+      document.removeEventListener('mousedown', handleClickFora);
+      document.body.style.overflow = '';
     };
   }, [menuVisivel]);
 
   const handleConfirmarSenha = (novaSenha: string) => {
-    console.log("Nova senha:", novaSenha);
+    console.log('Nova senha:', novaSenha);
     // 🔹 Aqui você pode adicionar a lógica para atualizar a senha via API
   };
 
@@ -96,7 +96,7 @@ const Header: React.FC = () => {
             className="group text-gray-700 dark:text-gray-300 underline underline-offset-4 transition hover:text-blue-600 dark:hover:text-blue-400"
           >
             <span>
-              {user?.username}{" "}
+              {user?.username}{' '}
               <span className="text-xs text-gray-400 group-hover:text-blue-400 transition">
                 ({user?.role})
               </span>
@@ -124,7 +124,7 @@ const Header: React.FC = () => {
           <div
             ref={menuRef}
             className={`fixed inset-y-0 left-0 w-[70vw] bg-white/95 dark:bg-[#1e1e1e] z-50 shadow-lg px-6 pb-6 flex flex-col transform transition-transform duration-300 ${
-              menuAnimado ? "translate-x-0" : "-translate-x-full"
+              menuAnimado ? 'translate-x-0' : '-translate-x-full'
             }`}
           >
             {/* Cabeçalho do menu */}
@@ -152,7 +152,7 @@ const Header: React.FC = () => {
               >
                 Dashboard
               </Link>
-              {user?.role === "Administrador" && (
+              {user?.role === 'Administrador' && (
                 <Link
                   to="/logs"
                   onClick={fecharMenu}

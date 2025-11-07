@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  X, 
-  Save, 
+import {
+  X,
+  Save,
   Loader2,
   DollarSign,
   Calendar,
@@ -10,7 +10,7 @@ import {
   Building,
   User,
   Tag,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { usePatrimonios } from '../context/PatrimoniosContext';
 import type {
@@ -19,7 +19,7 @@ import type {
   PatrimonioUpdate,
   ValidationErrors,
   STATUS_LABELS,
-  STATUS_COLORS
+  STATUS_COLORS,
 } from '../types/patrimonios.types';
 
 interface PatrimonioModalProps {
@@ -33,23 +33,23 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
   isOpen,
   onClose,
   patrimonio,
-  onSuccess
+  onSuccess,
 }) => {
-  const { 
-    categorias, 
-    setores, 
+  const {
+    categorias,
+    setores,
     usuarios,
     createPatrimonio,
     updatePatrimonio,
-    loading 
+    loading,
   } = usePatrimonios();
 
   const isEdit = !!patrimonio;
-  
+
   // ========================================
   // ESTADOS DO FORMULÁRIO
   // ========================================
-  
+
   const [formData, setFormData] = useState<PatrimonioCreate>({
     nome: '',
     descricao: '',
@@ -60,7 +60,7 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
     data_aquisicao: '',
     valor_aquisicao: 0,
     valor_atual: 0,
-    status: 'ativo'
+    status: 'ativo',
   });
 
   const [errors, setErrors] = useState<ValidationErrors>({});
@@ -70,7 +70,7 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
   // ========================================
   // INICIALIZAÇÃO DO FORMULÁRIO
   // ========================================
-  
+
   useEffect(() => {
     if (isOpen) {
       if (patrimonio) {
@@ -85,7 +85,7 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
           data_aquisicao: patrimonio.data_aquisicao || '',
           valor_aquisicao: patrimonio.valor_aquisicao || 0,
           valor_atual: patrimonio.valor_atual || 0,
-          status: patrimonio.status || 'ativo'
+          status: patrimonio.status || 'ativo',
         });
       } else {
         // Modo criação: limpa o formulário
@@ -99,7 +99,7 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
           data_aquisicao: '',
           valor_aquisicao: 0,
           valor_atual: 0,
-          status: 'ativo'
+          status: 'ativo',
         });
       }
       setErrors({});
@@ -110,56 +110,58 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
   // ========================================
   // HANDLERS
   // ========================================
-  
-  const handleChange = useCallback((
-    field: keyof PatrimonioCreate,
-    value: any
-  ) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
 
-    // Limpa erro do campo quando usuário começa a digitar
-    if (errors[field]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
+  const handleChange = useCallback(
+    (field: keyof PatrimonioCreate, value: any) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
 
-    // Validação especial para valor_atual
-    if (field === 'valor_atual' && formData.valor_aquisicao) {
-      if (Number(value) > Number(formData.valor_aquisicao)) {
-        setErrors(prev => ({
-          ...prev,
-          valor_atual: 'Valor atual não pode ser maior que o valor de aquisição'
-        }));
-      }
-    }
-
-    // Validação especial para valor_aquisicao
-    if (field === 'valor_aquisicao' && formData.valor_atual) {
-      if (Number(formData.valor_atual) > Number(value)) {
-        setErrors(prev => ({
-          ...prev,
-          valor_atual: 'Valor atual não pode ser maior que o valor de aquisição'
-        }));
-      } else {
-        setErrors(prev => {
+      // Limpa erro do campo quando usuário começa a digitar
+      if (errors[field]) {
+        setErrors((prev) => {
           const newErrors = { ...prev };
-          delete newErrors.valor_atual;
+          delete newErrors[field];
           return newErrors;
         });
       }
-    }
-  }, [formData, errors]);
+
+      // Validação especial para valor_atual
+      if (field === 'valor_atual' && formData.valor_aquisicao) {
+        if (Number(value) > Number(formData.valor_aquisicao)) {
+          setErrors((prev) => ({
+            ...prev,
+            valor_atual:
+              'Valor atual não pode ser maior que o valor de aquisição',
+          }));
+        }
+      }
+
+      // Validação especial para valor_aquisicao
+      if (field === 'valor_aquisicao' && formData.valor_atual) {
+        if (Number(formData.valor_atual) > Number(value)) {
+          setErrors((prev) => ({
+            ...prev,
+            valor_atual:
+              'Valor atual não pode ser maior que o valor de aquisição',
+          }));
+        } else {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.valor_atual;
+            return newErrors;
+          });
+        }
+      }
+    },
+    [formData, errors],
+  );
 
   // ========================================
   // VALIDAÇÃO
   // ========================================
-  
+
   const validate = useCallback((): boolean => {
     const newErrors: ValidationErrors = {};
 
@@ -192,7 +194,7 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
       const dataAquisicao = new Date(formData.data_aquisicao);
       const hoje = new Date();
       hoje.setHours(23, 59, 59, 999);
-      
+
       if (dataAquisicao > hoje) {
         newErrors.data_aquisicao = 'Data de aquisição não pode ser futura';
       }
@@ -204,12 +206,14 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
     }
 
     if (!formData.valor_atual || formData.valor_atual < 0) {
-      newErrors.valor_atual = 'Valor atual é obrigatório e deve ser maior ou igual a zero';
+      newErrors.valor_atual =
+        'Valor atual é obrigatório e deve ser maior ou igual a zero';
     }
 
     if (formData.valor_atual && formData.valor_aquisicao) {
       if (formData.valor_atual > formData.valor_aquisicao) {
-        newErrors.valor_atual = 'Valor atual não pode ser maior que o valor de aquisição';
+        newErrors.valor_atual =
+          'Valor atual não pode ser maior que o valor de aquisição';
       }
     }
 
@@ -225,51 +229,63 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
   // ========================================
   // SUBMIT
   // ========================================
-  
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validate()) {
-      return;
-    }
 
-    setSaving(true);
-    setSaveError(null);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
 
-    try {
-      if (isEdit && patrimonio) {
-        // Atualização
-        const updateData: PatrimonioUpdate = { ...formData };
-        await updatePatrimonio(patrimonio.id, updateData);
-      } else {
-        // Criação
-        await createPatrimonio(formData);
+      if (!validate()) {
+        return;
       }
 
-      // Sucesso
-      onSuccess?.();
-      onClose();
-    } catch (err: any) {
-      console.error('Erro ao salvar patrimônio:', err);
-      setSaveError(
-        err.response?.data?.detail || 
-        `Erro ao ${isEdit ? 'atualizar' : 'criar'} patrimônio. Tente novamente.`
-      );
-    } finally {
-      setSaving(false);
-    }
-  }, [formData, isEdit, patrimonio, validate, createPatrimonio, updatePatrimonio, onSuccess, onClose]);
+      setSaving(true);
+      setSaveError(null);
+
+      try {
+        if (isEdit && patrimonio) {
+          // Atualização
+          const updateData: PatrimonioUpdate = { ...formData };
+          await updatePatrimonio(patrimonio.id, updateData);
+        } else {
+          // Criação
+          await createPatrimonio(formData);
+        }
+
+        // Sucesso
+        onSuccess?.();
+        onClose();
+      } catch (err: any) {
+        console.error('Erro ao salvar patrimônio:', err);
+        setSaveError(
+          err.response?.data?.detail ||
+            `Erro ao ${isEdit ? 'atualizar' : 'criar'} patrimônio. Tente novamente.`,
+        );
+      } finally {
+        setSaving(false);
+      }
+    },
+    [
+      formData,
+      isEdit,
+      patrimonio,
+      validate,
+      createPatrimonio,
+      updatePatrimonio,
+      onSuccess,
+      onClose,
+    ],
+  );
 
   // ========================================
   // RENDER
   // ========================================
-  
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
@@ -280,7 +296,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              {isEdit ? `Editar Patrimônio - ${patrimonio?.nome}` : 'Cadastrar Novo Patrimônio'}
+              {isEdit
+                ? `Editar Patrimônio - ${patrimonio?.nome}`
+                : 'Cadastrar Novo Patrimônio'}
             </h2>
             <button
               onClick={onClose}
@@ -297,7 +315,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
               <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-                  <p className="text-sm text-red-700 dark:text-red-300">{saveError}</p>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {saveError}
+                  </p>
                 </div>
               </div>
             )}
@@ -318,9 +338,10 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.nome 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.nome
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
                       transition-colors`}
@@ -328,7 +349,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   />
                 </div>
                 {errors.nome && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.nome}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.nome}
+                  </p>
                 )}
               </div>
 
@@ -346,9 +369,10 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.descricao 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.descricao
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
                       transition-colors`}
@@ -356,7 +380,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   />
                 </div>
                 {errors.descricao && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.descricao}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.descricao}
+                  </p>
                 )}
               </div>
 
@@ -370,7 +396,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   <input
                     type="text"
                     value={formData.numero_serie}
-                    onChange={(e) => handleChange('numero_serie', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('numero_serie', e.target.value)
+                    }
                     className="w-full pl-10 pr-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
@@ -410,26 +438,34 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                 </label>
                 <select
                   value={formData.categoria_id || ''}
-                  onChange={(e) => handleChange('categoria_id', e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    handleChange(
+                      'categoria_id',
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
                   className={`w-full px-3 py-2 border rounded-lg
                     bg-white dark:bg-[#2a2a2a]
                     text-gray-900 dark:text-gray-100
-                    ${errors.categoria_id 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
+                    ${
+                      errors.categoria_id
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-gray-300 dark:border-gray-600'
                     }
                     focus:ring-2 focus:ring-blue-500 focus:border-transparent
                     transition-colors`}
                 >
                   <option value="">Selecione uma categoria</option>
-                  {categorias.map(cat => (
+                  {categorias.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                       {cat.nome}
                     </option>
                   ))}
                 </select>
                 {errors.categoria_id && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.categoria_id}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.categoria_id}
+                  </p>
                 )}
               </div>
 
@@ -440,26 +476,34 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                 </label>
                 <select
                   value={formData.setor_id || ''}
-                  onChange={(e) => handleChange('setor_id', e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    handleChange(
+                      'setor_id',
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
                   className={`w-full px-3 py-2 border rounded-lg
                     bg-white dark:bg-[#2a2a2a]
                     text-gray-900 dark:text-gray-100
-                    ${errors.setor_id 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
+                    ${
+                      errors.setor_id
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-gray-300 dark:border-gray-600'
                     }
                     focus:ring-2 focus:ring-blue-500 focus:border-transparent
                     transition-colors`}
                 >
                   <option value="">Selecione um setor</option>
-                  {setores.map(setor => (
+                  {setores.map((setor) => (
                     <option key={setor.id} value={setor.id}>
                       {setor.nome}
                     </option>
                   ))}
                 </select>
                 {errors.setor_id && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.setor_id}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.setor_id}
+                  </p>
                 )}
               </div>
 
@@ -470,26 +514,34 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                 </label>
                 <select
                   value={formData.responsavel_id || ''}
-                  onChange={(e) => handleChange('responsavel_id', e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    handleChange(
+                      'responsavel_id',
+                      e.target.value ? Number(e.target.value) : undefined,
+                    )
+                  }
                   className={`w-full px-3 py-2 border rounded-lg
                     bg-white dark:bg-[#2a2a2a]
                     text-gray-900 dark:text-gray-100
-                    ${errors.responsavel_id 
-                      ? 'border-red-500 dark:border-red-400' 
-                      : 'border-gray-300 dark:border-gray-600'
+                    ${
+                      errors.responsavel_id
+                        ? 'border-red-500 dark:border-red-400'
+                        : 'border-gray-300 dark:border-gray-600'
                     }
                     focus:ring-2 focus:ring-blue-500 focus:border-transparent
                     transition-colors`}
                 >
                   <option value="">Selecione um responsável</option>
-                  {usuarios.map(user => (
+                  {usuarios.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.username}
                     </option>
                   ))}
                 </select>
                 {errors.responsavel_id && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.responsavel_id}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.responsavel_id}
+                  </p>
                 )}
               </div>
 
@@ -503,13 +555,16 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   <input
                     type="date"
                     value={formData.data_aquisicao}
-                    onChange={(e) => handleChange('data_aquisicao', e.target.value)}
+                    onChange={(e) =>
+                      handleChange('data_aquisicao', e.target.value)
+                    }
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.data_aquisicao 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.data_aquisicao
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
                       transition-colors`}
@@ -517,7 +572,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   />
                 </div>
                 {errors.data_aquisicao && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.data_aquisicao}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.data_aquisicao}
+                  </p>
                 )}
               </div>
 
@@ -531,15 +588,18 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   <input
                     type="number"
                     value={formData.valor_aquisicao}
-                    onChange={(e) => handleChange('valor_aquisicao', Number(e.target.value))}
+                    onChange={(e) =>
+                      handleChange('valor_aquisicao', Number(e.target.value))
+                    }
                     step="0.01"
                     min="0"
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.valor_aquisicao 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.valor_aquisicao
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
                       transition-colors`}
@@ -547,7 +607,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   />
                 </div>
                 {errors.valor_aquisicao && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.valor_aquisicao}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.valor_aquisicao}
+                  </p>
                 )}
               </div>
 
@@ -561,16 +623,19 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   <input
                     type="number"
                     value={formData.valor_atual}
-                    onChange={(e) => handleChange('valor_atual', Number(e.target.value))}
+                    onChange={(e) =>
+                      handleChange('valor_atual', Number(e.target.value))
+                    }
                     step="0.01"
                     min="0"
                     max={formData.valor_aquisicao || undefined}
                     className={`w-full pl-10 pr-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.valor_atual 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.valor_atual
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
                       transition-colors`}
@@ -578,7 +643,9 @@ const PatrimonioModal: React.FC<PatrimonioModalProps> = ({
                   />
                 </div>
                 {errors.valor_atual && (
-                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.valor_atual}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                    {errors.valor_atual}
+                  </p>
                 )}
               </div>
             </div>

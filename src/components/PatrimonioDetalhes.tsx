@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
   X,
   Edit,
   FileText,
@@ -12,10 +12,14 @@ import {
   User,
   Tag,
   Clock,
-  Info
+  Info,
 } from 'lucide-react';
 import { usePatrimonios } from '../context/PatrimoniosContext';
-import type { Patrimonio, STATUS_LABELS, STATUS_COLORS } from '../types/patrimonios.types';
+import type {
+  Patrimonio,
+  STATUS_LABELS,
+  STATUS_COLORS,
+} from '../types/patrimonios.types';
 
 interface PatrimonioDetalhesProps {
   isOpen: boolean;
@@ -28,7 +32,7 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
   isOpen,
   onClose,
   patrimonio,
-  onEdit
+  onEdit,
 }) => {
   const { categorias, setores, usuarios } = usePatrimonios();
 
@@ -42,7 +46,7 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
     if (value == null) return 'R$ 0,00';
     return value.toLocaleString('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
     });
   };
 
@@ -57,17 +61,19 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
   };
 
   const getCategoriaNome = (): string => {
-    const categoria = categorias.find(c => c.id === patrimonio.categoria_id);
+    const categoria = categorias.find((c) => c.id === patrimonio.categoria_id);
     return categoria?.nome || 'N/A';
   };
 
   const getSetorNome = (): string => {
-    const setor = setores.find(s => s.id === patrimonio.setor_id);
+    const setor = setores.find((s) => s.id === patrimonio.setor_id);
     return setor?.nome || 'N/A';
   };
 
   const getResponsavelNome = (): string => {
-    const responsavel = usuarios.find(u => u.id === patrimonio.responsavel_id);
+    const responsavel = usuarios.find(
+      (u) => u.id === patrimonio.responsavel_id,
+    );
     return responsavel?.username || 'N/A';
   };
 
@@ -78,13 +84,12 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
     const valorAquisicao = patrimonio.valor_aquisicao || 0;
     const valorAtual = patrimonio.valor_atual || 0;
     const depreciacao = valorAquisicao - valorAtual;
-    const percentual = valorAquisicao > 0 
-      ? ((depreciacao / valorAquisicao) * 100)
-      : 0;
+    const percentual =
+      valorAquisicao > 0 ? (depreciacao / valorAquisicao) * 100 : 0;
 
     return {
       valor: depreciacao,
-      percentual
+      percentual,
     };
   };
 
@@ -97,7 +102,7 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
@@ -128,27 +133,33 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                   Informações Básicas
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
                 {/* Nome e Status */}
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nome</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Nome
+                    </p>
                     <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                       {patrimonio.nome}
                     </p>
                   </div>
                   <div>
-                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                      patrimonio.status === 'ativo'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
+                    <span
+                      className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        patrimonio.status === 'ativo'
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
+                          : patrimonio.status === 'manutencao'
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                      }`}
+                    >
+                      {patrimonio.status === 'ativo'
+                        ? 'Ativo'
                         : patrimonio.status === 'manutencao'
-                        ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
-                    }`}>
-                      {patrimonio.status === 'ativo' ? 'Ativo' 
-                        : patrimonio.status === 'manutencao' ? 'Em Manutenção' 
-                        : 'Baixado'}
+                          ? 'Em Manutenção'
+                          : 'Baixado'}
                     </span>
                   </div>
                 </div>
@@ -156,7 +167,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                 {/* Descrição */}
                 {patrimonio.descricao && (
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Descrição</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Descrição
+                    </p>
                     <p className="text-base text-gray-700 dark:text-gray-300">
                       {patrimonio.descricao}
                     </p>
@@ -166,7 +179,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                 {/* Número de Série */}
                 {patrimonio.numero_serie && (
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Número de Série</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Número de Série
+                    </p>
                     <p className="text-base font-mono text-gray-700 dark:text-gray-300">
                       {patrimonio.numero_serie}
                     </p>
@@ -175,7 +190,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
                 {/* ID */}
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">ID do Patrimônio</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    ID do Patrimônio
+                  </p>
                   <p className="text-base font-mono text-gray-700 dark:text-gray-300">
                     #{patrimonio.id}
                   </p>
@@ -191,12 +208,14 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                   Dados Financeiros
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4">
                 <div className="grid grid-cols-2 gap-4">
                   {/* Valor de Aquisição */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Valor de Aquisição</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Valor de Aquisição
+                    </p>
                     <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       {formatCurrency(patrimonio.valor_aquisicao)}
                     </p>
@@ -204,7 +223,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
                   {/* Valor Atual */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Valor Atual</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Valor Atual
+                    </p>
                     <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                       {formatCurrency(patrimonio.valor_atual)}
                     </p>
@@ -212,7 +233,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
                   {/* Depreciação */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Depreciação</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Depreciação
+                    </p>
                     <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
                       {formatCurrency(depreciacao.valor)}
                     </p>
@@ -220,7 +243,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
                   {/* % de Depreciação */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">% de Depreciação</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      % de Depreciação
+                    </p>
                     <div className="flex items-center gap-2">
                       <p className="text-lg font-semibold text-orange-600 dark:text-orange-400">
                         {depreciacao.percentual.toFixed(1)}%
@@ -240,14 +265,16 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                   Localização e Responsabilidade
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Categoria */}
                   <div className="flex items-start gap-2">
                     <Tag className="w-4 h-4 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Categoria</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Categoria
+                      </p>
                       <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                         {getCategoriaNome()}
                       </p>
@@ -258,7 +285,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                   <div className="flex items-start gap-2">
                     <Building className="w-4 h-4 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Setor</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Setor
+                      </p>
                       <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                         {getSetorNome()}
                       </p>
@@ -269,7 +298,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                   <div className="flex items-start gap-2">
                     <User className="w-4 h-4 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Responsável</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Responsável
+                      </p>
                       <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                         {getResponsavelNome()}
                       </p>
@@ -287,12 +318,14 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                   Datas
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {/* Data de Aquisição */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Data de Aquisição</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Data de Aquisição
+                    </p>
                     <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                       {formatDate(patrimonio.data_aquisicao)}
                     </p>
@@ -300,7 +333,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
                   {/* Data de Cadastro */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Data de Cadastro</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Data de Cadastro
+                    </p>
                     <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                       {formatDateTime(patrimonio.criado_em)}
                     </p>
@@ -308,7 +343,9 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
                   {/* Última Atualização */}
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Última Atualização</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Última Atualização
+                    </p>
                     <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                       {formatDateTime(patrimonio.atualizado_em)}
                     </p>
@@ -330,7 +367,7 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
             >
               Fechar
             </button>
-            
+
             {onEdit && (
               <button
                 onClick={() => {

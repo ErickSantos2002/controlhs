@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 interface ModalTrocarSenhaProps {
   isOpen: boolean;
@@ -11,14 +11,14 @@ const ModalTrocarSenha: React.FC<ModalTrocarSenhaProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const [novaSenha, setNovaSenha] = useState("");
-  const [repitaSenha, setRepitaSenha] = useState("");
+  const [novaSenha, setNovaSenha] = useState('');
+  const [repitaSenha, setRepitaSenha] = useState('');
 
   if (!isOpen) return null;
 
   const handleConfirm = () => {
     if (novaSenha !== repitaSenha) {
-      alert("As senhas não coincidem!");
+      alert('As senhas não coincidem!');
       return;
     }
     onConfirm(novaSenha);

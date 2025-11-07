@@ -56,7 +56,11 @@ export interface TransferenciaUpdate {
  * Status calculado da transferência
  * NÃO existe na API - deve ser calculado no frontend
  */
-export type TransferenciaStatus = 'pendente' | 'aprovada' | 'concluida' | 'rejeitada';
+export type TransferenciaStatus =
+  | 'pendente'
+  | 'aprovada'
+  | 'concluida'
+  | 'rejeitada';
 
 // ========================================
 // INTERFACES DE APOIO
@@ -148,7 +152,7 @@ export interface OrdenacaoTransferencia {
 /**
  * Type para campos de ordenação
  */
-export type OrdenacaoCampo = 
+export type OrdenacaoCampo =
   | 'id'
   | 'patrimonio_nome'
   | 'setor_origem_nome'
@@ -183,41 +187,45 @@ export interface TransferenciasContextData {
   categorias: Categoria[];
   setores: Setor[];
   usuarios: Usuario[];
-  
+
   // Filtros
   filtros: FiltrosTransferencia;
   setFiltros: (filtros: FiltrosTransferencia) => void;
-  
+
   // Ordenação
   ordenacao: OrdenacaoTransferencia;
   setOrdenacao: (ordenacao: OrdenacaoTransferencia) => void;
-  
+
   // Estados
   loading: boolean;
   error: string | null;
-  
+
   // Dados computados
   transferenciasFiltradas: TransferenciaComStatus[];
-  
+
   // KPIs
   kpis: TransferenciasKPIs;
-  
+
   // Funções CRUD
   createTransferencia: (data: TransferenciaCreate) => Promise<void>;
   updateTransferencia: (id: number, data: TransferenciaUpdate) => Promise<void>;
   deleteTransferencia: (id: number) => Promise<void>;
-  
+
   // Funções especiais
-  aprovarTransferencia: (id: number, observacoes?: string, efetivarAutomaticamente?: boolean) => Promise<void>;
+  aprovarTransferencia: (
+    id: number,
+    observacoes?: string,
+    efetivarAutomaticamente?: boolean,
+  ) => Promise<void>;
   rejeitarTransferencia: (id: number, motivo: string) => Promise<void>;
   efetivarTransferencia: (id: number) => Promise<void>;
-  
+
   // Funções de verificação
   getTransferenciaStatus: (transferencia: Transferencia) => TransferenciaStatus;
   podeAprovar: (transferencia: Transferencia) => boolean;
   podeEfetivar: (transferencia: Transferencia) => boolean;
   verificarTransferenciaPendente: (patrimonio_id: number) => boolean;
-  
+
   // Atualização
   refreshData: () => Promise<void>;
 }
@@ -250,12 +258,12 @@ export interface WizardTransferenciaData {
   // Step 1
   patrimonio_id?: number;
   patrimonio?: Patrimonio;
-  
+
   // Step 2
   setor_destino_id?: number;
   responsavel_destino_id?: number;
   motivo?: string;
-  
+
   // Dados automáticos
   setor_origem_id?: number;
   responsavel_origem_id?: number;
@@ -265,18 +273,18 @@ export interface WizardTransferenciaData {
  * Interface para exportação Excel
  */
 export interface TransferenciaExportData {
-  'ID': number;
-  'Patrimônio': string;
+  ID: number;
+  Patrimônio: string;
   'Setor Origem': string;
   'Setor Destino': string;
   'Responsável Origem': string;
   'Responsável Destino': string;
-  'Solicitante': string;
+  Solicitante: string;
   'Data Solicitação': string;
-  'Status': string;
-  'Aprovador': string;
+  Status: string;
+  Aprovador: string;
   'Data Aprovação': string;
-  'Motivo': string;
+  Motivo: string;
 }
 
 // ========================================
@@ -287,10 +295,12 @@ export interface TransferenciaExportData {
  * Cores dos badges de status
  */
 export const STATUS_COLORS: Record<TransferenciaStatus, string> = {
-  pendente: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400',
+  pendente:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400',
   aprovada: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-400',
-  concluida: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400',
-  rejeitada: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+  concluida:
+    'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400',
+  rejeitada: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400',
 };
 
 /**
@@ -300,7 +310,7 @@ export const STATUS_LABELS: Record<TransferenciaStatus, string> = {
   pendente: 'Pendente',
   aprovada: 'Aprovada',
   concluida: 'Concluída',
-  rejeitada: 'Rejeitada'
+  rejeitada: 'Rejeitada',
 };
 
 /**
@@ -309,7 +319,7 @@ export const STATUS_LABELS: Record<TransferenciaStatus, string> = {
 export enum WizardStep {
   SELECAO_PATRIMONIO = 1,
   DESTINO_TRANSFERENCIA = 2,
-  CONFIRMACAO = 3
+  CONFIRMACAO = 3,
 }
 
 /**
@@ -324,7 +334,9 @@ export const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
 /**
  * Type para erros de validação
  */
-export type ValidationErrors = Partial<Record<keyof TransferenciaCreate, string>>;
+export type ValidationErrors = Partial<
+  Record<keyof TransferenciaCreate, string>
+>;
 
 /**
  * Type para modo do modal

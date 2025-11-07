@@ -1,22 +1,25 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
-import Patrimonios from "./pages/Patrimonios";
-import Transferencias from "./pages/Transferencias";
-import NotFound from "./pages/NotFound";
-import Logs from "./pages/Logs";
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Patrimonios from './pages/Patrimonios';
+import Transferencias from './pages/Transferencias';
+import NotFound from './pages/NotFound';
+import Logs from './pages/Logs';
 
-import ProtectedRoute from "./components/ProtectedRoute";
-import { useAuth } from "./hooks/useAuth";
+import ProtectedRoute from './components/ProtectedRoute';
+import { useAuth } from './hooks/useAuth';
 
-const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div className="p-6 text-gray-500">Verificando permissões...</div>;
+  if (loading)
+    return <div className="p-6 text-gray-500">Verificando permissões...</div>;
 
-  if (!user || user.role !== "Administrador") {
+  if (!user || user.role !== 'Administrador') {
     return (
       <div className="p-6 text-red-600 text-center font-semibold">
         Acesso negado. Esta página é restrita a administradores.
@@ -27,7 +30,7 @@ const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => 
   return <>{children}</>;
 };
 
-import Bloqueio from "./pages/Bloqueio"; // importe o novo componente
+import Bloqueio from './pages/Bloqueio'; // importe o novo componente
 
 const AppRoutes: React.FC = () => (
   <Routes>
@@ -59,7 +62,7 @@ const AppRoutes: React.FC = () => (
         </ProtectedRoute>
       }
     />
-    
+
     <Route
       path="/logs"
       element={

@@ -1,32 +1,32 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { 
-  Filter, 
-  Home, 
-  Activity, 
-  DollarSign, 
-  PieChart, 
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import {
+  Filter,
+  Home,
+  Activity,
+  DollarSign,
+  PieChart,
   Search,
   Download,
   AlertCircle,
-  Loader2
-} from "lucide-react";
-import { 
-  ResponsiveContainer, 
-  PieChart as RChart, 
-  Pie, 
-  Cell, 
-  Tooltip, 
-  BarChart, 
-  Bar, 
-  CartesianGrid, 
-  XAxis, 
+  Loader2,
+} from 'lucide-react';
+import {
+  ResponsiveContainer,
+  PieChart as RChart,
+  Pie,
+  Cell,
+  Tooltip,
+  BarChart,
+  Bar,
+  CartesianGrid,
+  XAxis,
   YAxis,
-  Legend
-} from "recharts";
-import { useDashboard } from "../context/DashboardContext";
-import { useAuth } from "../hooks/useAuth";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+  Legend,
+} from 'recharts';
+import { useDashboard } from '../context/DashboardContext';
+import { useAuth } from '../hooks/useAuth';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const DashboardPatrimonio: React.FC = () => {
   const { user } = useAuth();
@@ -41,15 +41,15 @@ const DashboardPatrimonio: React.FC = () => {
     error,
     patrimoniosFiltrados,
     kpis,
-    refreshData
+    refreshData,
   } = useDashboard();
 
   // Estados locais para paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [buscaLocal, setBuscaLocal] = useState("");
+  const [buscaLocal, setBuscaLocal] = useState('');
   const itensPorPagina = 10;
 
-  const CORES_GRAFICO = ["#3b82f6", "#22c55e", "#facc15", "#ef4444", "#a855f7"];
+  const CORES_GRAFICO = ['#3b82f6', '#22c55e', '#facc15', '#ef4444', '#a855f7'];
 
   // Atualiza busca no contexto com debounce
   useEffect(() => {
@@ -62,46 +62,68 @@ const DashboardPatrimonio: React.FC = () => {
   // Dados para gráficos
   const dadosGraficos = useMemo(() => {
     // Distribuição por Categoria
-    const distribuicaoCategoria = categorias.map(cat => {
-      const patrimoniosCategoria = patrimoniosFiltrados.filter(p => p.categoria_id === cat.id);
-      const valor = patrimoniosCategoria.reduce((sum, p) => sum + p.valor_atual, 0);
-      return {
-        name: cat.nome,
-        value: valor
-      };
-    }).filter(item => item.value > 0);
+    const distribuicaoCategoria = categorias
+      .map((cat) => {
+        const patrimoniosCategoria = patrimoniosFiltrados.filter(
+          (p) => p.categoria_id === cat.id,
+        );
+        const valor = patrimoniosCategoria.reduce(
+          (sum, p) => sum + p.valor_atual,
+          0,
+        );
+        return {
+          name: cat.nome,
+          value: valor,
+        };
+      })
+      .filter((item) => item.value > 0);
 
     // Distribuição por Setor
-    const distribuicaoSetor = setores.map(setor => {
-      const patrimoniosSetor = patrimoniosFiltrados.filter(p => p.setor_id === setor.id);
-      return {
-        name: setor.nome,
-        value: patrimoniosSetor.length
-      };
-    }).filter(item => item.value > 0);
+    const distribuicaoSetor = setores
+      .map((setor) => {
+        const patrimoniosSetor = patrimoniosFiltrados.filter(
+          (p) => p.setor_id === setor.id,
+        );
+        return {
+          name: setor.nome,
+          value: patrimoniosSetor.length,
+        };
+      })
+      .filter((item) => item.value > 0);
 
     // Depreciação por Categoria
-    const depreciacaoCategoria = categorias.map(cat => {
-      const patrimoniosCategoria = patrimoniosFiltrados.filter(p => p.categoria_id === cat.id);
-      const depreciacao = patrimoniosCategoria.reduce(
-        (sum, p) => sum + (p.valor_aquisicao - p.valor_atual), 
-        0
-      );
-      return {
-        categoria: cat.nome,
-        valor: depreciacao
-      };
-    }).filter(item => item.valor > 0);
+    const depreciacaoCategoria = categorias
+      .map((cat) => {
+        const patrimoniosCategoria = patrimoniosFiltrados.filter(
+          (p) => p.categoria_id === cat.id,
+        );
+        const depreciacao = patrimoniosCategoria.reduce(
+          (sum, p) => sum + (p.valor_aquisicao - p.valor_atual),
+          0,
+        );
+        return {
+          categoria: cat.nome,
+          valor: depreciacao,
+        };
+      })
+      .filter((item) => item.valor > 0);
 
     // Valor por Responsável
-    const valorResponsavel = usuarios.map(user => {
-      const patrimoniosUser = patrimoniosFiltrados.filter(p => p.responsavel_id === user.id);
-      const valor = patrimoniosUser.reduce((sum, p) => sum + p.valor_atual, 0);
-      return {
-        responsavel: user.username,
-        valor: valor
-      };
-    }).filter(item => item.valor > 0)
+    const valorResponsavel = usuarios
+      .map((user) => {
+        const patrimoniosUser = patrimoniosFiltrados.filter(
+          (p) => p.responsavel_id === user.id,
+        );
+        const valor = patrimoniosUser.reduce(
+          (sum, p) => sum + p.valor_atual,
+          0,
+        );
+        return {
+          responsavel: user.username,
+          valor: valor,
+        };
+      })
+      .filter((item) => item.valor > 0)
       .sort((a, b) => b.valor - a.valor)
       .slice(0, 10); // Top 10 responsáveis
 
@@ -109,10 +131,10 @@ const DashboardPatrimonio: React.FC = () => {
       distribuicaoCategoria,
       distribuicaoSetor,
       depreciacaoCategoria,
-      valorResponsavel
+      valorResponsavel,
     };
   }, [patrimoniosFiltrados, categorias, setores, usuarios]);
-  
+
   const isMobile = window.innerWidth < 768;
 
   // Paginação
@@ -124,7 +146,10 @@ const DashboardPatrimonio: React.FC = () => {
 
   const totalPaginas = Math.ceil(patrimoniosFiltrados.length / itensPorPagina);
   const inicio = (paginaAtual - 1) * itensPorPagina + 1;
-  const fim = Math.min(paginaAtual * itensPorPagina, patrimoniosFiltrados.length);
+  const fim = Math.min(
+    paginaAtual * itensPorPagina,
+    patrimoniosFiltrados.length,
+  );
 
   // Páginas visíveis na navegação
   const paginasVisiveis = useMemo(() => {
@@ -139,67 +164,77 @@ const DashboardPatrimonio: React.FC = () => {
   }, [paginaAtual, totalPaginas]);
 
   // Handlers
-  const handleFiltroChange = useCallback((campo: string, valor: string) => {
-    setFiltros({ ...filtros, [campo]: valor });
-    setPaginaAtual(1); // Reset página ao filtrar
-  }, [filtros, setFiltros]);
+  const handleFiltroChange = useCallback(
+    (campo: string, valor: string) => {
+      setFiltros({ ...filtros, [campo]: valor });
+      setPaginaAtual(1); // Reset página ao filtrar
+    },
+    [filtros, setFiltros],
+  );
 
   const handleExportarExcel = useCallback(() => {
     if (patrimoniosFiltrados.length === 0) {
-      alert("Nenhum dado para exportar!");
+      alert('Nenhum dado para exportar!');
       return;
     }
 
     // Monta os dados que vão pro Excel
     const dados = patrimoniosFiltrados.map((bem) => ({
       Nome: bem.nome,
-      Categoria: categorias.find((c) => c.id === bem.categoria_id)?.nome || "N/A",
-      Responsavel: usuarios.find((u) => u.id === bem.responsavel_id)?.username || "N/A",
-      Setor: setores.find((s) => s.id === bem.setor_id)?.nome || "N/A",
-      "Data de Aquisição": bem.data_aquisicao
-        ? new Date(bem.data_aquisicao).toLocaleDateString("pt-BR")
-        : "N/A",
-      "Valor Atual (R$)": bem.valor_atual?.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
+      Categoria:
+        categorias.find((c) => c.id === bem.categoria_id)?.nome || 'N/A',
+      Responsavel:
+        usuarios.find((u) => u.id === bem.responsavel_id)?.username || 'N/A',
+      Setor: setores.find((s) => s.id === bem.setor_id)?.nome || 'N/A',
+      'Data de Aquisição': bem.data_aquisicao
+        ? new Date(bem.data_aquisicao).toLocaleDateString('pt-BR')
+        : 'N/A',
+      'Valor Atual (R$)': bem.valor_atual?.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
       }),
-      "Depreciação (R$)": ((bem.valor_aquisicao || 0) - (bem.valor_atual || 0)).toLocaleString(
-        "pt-BR",
-        {
-          style: "currency",
-          currency: "BRL",
-        }
-      ),
+      'Depreciação (R$)': (
+        (bem.valor_aquisicao || 0) - (bem.valor_atual || 0)
+      ).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }),
       Situação:
-        bem.status === "ativo"
-          ? "Ativo"
-          : bem.status === "manutencao"
-          ? "Manutenção"
-          : "Baixado",
+        bem.status === 'ativo'
+          ? 'Ativo'
+          : bem.status === 'manutencao'
+            ? 'Manutenção'
+            : 'Baixado',
     }));
 
     // Cria o workbook e a planilha
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(dados);
-    XLSX.utils.book_append_sheet(wb, ws, "Patrimonios");
+    XLSX.utils.book_append_sheet(wb, ws, 'Patrimonios');
 
     // Converte para blob e baixa
-    const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([wbout], { type: "application/octet-stream" });
-    saveAs(blob, `Patrimonios_ControlHS_${new Date().toISOString().split("T")[0]}.xlsx`);
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    saveAs(
+      blob,
+      `Patrimonios_ControlHS_${new Date().toISOString().split('T')[0]}.xlsx`,
+    );
   }, [patrimoniosFiltrados, categorias, setores, usuarios]);
 
   // Função auxiliar para obter nome por ID
-  const getNomeCategoria = (id: number) => categorias.find(c => c.id === id)?.nome || 'N/A';
-  const getNomeSetor = (id: number) => setores.find(s => s.id === id)?.nome || 'N/A';
-  const getNomeUsuario = (id: number) => usuarios.find(u => u.id === id)?.username || 'N/A';
+  const getNomeCategoria = (id: number) =>
+    categorias.find((c) => c.id === id)?.nome || 'N/A';
+  const getNomeSetor = (id: number) =>
+    setores.find((s) => s.id === id)?.nome || 'N/A';
+  const getNomeUsuario = (id: number) =>
+    usuarios.find((u) => u.id === id)?.username || 'N/A';
 
   // Mapear status para exibição
   const getStatusDisplay = (status: string) => {
     const statusMap: Record<string, string> = {
-      'ativo': 'Ativo',
-      'manutencao': 'Manutenção',
-      'baixado': 'Baixado'
+      ativo: 'Ativo',
+      manutencao: 'Manutenção',
+      baixado: 'Baixado',
     };
     return statusMap[status] || status;
   };
@@ -210,7 +245,9 @@ const DashboardPatrimonio: React.FC = () => {
       <div className="min-h-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-300">Carregando dados do patrimônio...</p>
+          <p className="text-gray-600 dark:text-gray-300">
+            Carregando dados do patrimônio...
+          </p>
         </div>
       </div>
     );
@@ -247,10 +284,12 @@ const DashboardPatrimonio: React.FC = () => {
               Patrimônio - Dashboard
             </h1>
             <p className="text-gray-600 dark:text-gray-300 mt-1">
-              Bem-vindo, <span className="font-semibold">{user?.username}</span> ({user?.role})
+              Bem-vindo, <span className="font-semibold">{user?.username}</span>{' '}
+              ({user?.role})
             </p>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-              Visualize os indicadores e a situação atual dos bens patrimoniais da empresa.
+              Visualize os indicadores e a situação atual dos bens patrimoniais
+              da empresa.
             </p>
           </div>
         </div>
@@ -285,13 +324,15 @@ const DashboardPatrimonio: React.FC = () => {
               </label>
               <select
                 value={filtros.categoria}
-                onChange={(e) => handleFiltroChange('categoria', e.target.value)}
+                onChange={(e) =>
+                  handleFiltroChange('categoria', e.target.value)
+                }
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="todas">Todas</option>
-                {categorias.map(cat => (
+                {categorias.map((cat) => (
                   <option key={cat.id} value={cat.nome.toLowerCase()}>
                     {cat.nome}
                   </option>
@@ -312,7 +353,7 @@ const DashboardPatrimonio: React.FC = () => {
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="todos">Todos</option>
-                {setores.map(setor => (
+                {setores.map((setor) => (
                   <option key={setor.id} value={setor.nome.toLowerCase()}>
                     {setor.nome}
                   </option>
@@ -346,13 +387,15 @@ const DashboardPatrimonio: React.FC = () => {
               </label>
               <select
                 value={filtros.responsavel}
-                onChange={(e) => handleFiltroChange('responsavel', e.target.value)}
+                onChange={(e) =>
+                  handleFiltroChange('responsavel', e.target.value)
+                }
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
               >
                 <option value="todos">Todos</option>
-                {usuarios.map(user => (
+                {usuarios.map((user) => (
                   <option key={user.id} value={user.username.toLowerCase()}>
                     {user.username}
                   </option>
@@ -370,7 +413,9 @@ const DashboardPatrimonio: React.FC = () => {
               <input
                 type="date"
                 value={filtros.dataInicio || ''}
-                onChange={(e) => handleFiltroChange('dataInicio', e.target.value)}
+                onChange={(e) =>
+                  handleFiltroChange('dataInicio', e.target.value)
+                }
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -399,7 +444,9 @@ const DashboardPatrimonio: React.FC = () => {
               </label>
               <select
                 value={filtros.filtroPersonalizado}
-                onChange={(e) => handleFiltroChange('filtroPersonalizado', e.target.value)}
+                onChange={(e) =>
+                  handleFiltroChange('filtroPersonalizado', e.target.value)
+                }
                 className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a]
                           text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600
                           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
@@ -418,7 +465,9 @@ const DashboardPatrimonio: React.FC = () => {
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-700 dark:text-gray-400">Total de Itens</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Total de Itens
+                </p>
                 <p className="text-3xl font-semibold text-blue-500 dark:text-blue-300 mt-2 tracking-tight">
                   {kpis.totalItens.toLocaleString('pt-BR')}
                 </p>
@@ -432,11 +481,13 @@ const DashboardPatrimonio: React.FC = () => {
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-700 dark:text-gray-400">Valor Total</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Valor Total
+                </p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-2">
-                  {kpis.valorTotal.toLocaleString('pt-BR', { 
-                    style: 'currency', 
-                    currency: 'BRL' 
+                  {kpis.valorTotal.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
                   })}
                 </p>
               </div>
@@ -449,11 +500,13 @@ const DashboardPatrimonio: React.FC = () => {
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-700 dark:text-gray-400">Depreciação Acumulada</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Depreciação Acumulada
+                </p>
                 <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">
                   {kpis.depreciacaoAcumulada.toLocaleString('pt-BR', {
                     style: 'currency',
-                    currency: 'BRL'
+                    currency: 'BRL',
                   })}
                 </p>
               </div>
@@ -466,7 +519,9 @@ const DashboardPatrimonio: React.FC = () => {
           <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-700 dark:text-gray-400">Bens Ativos</p>
+                <p className="text-sm text-gray-700 dark:text-gray-400">
+                  Bens Ativos
+                </p>
                 <p className="text-2xl font-bold text-purple-600 dark:text-purple-400 mt-2">
                   {kpis.ativos.toLocaleString('pt-BR')}
                 </p>
@@ -513,9 +568,9 @@ const DashboardPatrimonio: React.FC = () => {
 
                   <Tooltip
                     formatter={(value: number) =>
-                      value.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
+                      value.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
                       })
                     }
                   />
@@ -526,7 +581,7 @@ const DashboardPatrimonio: React.FC = () => {
                     align="center"
                     wrapperStyle={{
                       marginTop: 10,
-                      fontSize: "12px", // fonte um pouco menor para não pesar
+                      fontSize: '12px', // fonte um pouco menor para não pesar
                     }}
                   />
                 </RChart>
@@ -554,7 +609,7 @@ const DashboardPatrimonio: React.FC = () => {
                     outerRadius={80} // mantém o tamanho original do gráfico
                     dataKey="value"
                     label={({ name, value }) => {
-                      if (typeof value === "number") {
+                      if (typeof value === 'number') {
                         return `${name}: ${value}`;
                       }
                       return name;
@@ -570,8 +625,8 @@ const DashboardPatrimonio: React.FC = () => {
 
                   <Tooltip
                     formatter={(value: number) =>
-                      typeof value === "number"
-                        ? value.toLocaleString("pt-BR")
+                      typeof value === 'number'
+                        ? value.toLocaleString('pt-BR')
                         : value
                     }
                   />
@@ -582,7 +637,7 @@ const DashboardPatrimonio: React.FC = () => {
                     align="center"
                     wrapperStyle={{
                       marginTop: 10,
-                      fontSize: "12px",
+                      fontSize: '12px',
                     }}
                   />
                 </RChart>
@@ -601,9 +656,15 @@ const DashboardPatrimonio: React.FC = () => {
             </h3>
             {dadosGraficos.depreciacaoCategoria.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dadosGraficos.depreciacaoCategoria} layout="vertical">
+                <BarChart
+                  data={dadosGraficos.depreciacaoCategoria}
+                  layout="vertical"
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                  <XAxis type="number" tickFormatter={(value) => `${(value/1000).toFixed(0)}k`} />
+                  <XAxis
+                    type="number"
+                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                  />
                   <YAxis dataKey="categoria" type="category" width={120} />
                   <Bar dataKey="valor" fill="#f59e0b" />
                   <Tooltip
@@ -614,13 +675,13 @@ const DashboardPatrimonio: React.FC = () => {
                       })
                     }
                     contentStyle={{
-                      backgroundColor: "#f9fafb", 
-                      color: "#000",              
-                      borderRadius: "8px",
-                      border: "1px solid #d1d5db",
+                      backgroundColor: '#f9fafb',
+                      color: '#000',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
                     }}
-                    itemStyle={{ color: "#000" }} 
-                    labelStyle={{ color: "#f59e0b", fontWeight: 600 }}
+                    itemStyle={{ color: '#000' }}
+                    labelStyle={{ color: '#f59e0b', fontWeight: 600 }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -638,9 +699,15 @@ const DashboardPatrimonio: React.FC = () => {
             </h3>
             {dadosGraficos.valorResponsavel.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={dadosGraficos.valorResponsavel} layout="vertical">
+                <BarChart
+                  data={dadosGraficos.valorResponsavel}
+                  layout="vertical"
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#475569" />
-                  <XAxis type="number" tickFormatter={(value) => `${(value/1000).toFixed(0)}k`} />
+                  <XAxis
+                    type="number"
+                    tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
+                  />
                   <YAxis dataKey="responsavel" type="category" width={100} />
                   <Bar dataKey="valor" fill="#2563eb" />
                   <Tooltip
@@ -651,13 +718,13 @@ const DashboardPatrimonio: React.FC = () => {
                       })
                     }
                     contentStyle={{
-                      backgroundColor: "#f9fafb", 
-                      color: "#000",              
-                      borderRadius: "8px",
-                      border: "1px solid #d1d5db",
+                      backgroundColor: '#f9fafb',
+                      color: '#000',
+                      borderRadius: '8px',
+                      border: '1px solid #d1d5db',
                     }}
-                    itemStyle={{ color: "#000" }} 
-                    labelStyle={{ color: "#2563eb", fontWeight: 600 }}
+                    itemStyle={{ color: '#000' }}
+                    labelStyle={{ color: '#2563eb', fontWeight: 600 }}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -744,7 +811,8 @@ const DashboardPatrimonio: React.FC = () => {
                   </thead>
                   <tbody>
                     {dadosPaginados.map((bem, index) => {
-                      const depreciacao = (bem.valor_aquisicao || 0) - (bem.valor_atual || 0);
+                      const depreciacao =
+                        (bem.valor_aquisicao || 0) - (bem.valor_atual || 0);
                       return (
                         <tr
                           key={bem.id}
@@ -770,28 +838,36 @@ const DashboardPatrimonio: React.FC = () => {
                             {getNomeSetor(bem.setor_id)}
                           </td>
                           <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
-                            {bem.data_aquisicao ? new Date(bem.data_aquisicao).toLocaleDateString('pt-BR') : 'N/A'}
+                            {bem.data_aquisicao
+                              ? new Date(bem.data_aquisicao).toLocaleDateString(
+                                  'pt-BR',
+                                )
+                              : 'N/A'}
                           </td>
                           <td className="px-4 py-3 text-sm text-center font-semibold text-blue-600 dark:text-blue-400">
                             {(bem.valor_atual || 0).toLocaleString('pt-BR', {
                               style: 'currency',
-                              currency: 'BRL'
+                              currency: 'BRL',
                             })}
                           </td>
                           <td className="px-4 py-3 text-sm text-center font-semibold text-yellow-600 dark:text-yellow-400">
-                            {((bem.valor_aquisicao || 0) - (bem.valor_atual || 0)).toLocaleString('pt-BR', {
+                            {(
+                              (bem.valor_aquisicao || 0) -
+                              (bem.valor_atual || 0)
+                            ).toLocaleString('pt-BR', {
                               style: 'currency',
-                              currency: 'BRL'
+                              currency: 'BRL',
                             })}
                           </td>
                           <td className="px-4 py-3 text-center">
                             <span
                               className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                ${bem.status === 'ativo'
-                                  ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
-                                  : bem.status === 'manutencao'
-                                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-                                  : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                                ${
+                                  bem.status === 'ativo'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
+                                    : bem.status === 'manutencao'
+                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
+                                      : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
                                 }`}
                             >
                               {getStatusDisplay(bem.status)}
@@ -810,12 +886,15 @@ const DashboardPatrimonio: React.FC = () => {
                   {/* Desktop */}
                   <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
                     <div>
-                      Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                      Mostrando {inicio} a {fim} de{' '}
+                      {patrimoniosFiltrados.length} registros
                     </div>
 
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
+                        onClick={() =>
+                          setPaginaAtual((prev) => Math.max(1, prev - 1))
+                        }
                         disabled={paginaAtual === 1}
                         className="px-3 py-1 border rounded-lg
                                   bg-white dark:bg-[#1f1f1f]
@@ -829,14 +908,15 @@ const DashboardPatrimonio: React.FC = () => {
                       </button>
 
                       <div className="flex gap-1">
-                        {paginasVisiveis.map(page => (
+                        {paginasVisiveis.map((page) => (
                           <button
                             key={page}
                             onClick={() => setPaginaAtual(page)}
                             className={`px-3 py-1 border rounded-lg transition-colors
-                              ${paginaAtual === page
-                                ? 'bg-blue-600 text-white border-blue-600'
-                                : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                              ${
+                                paginaAtual === page
+                                  ? 'bg-blue-600 text-white border-blue-600'
+                                  : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
                               }`}
                           >
                             {page}
@@ -845,7 +925,11 @@ const DashboardPatrimonio: React.FC = () => {
                       </div>
 
                       <button
-                        onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
+                        onClick={() =>
+                          setPaginaAtual((prev) =>
+                            Math.min(totalPaginas, prev + 1),
+                          )
+                        }
                         disabled={paginaAtual === totalPaginas}
                         className="px-3 py-1 border rounded-lg
                                   bg-white dark:bg-[#1f1f1f]
@@ -860,52 +944,61 @@ const DashboardPatrimonio: React.FC = () => {
                     </div>
                   </div>
 
-                {/* Mobile */}
-                <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-600 dark:text-gray-300">
-                  {/* Texto de registros */}
-                  <div className="mb-2">
-                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
-                  </div>
+                  {/* Mobile */}
+                  <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-600 dark:text-gray-300">
+                    {/* Texto de registros */}
+                    <div className="mb-2">
+                      Mostrando {inicio} a {fim} de{' '}
+                      {patrimoniosFiltrados.length} registros
+                    </div>
 
-                  {/* Botões de paginação */}
-                  <div className="flex justify-center gap-2 items-center">
-                    <button
-                      onClick={() => setPaginaAtual(prev => Math.max(1, prev - 1))}
-                      disabled={paginaAtual === 1}
-                      className="px-3 py-1 border rounded-lg
+                    {/* Botões de paginação */}
+                    <div className="flex justify-center gap-2 items-center">
+                      <button
+                        onClick={() =>
+                          setPaginaAtual((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={paginaAtual === 1}
+                        className="px-3 py-1 border rounded-lg
                                 bg-white dark:bg-[#1f1f1f]
                                 border-gray-300 dark:border-gray-600
                                 text-gray-700 dark:text-gray-300
                                 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
                                 disabled:opacity-50 disabled:cursor-not-allowed
                                 transition-colors"
-                    >
-                      {"<"}
-                    </button>
+                      >
+                        {'<'}
+                      </button>
 
-                    <span className="px-3 py-1 border rounded-lg
+                      <span
+                        className="px-3 py-1 border rounded-lg
                                     bg-white dark:bg-[#1f1f1f]
                                     text-gray-700 dark:text-gray-300
-                                    border-gray-300 dark:border-gray-600">
-                      {paginaAtual}
-                    </span>
+                                    border-gray-300 dark:border-gray-600"
+                      >
+                        {paginaAtual}
+                      </span>
 
-                    <button
-                      onClick={() => setPaginaAtual(prev => Math.min(totalPaginas, prev + 1))}
-                      disabled={paginaAtual === totalPaginas}
-                      className="px-3 py-1 border rounded-lg
+                      <button
+                        onClick={() =>
+                          setPaginaAtual((prev) =>
+                            Math.min(totalPaginas, prev + 1),
+                          )
+                        }
+                        disabled={paginaAtual === totalPaginas}
+                        className="px-3 py-1 border rounded-lg
                                 bg-white dark:bg-[#1f1f1f]
                                 border-gray-300 dark:border-gray-600
                                 text-gray-700 dark:text-gray-300
                                 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
                                 disabled:opacity-50 disabled:cursor-not-allowed
                                 transition-colors"
-                    >
-                      {">"}
-                    </button>
+                      >
+                        {'>'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
               )}
             </>
           ) : (
@@ -923,7 +1016,7 @@ const DashboardPatrimonio: React.FC = () => {
                     dataInicio: undefined,
                     dataFim: undefined,
                     filtroPersonalizado: 'nenhum',
-                    busca: ''
+                    busca: '',
                   });
                   setBuscaLocal('');
                 }}

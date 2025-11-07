@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { 
+import {
   Plus,
   Download,
   Search,
@@ -15,9 +15,12 @@ import {
   X,
   Package,
   TrendingUp,
-  DollarSign
+  DollarSign,
 } from 'lucide-react';
-import { PatrimoniosProvider, usePatrimonios } from '../context/PatrimoniosContext';
+import {
+  PatrimoniosProvider,
+  usePatrimonios,
+} from '../context/PatrimoniosContext';
 import PatrimonioModal from '../components/PatrimonioModal';
 import PatrimonioDetalhes from '../components/PatrimonioDetalhes';
 import * as XLSX from 'xlsx';
@@ -25,7 +28,7 @@ import type {
   Patrimonio,
   FiltrosPatrimonio,
   OrdenacaoPatrimonio,
-  PatrimonioExportData
+  PatrimonioExportData,
 } from '../types/patrimonios.types';
 
 // ========================================
@@ -45,32 +48,37 @@ const PatrimoniosContent: React.FC = () => {
     loading,
     error,
     deletePatrimonio,
-    refreshData
+    refreshData,
   } = usePatrimonios();
 
   // ========================================
   // ESTADOS LOCAIS
   // ========================================
-  
+
   // Modais
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(null);
-  const [patrimonioSelecionado, setPatrimonioSelecionado] = useState<Patrimonio | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<Patrimonio | null>(null);
-  
+  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view' | null>(
+    null,
+  );
+  const [patrimonioSelecionado, setPatrimonioSelecionado] =
+    useState<Patrimonio | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<Patrimonio | null>(
+    null,
+  );
+
   // Paginação
   const [paginaAtual, setPaginaAtual] = useState(1);
   const itensPorPagina = 10;
-  
+
   // Busca local (com debounce)
   const [buscaLocal, setBuscaLocal] = useState('');
-  
+
   // Estados UI
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // ========================================
   // PERMISSÕES
   // ========================================
-  
+
   const userRole = localStorage.getItem('role')?.toLowerCase() || '';
   const canCreate = ['administrador', 'gestor'].includes(userRole);
   const canEdit = ['administrador', 'gestor'].includes(userRole);
@@ -79,7 +87,7 @@ const PatrimoniosContent: React.FC = () => {
   // ========================================
   // EFEITOS
   // ========================================
-  
+
   // Atualiza busca no contexto com debounce
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,31 +100,41 @@ const PatrimoniosContent: React.FC = () => {
   // Reset página quando filtros mudam
   useEffect(() => {
     setPaginaAtual(1);
-  }, [filtros.categoria, filtros.setor, filtros.status, filtros.responsavel, filtros.dataInicio, filtros.dataFim]);
+  }, [
+    filtros.categoria,
+    filtros.setor,
+    filtros.status,
+    filtros.responsavel,
+    filtros.dataInicio,
+    filtros.dataFim,
+  ]);
 
   // ========================================
   // KPIs CALCULADOS
   // ========================================
-  
+
   const kpis = useMemo(() => {
     const total = patrimoniosFiltrados.length;
-    const valorTotal = patrimoniosFiltrados.reduce((sum, p) => sum + (p.valor_atual || 0), 0);
-    const depreciacaoTotal = patrimoniosFiltrados.reduce(
-      (sum, p) => sum + ((p.valor_aquisicao || 0) - (p.valor_atual || 0)), 
-      0
+    const valorTotal = patrimoniosFiltrados.reduce(
+      (sum, p) => sum + (p.valor_atual || 0),
+      0,
     );
-    
+    const depreciacaoTotal = patrimoniosFiltrados.reduce(
+      (sum, p) => sum + ((p.valor_aquisicao || 0) - (p.valor_atual || 0)),
+      0,
+    );
+
     return {
       total,
       valorTotal,
-      depreciacaoTotal
+      depreciacaoTotal,
     };
   }, [patrimoniosFiltrados]);
 
   // ========================================
   // PAGINAÇÃO
   // ========================================
-  
+
   const dadosPaginados = useMemo(() => {
     const inicio = (paginaAtual - 1) * itensPorPagina;
     const fim = inicio + itensPorPagina;
@@ -125,7 +143,10 @@ const PatrimoniosContent: React.FC = () => {
 
   const totalPaginas = Math.ceil(patrimoniosFiltrados.length / itensPorPagina);
   const inicio = (paginaAtual - 1) * itensPorPagina + 1;
-  const fim = Math.min(paginaAtual * itensPorPagina, patrimoniosFiltrados.length);
+  const fim = Math.min(
+    paginaAtual * itensPorPagina,
+    patrimoniosFiltrados.length,
+  );
 
   const paginasVisiveis = useMemo(() => {
     const window = Math.min(5, totalPaginas);
@@ -141,11 +162,14 @@ const PatrimoniosContent: React.FC = () => {
   // ========================================
   // HANDLERS
   // ========================================
-  
+
   const handleOrdenar = (campo: OrdenacaoPatrimonio['campo']) => {
     setOrdenacao({
       campo: campo as any,
-      direcao: ordenacao.campo === campo && ordenacao.direcao === 'asc' ? 'desc' : 'asc'
+      direcao:
+        ordenacao.campo === campo && ordenacao.direcao === 'asc'
+          ? 'desc'
+          : 'asc',
     });
   };
 
@@ -185,7 +209,7 @@ const PatrimoniosContent: React.FC = () => {
       status: 'todos',
       responsavel: 'todos',
       dataInicio: undefined,
-      dataFim: undefined
+      dataFim: undefined,
     });
     setBuscaLocal('');
   };
@@ -196,24 +220,42 @@ const PatrimoniosContent: React.FC = () => {
       return;
     }
 
-    const dados: PatrimonioExportData[] = patrimoniosFiltrados.map(p => ({
-      'ID': p.id,
-      'Nome': p.nome,
+    const dados: PatrimonioExportData[] = patrimoniosFiltrados.map((p) => ({
+      ID: p.id,
+      Nome: p.nome,
       'Número de Série': p.numero_serie || '-',
-      'Categoria': categorias.find(c => c.id === p.categoria_id)?.nome || '-',
-      'Setor': setores.find(s => s.id === p.setor_id)?.nome || '-',
-      'Responsável': usuarios.find(u => u.id === p.responsavel_id)?.username || '-',
-      'Data Aquisição': p.data_aquisicao ? new Date(p.data_aquisicao).toLocaleDateString('pt-BR') : '-',
-      'Valor Aquisição': p.valor_aquisicao?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) || 'R$ 0,00',
-      'Valor Atual': p.valor_atual?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) || 'R$ 0,00',
-      'Depreciação': ((p.valor_aquisicao || 0) - (p.valor_atual || 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-      'Status': p.status === 'ativo' ? 'Ativo' : p.status === 'manutencao' ? 'Em Manutenção' : 'Baixado'
+      Categoria: categorias.find((c) => c.id === p.categoria_id)?.nome || '-',
+      Setor: setores.find((s) => s.id === p.setor_id)?.nome || '-',
+      Responsável:
+        usuarios.find((u) => u.id === p.responsavel_id)?.username || '-',
+      'Data Aquisição': p.data_aquisicao
+        ? new Date(p.data_aquisicao).toLocaleDateString('pt-BR')
+        : '-',
+      'Valor Aquisição':
+        p.valor_aquisicao?.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }) || 'R$ 0,00',
+      'Valor Atual':
+        p.valor_atual?.toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        }) || 'R$ 0,00',
+      Depreciação: (
+        (p.valor_aquisicao || 0) - (p.valor_atual || 0)
+      ).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      Status:
+        p.status === 'ativo'
+          ? 'Ativo'
+          : p.status === 'manutencao'
+            ? 'Em Manutenção'
+            : 'Baixado',
     }));
 
     const ws = XLSX.utils.json_to_sheet(dados);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Patrimônios');
-    
+
     const fileName = `patrimonios_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
   };
@@ -221,14 +263,20 @@ const PatrimoniosContent: React.FC = () => {
   // ========================================
   // HELPERS
   // ========================================
-  
-  const getCategoriaNome = (id?: number) => categorias.find(c => c.id === id)?.nome || 'N/A';
-  const getSetorNome = (id?: number) => setores.find(s => s.id === id)?.nome || 'N/A';
-  const getResponsavelNome = (id?: number) => usuarios.find(u => u.id === id)?.username || 'N/A';
+
+  const getCategoriaNome = (id?: number) =>
+    categorias.find((c) => c.id === id)?.nome || 'N/A';
+  const getSetorNome = (id?: number) =>
+    setores.find((s) => s.id === id)?.nome || 'N/A';
+  const getResponsavelNome = (id?: number) =>
+    usuarios.find((u) => u.id === id)?.username || 'N/A';
 
   const formatCurrency = (value?: number) => {
     if (value == null) return 'R$ 0,00';
-    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
   };
 
   const getStatusDisplay = (status?: string) => {
@@ -240,9 +288,11 @@ const PatrimoniosContent: React.FC = () => {
 
   const OrdenacaoIcon = ({ campo }: { campo: string }) => {
     if (ordenacao.campo !== campo) return null;
-    return ordenacao.direcao === 'asc' ? 
-      <ChevronUp className="w-4 h-4" /> : 
-      <ChevronDown className="w-4 h-4" />;
+    return ordenacao.direcao === 'asc' ? (
+      <ChevronUp className="w-4 h-4" />
+    ) : (
+      <ChevronDown className="w-4 h-4" />
+    );
   };
 
   // ========================================
@@ -298,7 +348,9 @@ const PatrimoniosContent: React.FC = () => {
                 shadow-sm hover:shadow-md
                 transition-all duration-200"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
+              />
               Atualizar
             </button>
 
@@ -441,7 +493,9 @@ const PatrimoniosContent: React.FC = () => {
             </label>
             <select
               value={filtros.categoria}
-              onChange={(e) => setFiltros({ ...filtros, categoria: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, categoria: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                 bg-white/95 dark:bg-[#2a2a2a]/95
                 text-gray-900 dark:text-gray-100
@@ -464,7 +518,9 @@ const PatrimoniosContent: React.FC = () => {
             </label>
             <select
               value={filtros.setor}
-              onChange={(e) => setFiltros({ ...filtros, setor: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, setor: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                 bg-white/95 dark:bg-[#2a2a2a]/95
                 text-gray-900 dark:text-gray-100
@@ -487,7 +543,9 @@ const PatrimoniosContent: React.FC = () => {
             </label>
             <select
               value={filtros.status}
-              onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, status: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                 bg-white/95 dark:bg-[#2a2a2a]/95
                 text-gray-900 dark:text-gray-100
@@ -508,7 +566,9 @@ const PatrimoniosContent: React.FC = () => {
             </label>
             <select
               value={filtros.responsavel}
-              onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, responsavel: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                 bg-white/95 dark:bg-[#2a2a2a]/95
                 text-gray-900 dark:text-gray-100
@@ -525,7 +585,6 @@ const PatrimoniosContent: React.FC = () => {
           </div>
         </div>
       </div>
-
 
       {/* Tabela */}
       <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] shadow-md overflow-hidden transition-colors">
@@ -612,7 +671,9 @@ const PatrimoniosContent: React.FC = () => {
                       </td>
                       <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
                         {patrimonio.data_aquisicao
-                          ? new Date(patrimonio.data_aquisicao).toLocaleDateString('pt-BR')
+                          ? new Date(
+                              patrimonio.data_aquisicao,
+                            ).toLocaleDateString('pt-BR')
                           : 'N/A'}
                       </td>
                       <td className="px-4 py-3 text-sm text-center font-semibold text-blue-600 dark:text-blue-400">
@@ -621,7 +682,7 @@ const PatrimoniosContent: React.FC = () => {
                       <td className="px-4 py-3 text-sm text-center font-semibold text-yellow-600 dark:text-yellow-400">
                         {formatCurrency(
                           (patrimonio.valor_aquisicao || 0) -
-                            (patrimonio.valor_atual || 0)
+                            (patrimonio.valor_atual || 0),
                         )}
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -630,8 +691,8 @@ const PatrimoniosContent: React.FC = () => {
                             patrimonio.status === 'ativo'
                               ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
                               : patrimonio.status === 'manutencao'
-                              ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-                              : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
                           }`}
                         >
                           {getStatusDisplay(patrimonio.status)}
@@ -684,12 +745,15 @@ const PatrimoniosContent: React.FC = () => {
               <div className="mt-4 px-4 pb-4">
                 <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
                   <div>
-                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length}{' '}
+                    registros
                   </div>
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
+                      onClick={() =>
+                        setPaginaAtual((prev) => Math.max(1, prev - 1))
+                      }
                       disabled={paginaAtual === 1}
                       className="px-3 py-1 border rounded-lg
                         bg-white/95 dark:bg-[#1e1e1e]/95
@@ -719,7 +783,11 @@ const PatrimoniosContent: React.FC = () => {
                     </div>
 
                     <button
-                      onClick={() => setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))}
+                      onClick={() =>
+                        setPaginaAtual((prev) =>
+                          Math.min(totalPaginas, prev + 1),
+                        )
+                      }
                       disabled={paginaAtual === totalPaginas}
                       className="px-3 py-1 border rounded-lg
                         bg-white/95 dark:bg-[#1e1e1e]/95
@@ -787,7 +855,7 @@ const PatrimoniosContent: React.FC = () => {
       {/* Modal de confirmação de exclusão */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
             onClick={() => setShowDeleteConfirm(null)}
           />
@@ -801,12 +869,13 @@ const PatrimoniosContent: React.FC = () => {
                   Confirmar Exclusão
                 </h3>
               </div>
-              
+
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Tem certeza que deseja excluir o patrimônio <strong>{showDeleteConfirm.nome}</strong>? 
-                Esta ação não pode ser desfeita.
+                Tem certeza que deseja excluir o patrimônio{' '}
+                <strong>{showDeleteConfirm.nome}</strong>? Esta ação não pode
+                ser desfeita.
               </p>
-              
+
               <div className="flex justify-end gap-3">
                 <button
                   onClick={() => setShowDeleteConfirm(null)}

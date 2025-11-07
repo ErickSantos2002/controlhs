@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
-import logo from "../assets/logo.png"; // ajuste o caminho se necessário
+import React, { useState } from 'react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import logo from '../assets/logo.png'; // ajuste o caminho se necessário
 
 interface Produto {
   id: number;
@@ -21,16 +21,21 @@ interface Props {
   solicitante: string;
 }
 
-const SolicitacaoComprasModal: React.FC<Props> = ({ aberto, fechar, produtos, solicitante }) => {
+const SolicitacaoComprasModal: React.FC<Props> = ({
+  aberto,
+  fechar,
+  produtos,
+  solicitante,
+}) => {
   const [solicitacao, setSolicitacao] = useState<Solicitacao[]>([]);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = useState('');
 
   const atualizarQuantidade = (id: number, quantidade: number) => {
     setSolicitacao((prev) => {
       const existe = prev.find((item) => item.id === id);
       if (existe) {
         return prev.map((item) =>
-          item.id === id ? { ...item, quantidade } : item
+          item.id === id ? { ...item, quantidade } : item,
         );
       } else {
         return [...prev, { id, quantidade }];
@@ -42,37 +47,37 @@ const SolicitacaoComprasModal: React.FC<Props> = ({ aberto, fechar, produtos, so
     const doc = new jsPDF();
 
     // Cabeçalho com logo
-    doc.addImage(logo, "PNG", 150, 10, 40, 20);
+    doc.addImage(logo, 'PNG', 150, 10, 40, 20);
 
     doc.setFontSize(16);
-    doc.text("Solicitação de Compras", 14, 20);
+    doc.text('Solicitação de Compras', 14, 20);
     doc.setFontSize(10);
-    doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 14, 28);
+    doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 14, 28);
 
     // Montar tabela
     const dadosTabela = solicitacao
       .filter((item) => item.quantidade > 0)
       .map((item) => {
         const produto = produtos.find((p) => p.id === item.id);
-        return [
-          produto?.nome || "",
-          produto?.saldo ?? 0,
-          item.quantidade,
-        ];
+        return [produto?.nome || '', produto?.saldo ?? 0, item.quantidade];
       });
 
     autoTable(doc, {
       startY: 40,
-      head: [["Produto", "Saldo Atual", "Quantidade Solicitada"]],
+      head: [['Produto', 'Saldo Atual', 'Quantidade Solicitada']],
       body: dadosTabela,
-      theme: "grid",
+      theme: 'grid',
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [37, 99, 235], textColor: 255, halign: "center" }, // títulos centralizados
+      headStyles: {
+        fillColor: [37, 99, 235],
+        textColor: 255,
+        halign: 'center',
+      }, // títulos centralizados
       alternateRowStyles: { fillColor: [245, 245, 245] },
       columnStyles: {
-        0: { cellWidth: 90, halign: "center" }, // Produto centralizado
-        1: { halign: "center" },                // Saldo centralizado
-        2: { halign: "center" },                // Quantidade centralizada
+        0: { cellWidth: 90, halign: 'center' }, // Produto centralizado
+        1: { halign: 'center' }, // Saldo centralizado
+        2: { halign: 'center' }, // Quantidade centralizada
       },
     });
 
@@ -81,16 +86,18 @@ const SolicitacaoComprasModal: React.FC<Props> = ({ aberto, fechar, produtos, so
     doc.text(
       `Solicitante: ${solicitante}`,
       14,
-      doc.internal.pageSize.height - 10
+      doc.internal.pageSize.height - 10,
     );
 
     // Salvar
-    doc.save(`solicitacao_compras_${new Date().toISOString().split("T")[0]}.pdf`);
+    doc.save(
+      `solicitacao_compras_${new Date().toISOString().split('T')[0]}.pdf`,
+    );
     fechar();
   };
 
   const produtosFiltrados = produtos.filter((p) =>
-    p.nome.toLowerCase().includes(busca.toLowerCase())
+    p.nome.toLowerCase().includes(busca.toLowerCase()),
   );
 
   if (!aberto) return null;
@@ -124,7 +131,7 @@ const SolicitacaoComprasModal: React.FC<Props> = ({ aberto, fechar, produtos, so
                         text-gray-800 dark:text-gray-200"
             >
               <span>
-                {produto.nome}{" "}
+                {produto.nome}{' '}
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   (Saldo: {produto.saldo})
                 </span>

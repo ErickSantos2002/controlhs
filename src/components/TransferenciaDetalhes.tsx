@@ -13,14 +13,14 @@ import {
   Info,
   Check,
   ArrowRightLeft,
-  Hash
+  Hash,
 } from 'lucide-react';
 import { useTransferencias } from '../context/TransferenciasContext';
 import {
   Transferencia,
   TransferenciaStatus,
   STATUS_COLORS,
-  STATUS_LABELS
+  STATUS_LABELS,
 } from '../types/transferencias.types';
 
 interface TransferenciaDetalhesProps {
@@ -38,7 +38,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
   transferencia,
   onAprovar,
   onRejeitar,
-  onEfetivar
+  onEfetivar,
 }) => {
   const {
     patrimonios,
@@ -46,7 +46,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
     usuarios,
     getTransferenciaStatus,
     podeAprovar,
-    podeEfetivar
+    podeEfetivar,
   } = useTransferencias();
 
   if (!isOpen || !transferencia) return null;
@@ -71,59 +71,71 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
   };
 
   const getPatrimonioNome = (): string => {
-    const patrimonio = patrimonios.find(p => p.id === transferencia.patrimonio_id);
+    const patrimonio = patrimonios.find(
+      (p) => p.id === transferencia.patrimonio_id,
+    );
     return patrimonio?.nome || 'N/A';
   };
 
   const getPatrimonioNumeroSerie = (): string => {
-    const patrimonio = patrimonios.find(p => p.id === transferencia.patrimonio_id);
+    const patrimonio = patrimonios.find(
+      (p) => p.id === transferencia.patrimonio_id,
+    );
     return patrimonio?.numero_serie || '';
   };
 
   const getPatrimonioValor = (): string => {
-    const patrimonio = patrimonios.find(p => p.id === transferencia.patrimonio_id);
+    const patrimonio = patrimonios.find(
+      (p) => p.id === transferencia.patrimonio_id,
+    );
     const valor = patrimonio?.valor_atual || 0;
     return valor.toLocaleString('pt-BR', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'BRL',
     });
   };
 
   const getCategoriaNome = (): string => {
-    const patrimonio = patrimonios.find(p => p.id === transferencia.patrimonio_id);
+    const patrimonio = patrimonios.find(
+      (p) => p.id === transferencia.patrimonio_id,
+    );
     if (!patrimonio?.categoria_id) return 'N/A';
     // Assumindo que temos categorias no contexto, senão retorna 'N/A'
     return 'N/A'; // Poderia buscar de categorias se estivesse disponível
   };
 
   const getSetorOrigemNome = (): string => {
-    const setor = setores.find(s => s.id === transferencia.setor_origem_id);
+    const setor = setores.find((s) => s.id === transferencia.setor_origem_id);
     return setor?.nome || 'N/A';
   };
 
   const getSetorDestinoNome = (): string => {
-    const setor = setores.find(s => s.id === transferencia.setor_destino_id);
+    const setor = setores.find((s) => s.id === transferencia.setor_destino_id);
     return setor?.nome || 'N/A';
   };
 
   const getResponsavelOrigemNome = (): string => {
-    const user = usuarios.find(u => u.id === transferencia.responsavel_origem_id);
+    const user = usuarios.find(
+      (u) => u.id === transferencia.responsavel_origem_id,
+    );
     return user?.username || 'N/A';
   };
 
   const getResponsavelDestinoNome = (): string => {
-    const user = usuarios.find(u => u.id === transferencia.responsavel_destino_id);
+    const user = usuarios.find(
+      (u) => u.id === transferencia.responsavel_destino_id,
+    );
     return user?.username || 'N/A';
   };
 
   const getSolicitanteNome = (): string => {
-    const user = usuarios.find(u => u.id === transferencia.solicitante_id);
+    const user = usuarios.find((u) => u.id === transferencia.solicitante_id);
     return user?.username || 'N/A';
   };
 
   const getAprovadorNome = (): string => {
     if (!transferencia.aprovado_por) return 'N/A';
-    const user = usuarios.find(u => u.id === transferencia.aprovado_por);
+    const user = usuarios.find((u) => u.id === transferencia.aprovado_por);
     return user?.username || 'N/A';
   };
 
@@ -149,7 +161,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
@@ -163,15 +175,17 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Detalhes da Transferência #{transferencia.id}
               </h2>
-              <span className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full ${
-                status === 'pendente'
-                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-                  : status === 'aprovada'
-                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-400'
-                  : status === 'concluida'
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
-                  : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
-              }`}>
+              <span
+                className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full ${
+                  status === 'pendente'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
+                    : status === 'aprovada'
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-400'
+                      : status === 'concluida'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
+                        : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                }`}
+              >
                 {getStatusIcon()}
                 {STATUS_LABELS[status]}
               </span>
@@ -194,34 +208,42 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                   Patrimônio
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Nome</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Nome
+                    </p>
                     <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                       {getPatrimonioNome()}
                     </p>
                   </div>
-                  
+
                   {getPatrimonioNumeroSerie() && (
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Número de Série</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Número de Série
+                      </p>
                       <p className="text-base font-mono text-gray-700 dark:text-gray-300">
                         {getPatrimonioNumeroSerie()}
                       </p>
                     </div>
                   )}
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Valor Atual</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Valor Atual
+                    </p>
                     <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                       {getPatrimonioValor()}
                     </p>
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">ID do Patrimônio</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      ID do Patrimônio
+                    </p>
                     <p className="text-base font-mono text-gray-700 dark:text-gray-300">
                       #{transferencia.patrimonio_id}
                     </p>
@@ -238,14 +260,18 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                   Movimentação
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-4">
                 {/* Setor */}
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Setor</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    Setor
+                  </p>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">De</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        De
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
                         <Building className="w-4 h-4 text-gray-400" />
                         {getSetorOrigemNome()}
@@ -253,7 +279,9 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                     </div>
                     <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
                     <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Para</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Para
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
                         <Building className="w-4 h-4 text-gray-400" />
                         {getSetorDestinoNome()}
@@ -264,10 +292,14 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
 
                 {/* Responsável */}
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Responsável</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                    Responsável
+                  </p>
                   <div className="flex items-center gap-3">
                     <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">De</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        De
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
                         <User className="w-4 h-4 text-gray-400" />
                         {getResponsavelOrigemNome()}
@@ -275,7 +307,9 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                     </div>
                     <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
                     <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Para</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Para
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
                         <User className="w-4 h-4 text-gray-400" />
                         {getResponsavelDestinoNome()}
@@ -294,27 +328,33 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                   Informações da Solicitação
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
                 {transferencia.motivo && (
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Motivo da Transferência</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Motivo da Transferência
+                    </p>
                     <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
                       {transferencia.motivo}
                     </p>
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Solicitante</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Solicitante
+                    </p>
                     <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                       {getSolicitanteNome()}
                     </p>
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Data da Solicitação</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Data da Solicitação
+                    </p>
                     <p className="text-base text-gray-700 dark:text-gray-300">
                       {formatDate(transferencia.data_transferencia)}
                     </p>
@@ -336,45 +376,53 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                     {status === 'rejeitada' ? 'Rejeição' : 'Aprovação'}
                   </h3>
                 </div>
-                
+
                 <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {status === 'rejeitada' ? 'Rejeitado por' : 'Aprovado por'}
+                        {status === 'rejeitada'
+                          ? 'Rejeitado por'
+                          : 'Aprovado por'}
                       </p>
                       <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                         {getAprovadorNome()}
                       </p>
                     </div>
-                    
+
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Data da {status === 'rejeitada' ? 'Rejeição' : 'Aprovação'}
+                        Data da{' '}
+                        {status === 'rejeitada' ? 'Rejeição' : 'Aprovação'}
                       </p>
                       <p className="text-base text-gray-700 dark:text-gray-300">
                         {formatDate((transferencia as any).data_aprovacao)}
                       </p>
                     </div>
                   </div>
-                  
+
                   {transferencia.observacoes && (
                     <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Observações</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Observações
+                      </p>
                       <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
                         {transferencia.observacoes}
                       </p>
                     </div>
                   )}
-                  
-                  {status === 'rejeitada' && (transferencia as any).motivo_rejeicao && (
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Motivo da Rejeição</p>
-                      <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
-                        {(transferencia as any).motivo_rejeicao}
-                      </p>
-                    </div>
-                  )}
+
+                  {status === 'rejeitada' &&
+                    (transferencia as any).motivo_rejeicao && (
+                      <div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Motivo da Rejeição
+                        </p>
+                        <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
+                          {(transferencia as any).motivo_rejeicao}
+                        </p>
+                      </div>
+                    )}
                 </div>
               </div>
             )}
@@ -387,25 +435,31 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                   Datas
                 </h3>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Data da Transferência</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Data da Transferência
+                    </p>
                     <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                       {formatDate(transferencia.data_transferencia)}
                     </p>
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Data de Criação</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Data de Criação
+                    </p>
                     <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                       {formatDateTime(transferencia.criado_em)}
                     </p>
                   </div>
-                  
+
                   <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Última Atualização</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Última Atualização
+                    </p>
                     <p className="text-base font-medium text-gray-700 dark:text-gray-300">
                       {formatDateTime(transferencia.atualizado_em)}
                     </p>
@@ -424,8 +478,9 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                       Transferência Aprovada
                     </p>
                     <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                      Esta transferência foi aprovada e está aguardando efetivação. 
-                      Após efetivada, o patrimônio será atualizado com o novo setor e responsável.
+                      Esta transferência foi aprovada e está aguardando
+                      efetivação. Após efetivada, o patrimônio será atualizado
+                      com o novo setor e responsável.
                     </p>
                   </div>
                 </div>
@@ -441,8 +496,8 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                       Transferência Concluída
                     </p>
                     <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                      Esta transferência foi efetivada com sucesso. 
-                      O patrimônio já está atualizado com o novo setor e responsável.
+                      Esta transferência foi efetivada com sucesso. O patrimônio
+                      já está atualizado com o novo setor e responsável.
                     </p>
                   </div>
                 </div>
@@ -462,7 +517,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
             >
               Fechar
             </button>
-            
+
             <div className="flex gap-2">
               {canApprove && onAprovar && (
                 <button
@@ -479,7 +534,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                   Aprovar
                 </button>
               )}
-              
+
               {canReject && onRejeitar && (
                 <button
                   onClick={() => {
@@ -495,7 +550,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                   Rejeitar
                 </button>
               )}
-              
+
               {canTransfer && onEfetivar && (
                 <button
                   onClick={() => {

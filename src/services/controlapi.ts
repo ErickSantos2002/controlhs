@@ -1,6 +1,8 @@
-import axios from "axios";
+import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_URL || "https://authapicontrolhs.healthsafetytech.com";
+const baseURL =
+  import.meta.env.VITE_API_URL ||
+  'https://authapicontrolhs.healthsafetytech.com';
 
 const api = axios.create({ baseURL });
 
@@ -19,7 +21,7 @@ api.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Interceptor para tratar erros de resposta
@@ -31,7 +33,7 @@ api.interceptors.response.use(
       // E se NÃO for uma requisição de login
       const isLoginPage = window.location.pathname === '/login';
       const isLoginRequest = error.config?.url?.includes('/login');
-      
+
       if (!isLoginPage && !isLoginRequest) {
         localStorage.removeItem('access_token');
         localStorage.removeItem('id');
@@ -41,7 +43,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // ========================================
@@ -49,19 +51,27 @@ api.interceptors.response.use(
 // ========================================
 
 export async function login(username: string, password: string) {
-  const { data } = await api.post("/login", { username, password });
+  const { data } = await api.post('/login', { username, password });
   // Salva o token no localStorage
   setAuthToken(data.access_token);
   return data;
 }
 
-export async function register(username: string, password: string, role_name?: string) {
-  const { data } = await api.post("/register", { username, password, role_name });
+export async function register(
+  username: string,
+  password: string,
+  role_name?: string,
+) {
+  const { data } = await api.post('/register', {
+    username,
+    password,
+    role_name,
+  });
   return data;
 }
 
 export async function getMe() {
-  const { data } = await api.get("/me");
+  const { data } = await api.get('/me');
   return data;
 }
 
@@ -85,7 +95,7 @@ export function removeAuthToken() {
 // ========================================
 
 export async function listUsuarios() {
-  const { data } = await api.get("/users/");
+  const { data } = await api.get('/users/');
   return data;
 }
 
@@ -107,7 +117,7 @@ export async function updateUserPassword(userId: number, novaSenha: string) {
     });
     return response.data;
   } catch (error: any) {
-    console.error("Erro ao atualizar senha:", error);
+    console.error('Erro ao atualizar senha:', error);
     throw error;
   }
 }
@@ -117,12 +127,12 @@ export async function updateUserPassword(userId: number, novaSenha: string) {
 // ========================================
 
 export async function listCategorias() {
-  const { data } = await api.get("/categorias/");
+  const { data } = await api.get('/categorias/');
   return data;
 }
 
 export async function createCategoria(payload: any) {
-  const { data } = await api.post("/categorias/", payload);
+  const { data } = await api.post('/categorias/', payload);
   return data;
 }
 
@@ -140,12 +150,12 @@ export async function deleteCategoria(id: number) {
 // ========================================
 
 export async function listSetores() {
-  const { data } = await api.get("/setores/");
+  const { data } = await api.get('/setores/');
   return data;
 }
 
 export async function createSetor(payload: any) {
-  const { data } = await api.post("/setores/", payload);
+  const { data } = await api.post('/setores/', payload);
   return data;
 }
 
@@ -163,12 +173,12 @@ export async function deleteSetor(id: number) {
 // ========================================
 
 export async function listPatrimonios() {
-  const { data } = await api.get("/patrimonios/");
+  const { data } = await api.get('/patrimonios/');
   return data;
 }
 
 export async function createPatrimonio(payload: any) {
-  const { data } = await api.post("/patrimonios/", payload);
+  const { data } = await api.post('/patrimonios/', payload);
   return data;
 }
 
@@ -187,13 +197,13 @@ export async function deletePatrimonio(id: number) {
 
 // Listar todas as transferências
 export async function listTransferencias() {
-  const { data } = await api.get("/transferencias/");
+  const { data } = await api.get('/transferencias/');
   return data;
 }
 
 // Criar nova transferência
 export async function createTransferencia(payload: any) {
-  const { data } = await api.post("/transferencias/", payload);
+  const { data } = await api.post('/transferencias/', payload);
   return data;
 }
 
@@ -215,18 +225,17 @@ export async function deleteTransferencia(id: number | string) {
   return data;
 }
 
-
 // ========================================
 // 📉 BAIXAS
 // ========================================
 
 export async function listBaixas() {
-  const { data } = await api.get("/baixas/");
+  const { data } = await api.get('/baixas/');
   return data;
 }
 
 export async function createBaixa(payload: any) {
-  const { data } = await api.post("/baixas/", payload);
+  const { data } = await api.post('/baixas/', payload);
   return data;
 }
 
@@ -235,12 +244,12 @@ export async function createBaixa(payload: any) {
 // ========================================
 
 export async function listInventarios() {
-  const { data } = await api.get("/inventarios/");
+  const { data } = await api.get('/inventarios/');
   return data;
 }
 
 export async function createInventario(payload: any) {
-  const { data } = await api.post("/inventarios/", payload);
+  const { data } = await api.post('/inventarios/', payload);
   return data;
 }
 
@@ -249,13 +258,13 @@ export async function createInventario(payload: any) {
 // ========================================
 
 export async function listAnexos() {
-  const { data } = await api.get("/anexos/");
+  const { data } = await api.get('/anexos/');
   return data;
 }
 
 export async function uploadAnexo(formData: FormData) {
-  const { data } = await api.post("/anexos/", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
+  const { data } = await api.post('/anexos/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data;
 }
@@ -265,12 +274,12 @@ export async function uploadAnexo(formData: FormData) {
 // ========================================
 
 export async function listLogs() {
-  const { data } = await api.get("/logs/");
+  const { data } = await api.get('/logs/');
   return data;
 }
 
 export async function createLog(payload: any) {
-  const { data } = await api.post("/logs/", payload);
+  const { data } = await api.post('/logs/', payload);
   return data;
 }
 

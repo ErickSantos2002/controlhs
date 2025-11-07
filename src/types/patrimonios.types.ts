@@ -148,22 +148,22 @@ export interface PatrimoniosContextData {
   categorias: Categoria[];
   setores: Setor[];
   usuarios: Usuario[];
-  
+
   // Filtros
   filtros: FiltrosPatrimonio;
   setFiltros: (filtros: FiltrosPatrimonio) => void;
-  
+
   // Ordenação
   ordenacao: OrdenacaoPatrimonio;
   setOrdenacao: (ordenacao: OrdenacaoPatrimonio) => void;
-  
+
   // Estados
   loading: boolean;
   error: string | null;
-  
+
   // Dados computados
   patrimoniosFiltrados: Patrimonio[];
-  
+
   // Funções CRUD
   createPatrimonio: (data: PatrimonioCreate) => Promise<void>;
   updatePatrimonio: (id: number, data: PatrimonioUpdate) => Promise<void>;
@@ -181,7 +181,7 @@ export interface PatrimoniosContextData {
 export enum StatusPatrimonio {
   ATIVO = 'ativo',
   MANUTENCAO = 'manutencao',
-  BAIXADO = 'baixado'
+  BAIXADO = 'baixado',
 }
 
 /**
@@ -190,7 +190,7 @@ export enum StatusPatrimonio {
 export const STATUS_LABELS: Record<string, string> = {
   ativo: 'Ativo',
   manutencao: 'Em Manutenção',
-  baixado: 'Baixado'
+  baixado: 'Baixado',
 };
 
 /**
@@ -198,8 +198,9 @@ export const STATUS_LABELS: Record<string, string> = {
  */
 export const STATUS_COLORS: Record<string, string> = {
   ativo: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  manutencao: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-  baixado: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+  manutencao:
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  baixado: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
 };
 
 /**
@@ -231,15 +232,15 @@ export type OrdenacaoCampo =
  * Type para exportação Excel
  */
 export interface PatrimonioExportData {
-  'ID': number;
-  'Nome': string;
+  ID: number;
+  Nome: string;
   'Número de Série': string;
-  'Categoria': string;
-  'Setor': string;
-  'Responsável': string;
+  Categoria: string;
+  Setor: string;
+  Responsável: string;
   'Data Aquisição': string;
   'Valor Aquisição': string;
   'Valor Atual': string;
-  'Depreciação': string;
-  'Status': string;
+  Depreciação: string;
+  Status: string;
 }

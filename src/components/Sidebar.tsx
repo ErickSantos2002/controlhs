@@ -1,28 +1,28 @@
-import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import { useTheme } from "../context/ThemeContext";
+import React from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../context/ThemeContext';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
 
-  if (location.pathname === "/login") return null;
+  if (location.pathname === '/login') return null;
 
-  const iconBaseClass = "w-5 h-5 mr-2 transition-colors";
+  const iconBaseClass = 'w-5 h-5 mr-2 transition-colors';
 
   const getColor = (isActive: boolean) => {
     if (darkMode) {
-      return "D1D1D1"; // ícones em cinza claro no dark
+      return 'D1D1D1'; // ícones em cinza claro no dark
     }
-    return isActive ? "1E3A8A" : "1D4ED8"; // tons de azul no modo claro
+    return isActive ? '1E3A8A' : '1D4ED8'; // tons de azul no modo claro
   };
 
   const menuItems = [
     {
-      label: "Dashboard",
-      to: "/dashboard",
+      label: 'Dashboard',
+      to: '/dashboard',
       icon: (isActive: boolean) => (
         <img
           src={`https://img.icons8.com/?size=100&id=udjU_YS4lMXL&format=png&color=${getColor(isActive)}`}
@@ -32,8 +32,8 @@ const Sidebar: React.FC = () => {
       ),
     },
     {
-      label: "Patrimônios",
-      to: "/patrimonios",
+      label: 'Patrimônios',
+      to: '/patrimonios',
       icon: (isActive: boolean) => (
         <img
           src="https://img.icons8.com/?size=100&id=f6XnJbAyvoWg&format=png"
@@ -44,8 +44,8 @@ const Sidebar: React.FC = () => {
       ),
     },
     {
-      label: "Transferências",
-      to: "/transferencias",
+      label: 'Transferências',
+      to: '/transferencias',
       icon: (isActive: boolean) => (
         <img
           src={`https://img.icons8.com/?size=100&id=P1YG1sk94HiB&format=png&color=${getColor(isActive)}`}
@@ -55,11 +55,11 @@ const Sidebar: React.FC = () => {
         />
       ),
     },
-    ...(user?.role === "Administrador"
+    ...(user?.role === 'Administrador'
       ? [
           {
-            label: "Log de Auditoria",
-            to: "/Logs",
+            label: 'Log de Auditoria',
+            to: '/Logs',
             icon: (isActive: boolean) => (
               <img
                 src={`https://img.icons8.com/?size=100&id=2969&format=png&color=${getColor(isActive)}`}
@@ -73,7 +73,8 @@ const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden lg:flex w-56 
+    <aside
+      className="hidden lg:flex w-56 
       bg-white/95 dark:bg-[#1e1e1e]/95 
       text-gray-900 dark:text-lightGray 
       shadow-md sticky top-0 flex-col 
@@ -89,8 +90,8 @@ const Sidebar: React.FC = () => {
                 className={({ isActive }) =>
                   `flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
                     isActive
-                      ? "bg-gray-200 text-blue-700 dark:bg-accentGray/50 dark:text-lightGray"
-                      : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-accentGray/30"
+                      ? 'bg-gray-200 text-blue-700 dark:bg-accentGray/50 dark:text-lightGray'
+                      : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-accentGray/30'
                   }`
                 }
                 end

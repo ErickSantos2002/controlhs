@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { Navigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { Navigate } from 'react-router-dom';
 
 interface LogItem {
   acao: string;
@@ -11,16 +11,15 @@ interface LogItem {
   detalhes: any;
 }
 
-
 const Logs: React.FC = () => {
   const { user, loading } = useAuth();
   const [modalAberto, setModalAberto] = useState(false);
   const [detalheSelecionado, setDetalheSelecionado] = useState<any>(null);
 
   // --- Paginação ESTÁTICA (somente visual) ---
-  const PAGINA_ATUAL = 1;         // mude aqui pra simular outra página
-  const ITENS_POR_PAGINA = 10;    // tamanho da página (visual)
-  const TOTAL_REGISTROS = 48;     // total mockado
+  const PAGINA_ATUAL = 1; // mude aqui pra simular outra página
+  const ITENS_POR_PAGINA = 10; // tamanho da página (visual)
+  const TOTAL_REGISTROS = 48; // total mockado
 
   const TOTAL_PAGINAS = Math.ceil(TOTAL_REGISTROS / ITENS_POR_PAGINA);
   const INICIO = (PAGINA_ATUAL - 1) * ITENS_POR_PAGINA + 1;
@@ -28,149 +27,148 @@ const Logs: React.FC = () => {
 
   // janelinha de até 5 páginas
   const WINDOW = Math.min(5, TOTAL_PAGINAS);
-    let start = 1;
-    if (TOTAL_PAGINAS > 5) {
-      if (PAGINA_ATUAL <= 3) start = 1;
-      else if (PAGINA_ATUAL >= TOTAL_PAGINAS - 2) start = TOTAL_PAGINAS - 4;
-      else start = PAGINA_ATUAL - 2;
-    }
+  let start = 1;
+  if (TOTAL_PAGINAS > 5) {
+    if (PAGINA_ATUAL <= 3) start = 1;
+    else if (PAGINA_ATUAL >= TOTAL_PAGINAS - 2) start = TOTAL_PAGINAS - 4;
+    else start = PAGINA_ATUAL - 2;
+  }
   const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
-
 
   // 🔹 Logs fictícios — depois pode substituir por fetch real da API
   const logs: LogItem[] = [
     {
-      acao: "Atualização de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Atualização de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 12,
-      usuario: "Welton",
-      criado_em: "2025-10-09 14:21:32",
+      usuario: 'Welton',
+      criado_em: '2025-10-09 14:21:32',
       detalhes: {
-        antes: { status: "ativo" },
-        depois: { status: "baixado" },
+        antes: { status: 'ativo' },
+        depois: { status: 'baixado' },
       },
     },
     {
-      acao: "Exclusão de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Exclusão de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 9,
-      usuario: "Erick",
-      criado_em: "2025-10-09 10:11:52",
+      usuario: 'Erick',
+      criado_em: '2025-10-09 10:11:52',
       detalhes: {
-        registro_removido: { id: 9, nome: "Notebook Dell", valor: 6500 },
+        registro_removido: { id: 9, nome: 'Notebook Dell', valor: 6500 },
       },
     },
     {
-      acao: "Atualização de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Atualização de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 5,
-      usuario: "Djalma",
-      criado_em: "2025-10-08 16:05:14",
+      usuario: 'Djalma',
+      criado_em: '2025-10-08 16:05:14',
       detalhes: {
-        antes: { status: "manutenção" },
-        depois: { status: "ativo" },
+        antes: { status: 'manutenção' },
+        depois: { status: 'ativo' },
       },
     },
     {
-      acao: "Atualização de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Atualização de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 3,
-      usuario: "Gabriel",
-      criado_em: "2025-10-08 12:32:47",
+      usuario: 'Gabriel',
+      criado_em: '2025-10-08 12:32:47',
       detalhes: {
         antes: { valor: 2500 },
         depois: { valor: 2700 },
       },
     },
     {
-      acao: "Atualização de usuário",
-      entidade: "users",
+      acao: 'Atualização de usuário',
+      entidade: 'users',
       entidade_id: 4,
-      usuario: "Admin",
-      criado_em: "2025-10-07 18:41:20",
+      usuario: 'Admin',
+      criado_em: '2025-10-07 18:41:20',
       detalhes: {
-        antes: { role: "comum" },
-        depois: { role: "admin" },
+        antes: { role: 'comum' },
+        depois: { role: 'admin' },
       },
     },
     {
-      acao: "Criação de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Criação de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 25,
-      usuario: "Welton",
-      criado_em: "2025-10-06 11:07:15",
+      usuario: 'Welton',
+      criado_em: '2025-10-06 11:07:15',
       detalhes: {
         novo_registro: {
-          nome: "Impressora HP LaserJet 4200",
-          categoria: "Equipamento",
+          nome: 'Impressora HP LaserJet 4200',
+          categoria: 'Equipamento',
           valor: 3500,
         },
       },
     },
     {
-      acao: "Atualização de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Atualização de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 12,
-      usuario: "Welton",
-      criado_em: "2025-10-09 14:21:32",
+      usuario: 'Welton',
+      criado_em: '2025-10-09 14:21:32',
       detalhes: {
-        antes: { status: "ativo" },
-        depois: { status: "baixado" },
+        antes: { status: 'ativo' },
+        depois: { status: 'baixado' },
       },
     },
     {
-      acao: "Exclusão de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Exclusão de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 9,
-      usuario: "Erick",
-      criado_em: "2025-10-09 10:11:52",
+      usuario: 'Erick',
+      criado_em: '2025-10-09 10:11:52',
       detalhes: {
-        registro_removido: { id: 9, nome: "Notebook Dell", valor: 6500 },
+        registro_removido: { id: 9, nome: 'Notebook Dell', valor: 6500 },
       },
     },
     {
-      acao: "Atualização de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Atualização de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 5,
-      usuario: "Djalma",
-      criado_em: "2025-10-08 16:05:14",
+      usuario: 'Djalma',
+      criado_em: '2025-10-08 16:05:14',
       detalhes: {
-        antes: { status: "manutenção" },
-        depois: { status: "ativo" },
+        antes: { status: 'manutenção' },
+        depois: { status: 'ativo' },
       },
     },
     {
-      acao: "Atualização de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Atualização de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 3,
-      usuario: "Gabriel",
-      criado_em: "2025-10-08 12:32:47",
+      usuario: 'Gabriel',
+      criado_em: '2025-10-08 12:32:47',
       detalhes: {
         antes: { valor: 2500 },
         depois: { valor: 2700 },
       },
     },
     {
-      acao: "Atualização de usuário",
-      entidade: "users",
+      acao: 'Atualização de usuário',
+      entidade: 'users',
       entidade_id: 4,
-      usuario: "Admin",
-      criado_em: "2025-10-07 18:41:20",
+      usuario: 'Admin',
+      criado_em: '2025-10-07 18:41:20',
       detalhes: {
-        antes: { role: "comum" },
-        depois: { role: "admin" },
+        antes: { role: 'comum' },
+        depois: { role: 'admin' },
       },
     },
     {
-      acao: "Criação de patrimônio",
-      entidade: "patrimonios",
+      acao: 'Criação de patrimônio',
+      entidade: 'patrimonios',
       entidade_id: 25,
-      usuario: "Welton",
-      criado_em: "2025-10-06 11:07:15",
+      usuario: 'Welton',
+      criado_em: '2025-10-06 11:07:15',
       detalhes: {
         novo_registro: {
-          nome: "Impressora HP LaserJet 4200",
-          categoria: "Equipamento",
+          nome: 'Impressora HP LaserJet 4200',
+          categoria: 'Equipamento',
           valor: 3500,
         },
       },
@@ -204,10 +202,13 @@ const Logs: React.FC = () => {
             Log de Auditoria
           </h1>
           <p className="text-gray-600 dark:text-gray-300 mt-1">
-            Bem-vindo, <span className="font-semibold">{user?.username}</span> ({user?.role})
+            Bem-vindo, <span className="font-semibold">{user?.username}</span> (
+            {user?.role})
           </p>
           <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-            Consulte abaixo o histórico de alterações e ações realizadas no sistema, permitindo acompanhar a rastreabilidade e manter a transparência dos dados.
+            Consulte abaixo o histórico de alterações e ações realizadas no
+            sistema, permitindo acompanhar a rastreabilidade e manter a
+            transparência dos dados.
           </p>
         </div>
       </div>
@@ -243,7 +244,14 @@ const Logs: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
-                {["Ação", "Entidade", "ID Entidade", "Usuário", "Data", "Detalhes"].map((header, idx) => (
+                {[
+                  'Ação',
+                  'Entidade',
+                  'ID Entidade',
+                  'Usuário',
+                  'Data',
+                  'Detalhes',
+                ].map((header, idx) => (
                   <th
                     key={idx}
                     className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200"
@@ -259,7 +267,7 @@ const Logs: React.FC = () => {
                   key={index}
                   className={`border-b border-gray-100 dark:border-gray-700 
                               hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
-                              ${index % 2 === 0 ? "bg-white dark:bg-[#1b1b1b]" : "bg-gray-50 dark:bg-[#222222]"}`}
+                              ${index % 2 === 0 ? 'bg-white dark:bg-[#1b1b1b]' : 'bg-gray-50 dark:bg-[#222222]'}`}
                 >
                   <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">
                     {log.acao}
@@ -274,7 +282,7 @@ const Logs: React.FC = () => {
                     {log.usuario}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                    {new Date(log.criado_em).toLocaleString("pt-BR")}
+                    {new Date(log.criado_em).toLocaleString('pt-BR')}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <button
@@ -324,10 +332,10 @@ const Logs: React.FC = () => {
                     key={page}
                     className={`px-3 py-1 border rounded-lg transition-colors ${
                       PAGINA_ATUAL === page
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]"
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
                     }`}
-                    aria-current={PAGINA_ATUAL === page ? "page" : undefined}
+                    aria-current={PAGINA_ATUAL === page ? 'page' : undefined}
                   >
                     {page}
                   </button>
@@ -367,7 +375,7 @@ const Logs: React.FC = () => {
                   disabled:opacity-50 disabled:cursor-not-allowed
                   transition-colors"
               >
-                {"<"}
+                {'<'}
               </button>
 
               <span
@@ -389,7 +397,7 @@ const Logs: React.FC = () => {
                   disabled:opacity-50 disabled:cursor-not-allowed
                   transition-colors"
               >
-                {">"}
+                {'>'}
               </button>
             </div>
           </div>

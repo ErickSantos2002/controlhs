@@ -11,14 +11,14 @@ import {
   FileText,
   AlertCircle,
   Loader2,
-  ArrowRightLeft
+  ArrowRightLeft,
 } from 'lucide-react';
 import { useTransferencias } from '../context/TransferenciasContext';
 import {
   TransferenciaCreate,
   WizardTransferenciaData,
   WizardStep,
-  Patrimonio
+  Patrimonio,
 } from '../types/transferencias.types';
 
 interface TransferenciaModalProps {
@@ -30,7 +30,7 @@ interface TransferenciaModalProps {
 const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   isOpen,
   onClose,
-  onSuccess
+  onSuccess,
 }) => {
   const {
     patrimonios,
@@ -38,14 +38,16 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
     usuarios,
     createTransferencia,
     verificarTransferenciaPendente,
-    loading
+    loading,
   } = useTransferencias();
 
   // ========================================
   // ESTADOS DO WIZARD
   // ========================================
-  
-  const [currentStep, setCurrentStep] = useState<WizardStep>(WizardStep.SELECAO_PATRIMONIO);
+
+  const [currentStep, setCurrentStep] = useState<WizardStep>(
+    WizardStep.SELECAO_PATRIMONIO,
+  );
   const [wizardData, setWizardData] = useState<WizardTransferenciaData>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -54,7 +56,7 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // RESET DO MODAL
   // ========================================
-  
+
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(WizardStep.SELECAO_PATRIMONIO);
@@ -67,16 +69,18 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // BUSCA DADOS DO PATRIMÔNIO SELECIONADO
   // ========================================
-  
+
   useEffect(() => {
     if (wizardData.patrimonio_id) {
-      const patrimonio = patrimonios.find(p => p.id === wizardData.patrimonio_id);
+      const patrimonio = patrimonios.find(
+        (p) => p.id === wizardData.patrimonio_id,
+      );
       if (patrimonio) {
-        setWizardData(prev => ({
+        setWizardData((prev) => ({
           ...prev,
           patrimonio,
           setor_origem_id: patrimonio.setor_id,
-          responsavel_origem_id: patrimonio.responsavel_id
+          responsavel_origem_id: patrimonio.responsavel_id,
         }));
       }
     }
@@ -85,48 +89,55 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // VALIDAÇÕES POR ETAPA
   // ========================================
-  
+
   const validateStep1 = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!wizardData.patrimonio_id) {
       newErrors.patrimonio = 'Selecione um patrimônio';
     } else {
       // Verifica se o patrimônio está ativo
-      const patrimonio = patrimonios.find(p => p.id === wizardData.patrimonio_id);
+      const patrimonio = patrimonios.find(
+        (p) => p.id === wizardData.patrimonio_id,
+      );
       if (patrimonio?.status === 'baixado') {
-        newErrors.patrimonio = 'Este patrimônio foi baixado e não pode ser transferido';
+        newErrors.patrimonio =
+          'Este patrimônio foi baixado e não pode ser transferido';
       }
-      
+
       // Verifica se já existe transferência pendente
       if (verificarTransferenciaPendente(wizardData.patrimonio_id!)) {
-        newErrors.patrimonio = 'Este patrimônio já possui uma transferência pendente';
+        newErrors.patrimonio =
+          'Este patrimônio já possui uma transferência pendente';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!wizardData.setor_destino_id) {
       newErrors.setor = 'Selecione o setor de destino';
     } else if (wizardData.setor_destino_id === wizardData.setor_origem_id) {
       newErrors.setor = 'O setor de destino deve ser diferente do setor atual';
     }
-    
+
     if (!wizardData.responsavel_destino_id) {
       newErrors.responsavel = 'Selecione o responsável de destino';
-    } else if (wizardData.responsavel_destino_id === wizardData.responsavel_origem_id) {
-      newErrors.responsavel = 'O responsável de destino deve ser diferente do atual';
+    } else if (
+      wizardData.responsavel_destino_id === wizardData.responsavel_origem_id
+    ) {
+      newErrors.responsavel =
+        'O responsável de destino deve ser diferente do atual';
     }
-    
+
     if (!wizardData.motivo || wizardData.motivo.length < 10) {
       newErrors.motivo = 'O motivo deve ter pelo menos 10 caracteres';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -134,7 +145,7 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // NAVEGAÇÃO DO WIZARD
   // ========================================
-  
+
   const handleNext = () => {
     if (currentStep === WizardStep.SELECAO_PATRIMONIO) {
       if (validateStep1()) {
@@ -158,11 +169,11 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // SUBMIT DA TRANSFERÊNCIA
   // ========================================
-  
+
   const handleSubmit = async () => {
     setSaving(true);
     setSaveError(null);
-    
+
     try {
       const data: TransferenciaCreate = {
         patrimonio_id: wizardData.patrimonio_id!,
@@ -170,19 +181,21 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
         setor_destino_id: wizardData.setor_destino_id,
         responsavel_origem_id: wizardData.responsavel_origem_id,
         responsavel_destino_id: wizardData.responsavel_destino_id,
-        motivo: wizardData.motivo!
+        motivo: wizardData.motivo!,
       };
-      
+
       await createTransferencia(data);
-      
+
       if (onSuccess) {
         onSuccess();
       }
-      
+
       onClose();
     } catch (err: any) {
       console.error('Erro ao criar transferência:', err);
-      setSaveError(err.response?.data?.detail || 'Erro ao solicitar transferência');
+      setSaveError(
+        err.response?.data?.detail || 'Erro ao solicitar transferência',
+      );
     } finally {
       setSaving(false);
     }
@@ -191,28 +204,32 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // HELPERS
   // ========================================
-  
+
   const getNomePatrimonio = () => {
     return wizardData.patrimonio?.nome || 'N/A';
   };
 
   const getNomeSetorOrigem = () => {
-    const setor = setores.find(s => s.id === wizardData.setor_origem_id);
+    const setor = setores.find((s) => s.id === wizardData.setor_origem_id);
     return setor?.nome || 'N/A';
   };
 
   const getNomeSetorDestino = () => {
-    const setor = setores.find(s => s.id === wizardData.setor_destino_id);
+    const setor = setores.find((s) => s.id === wizardData.setor_destino_id);
     return setor?.nome || 'N/A';
   };
 
   const getNomeResponsavelOrigem = () => {
-    const user = usuarios.find(u => u.id === wizardData.responsavel_origem_id);
+    const user = usuarios.find(
+      (u) => u.id === wizardData.responsavel_origem_id,
+    );
     return user?.username || 'N/A';
   };
 
   const getNomeResponsavelDestino = () => {
-    const user = usuarios.find(u => u.id === wizardData.responsavel_destino_id);
+    const user = usuarios.find(
+      (u) => u.id === wizardData.responsavel_destino_id,
+    );
     return user?.username || 'N/A';
   };
 
@@ -221,11 +238,11 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   // ========================================
   // RENDER
   // ========================================
-  
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
@@ -252,56 +269,84 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
           <div className="px-6 pt-6">
             <div className="flex items-center justify-center mb-6">
               {/* Step 1 */}
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                currentStep >= 1 
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}>
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                  currentStep >= 1
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                }`}
+              >
                 1
               </div>
-              
+
               {/* Line 1-2 */}
-              <div className={`h-1 w-16 transition-all ${
-                currentStep >= 2 
-                  ? 'bg-blue-600 dark:bg-blue-500' 
-                  : 'bg-gray-200 dark:bg-gray-700'
-              }`} />
-              
+              <div
+                className={`h-1 w-16 transition-all ${
+                  currentStep >= 2
+                    ? 'bg-blue-600 dark:bg-blue-500'
+                    : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              />
+
               {/* Step 2 */}
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                currentStep >= 2 
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}>
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                  currentStep >= 2
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                }`}
+              >
                 2
               </div>
-              
+
               {/* Line 2-3 */}
-              <div className={`h-1 w-16 transition-all ${
-                currentStep >= 3 
-                  ? 'bg-blue-600 dark:bg-blue-500' 
-                  : 'bg-gray-200 dark:bg-gray-700'
-              }`} />
-              
+              <div
+                className={`h-1 w-16 transition-all ${
+                  currentStep >= 3
+                    ? 'bg-blue-600 dark:bg-blue-500'
+                    : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              />
+
               {/* Step 3 */}
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                currentStep >= 3 
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white' 
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-              }`}>
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                  currentStep >= 3
+                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                }`}
+              >
                 3
               </div>
             </div>
 
             {/* Step Titles */}
             <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-4">
-              <span className={currentStep === 1 ? 'font-semibold text-blue-600 dark:text-blue-400' : ''}>
+              <span
+                className={
+                  currentStep === 1
+                    ? 'font-semibold text-blue-600 dark:text-blue-400'
+                    : ''
+                }
+              >
                 Patrimônio
               </span>
-              <span className={currentStep === 2 ? 'font-semibold text-blue-600 dark:text-blue-400' : ''}>
+              <span
+                className={
+                  currentStep === 2
+                    ? 'font-semibold text-blue-600 dark:text-blue-400'
+                    : ''
+                }
+              >
                 Destino
               </span>
-              <span className={currentStep === 3 ? 'font-semibold text-blue-600 dark:text-blue-400' : ''}>
+              <span
+                className={
+                  currentStep === 3
+                    ? 'font-semibold text-blue-600 dark:text-blue-400'
+                    : ''
+                }
+              >
                 Confirmação
               </span>
             </div>
@@ -336,29 +381,31 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   </label>
                   <select
                     value={wizardData.patrimonio_id || ''}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      patrimonio_id: parseInt(e.target.value)
-                    }))}
+                    onChange={(e) =>
+                      setWizardData((prev) => ({
+                        ...prev,
+                        patrimonio_id: parseInt(e.target.value),
+                      }))
+                    }
                     className={`w-full px-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.patrimonio 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.patrimonio
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
                   >
                     <option value="">Selecione um patrimônio...</option>
                     {patrimonios
-                      .filter(p => p.status !== 'baixado')
-                      .map(p => (
+                      .filter((p) => p.status !== 'baixado')
+                      .map((p) => (
                         <option key={p.id} value={p.id}>
                           {p.nome} {p.numero_serie ? `(${p.numero_serie})` : ''}
                         </option>
-                      ))
-                    }
+                      ))}
                   </select>
                   {errors.patrimonio && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -373,44 +420,58 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                     <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
                       Informações Atuais do Patrimônio
                     </h3>
-                    
+
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Categoria:</span>
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Categoria:
+                        </span>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
                           {wizardData.patrimonio?.categoria_id
-                            ? patrimonios.find(p => p.id === wizardData.patrimonio?.id)?.nome
+                            ? patrimonios.find(
+                                (p) => p.id === wizardData.patrimonio?.id,
+                              )?.nome
                             : 'N/A'}
                         </p>
                       </div>
-                      
+
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Status:
+                        </span>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {wizardData.patrimonio.status === 'ativo' ? 'Ativo' 
-                            : wizardData.patrimonio.status === 'manutencao' ? 'Em Manutenção' 
-                            : 'Baixado'}
+                          {wizardData.patrimonio.status === 'ativo'
+                            ? 'Ativo'
+                            : wizardData.patrimonio.status === 'manutencao'
+                              ? 'Em Manutenção'
+                              : 'Baixado'}
                         </p>
                       </div>
-                      
+
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Setor Atual:</span>
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Setor Atual:
+                        </span>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
                           {getNomeSetorOrigem()}
                         </p>
                       </div>
-                      
+
                       <div>
-                        <span className="text-gray-500 dark:text-gray-400">Responsável Atual:</span>
+                        <span className="text-gray-500 dark:text-gray-400">
+                          Responsável Atual:
+                        </span>
                         <p className="font-medium text-gray-900 dark:text-gray-100">
                           {getNomeResponsavelOrigem()}
                         </p>
                       </div>
                     </div>
-                    
+
                     {wizardData.patrimonio.descricao && (
                       <div>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">Descrição:</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Descrição:
+                        </span>
                         <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                           {wizardData.patrimonio.descricao}
                         </p>
@@ -431,13 +492,17 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   </h3>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Setor:</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        Setor:
+                      </span>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {getNomeSetorOrigem()}
                       </p>
                     </div>
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">Responsável:</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        Responsável:
+                      </span>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {getNomeResponsavelOrigem()}
                       </p>
@@ -453,29 +518,31 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   </label>
                   <select
                     value={wizardData.setor_destino_id || ''}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      setor_destino_id: parseInt(e.target.value)
-                    }))}
+                    onChange={(e) =>
+                      setWizardData((prev) => ({
+                        ...prev,
+                        setor_destino_id: parseInt(e.target.value),
+                      }))
+                    }
                     className={`w-full px-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.setor 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.setor
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
                   >
                     <option value="">Selecione o setor de destino...</option>
                     {setores
-                      .filter(s => s.id !== wizardData.setor_origem_id)
-                      .map(s => (
+                      .filter((s) => s.id !== wizardData.setor_origem_id)
+                      .map((s) => (
                         <option key={s.id} value={s.id}>
                           {s.nome}
                         </option>
-                      ))
-                    }
+                      ))}
                   </select>
                   {errors.setor && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -492,29 +559,33 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   </label>
                   <select
                     value={wizardData.responsavel_destino_id || ''}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      responsavel_destino_id: parseInt(e.target.value)
-                    }))}
+                    onChange={(e) =>
+                      setWizardData((prev) => ({
+                        ...prev,
+                        responsavel_destino_id: parseInt(e.target.value),
+                      }))
+                    }
                     className={`w-full px-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.responsavel 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.responsavel
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
                   >
-                    <option value="">Selecione o responsável de destino...</option>
+                    <option value="">
+                      Selecione o responsável de destino...
+                    </option>
                     {usuarios
-                      .filter(u => u.id !== wizardData.responsavel_origem_id)
-                      .map(u => (
+                      .filter((u) => u.id !== wizardData.responsavel_origem_id)
+                      .map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.username}
                         </option>
-                      ))
-                    }
+                      ))}
                   </select>
                   {errors.responsavel && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">
@@ -531,18 +602,21 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   </label>
                   <textarea
                     value={wizardData.motivo || ''}
-                    onChange={(e) => setWizardData(prev => ({
-                      ...prev,
-                      motivo: e.target.value
-                    }))}
+                    onChange={(e) =>
+                      setWizardData((prev) => ({
+                        ...prev,
+                        motivo: e.target.value,
+                      }))
+                    }
                     rows={3}
                     placeholder="Descreva o motivo da transferência (mínimo 10 caracteres)"
                     className={`w-full px-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${errors.motivo 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        errors.motivo
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
@@ -567,7 +641,8 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                         Confirmação da Transferência
                       </p>
                       <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-                        Esta solicitação será enviada para aprovação. Após aprovada, o patrimônio poderá ser transferido.
+                        Esta solicitação será enviada para aprovação. Após
+                        aprovada, o patrimônio poderá ser transferido.
                       </p>
                     </div>
                   </div>
@@ -581,7 +656,9 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
 
                   {/* Patrimônio */}
                   <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Patrimônio:</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Patrimônio:
+                    </span>
                     <p className="font-medium text-gray-900 dark:text-gray-100">
                       {getNomePatrimonio()}
                       {wizardData.patrimonio?.numero_serie && (
@@ -595,14 +672,18 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   {/* Transferência de Setor */}
                   <div className="flex items-center gap-3 py-2">
                     <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">De</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        De
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {getNomeSetorOrigem()}
                       </p>
                     </div>
                     <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                     <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Para</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Para
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {getNomeSetorDestino()}
                       </p>
@@ -612,14 +693,18 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   {/* Transferência de Responsável */}
                   <div className="flex items-center gap-3 py-2">
                     <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">De</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        De
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {getNomeResponsavelOrigem()}
                       </p>
                     </div>
                     <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                     <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">Para</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Para
+                      </p>
                       <p className="font-medium text-gray-900 dark:text-gray-100">
                         {getNomeResponsavelDestino()}
                       </p>
@@ -628,7 +713,9 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
 
                   {/* Motivo */}
                   <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Motivo:</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Motivo:
+                    </span>
                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
                       {wizardData.motivo}
                     </p>
@@ -657,7 +744,7 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   Voltar
                 </button>
               )}
-              
+
               <button
                 onClick={onClose}
                 disabled={saving}

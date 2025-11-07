@@ -6,12 +6,12 @@ import {
   AlertTriangle,
   Loader2,
   FileText,
-  ArrowRightLeft
+  ArrowRightLeft,
 } from 'lucide-react';
 import { useTransferencias } from '../context/TransferenciasContext';
 import type {
   Transferencia,
-  TipoAprovacao
+  TipoAprovacao,
 } from '../types/transferencias.types';
 
 interface TransferenciaAprovacaoProps {
@@ -27,20 +27,20 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
   onClose,
   transferencia,
   tipo,
-  onSuccess
+  onSuccess,
 }) => {
   const {
     patrimonios,
     setores,
     usuarios,
     aprovarTransferencia,
-    rejeitarTransferencia
+    rejeitarTransferencia,
   } = useTransferencias();
 
   // ========================================
   // ESTADOS
   // ========================================
-  
+
   const [observacoes, setObservacoes] = useState('');
   const [motivo, setMotivo] = useState('');
   const [efetivarAutomaticamente, setEfetivarAutomaticamente] = useState(false);
@@ -50,72 +50,78 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
   // ========================================
   // HELPERS
   // ========================================
-  
+
   const getPatrimonioNome = (): string => {
     if (!transferencia) return 'N/A';
-    const patrimonio = patrimonios.find(p => p.id === transferencia.patrimonio_id);
+    const patrimonio = patrimonios.find(
+      (p) => p.id === transferencia.patrimonio_id,
+    );
     return patrimonio?.nome || 'N/A';
   };
 
   const getSetorOrigemNome = (): string => {
     if (!transferencia) return 'N/A';
-    const setor = setores.find(s => s.id === transferencia.setor_origem_id);
+    const setor = setores.find((s) => s.id === transferencia.setor_origem_id);
     return setor?.nome || 'N/A';
   };
 
   const getSetorDestinoNome = (): string => {
     if (!transferencia) return 'N/A';
-    const setor = setores.find(s => s.id === transferencia.setor_destino_id);
+    const setor = setores.find((s) => s.id === transferencia.setor_destino_id);
     return setor?.nome || 'N/A';
   };
 
   const getResponsavelOrigemNome = (): string => {
     if (!transferencia) return 'N/A';
-    const user = usuarios.find(u => u.id === transferencia.responsavel_origem_id);
+    const user = usuarios.find(
+      (u) => u.id === transferencia.responsavel_origem_id,
+    );
     return user?.username || 'N/A';
   };
 
   const getResponsavelDestinoNome = (): string => {
     if (!transferencia) return 'N/A';
-    const user = usuarios.find(u => u.id === transferencia.responsavel_destino_id);
+    const user = usuarios.find(
+      (u) => u.id === transferencia.responsavel_destino_id,
+    );
     return user?.username || 'N/A';
   };
 
   // ========================================
   // HANDLERS
   // ========================================
-  
+
   const handleSubmit = async () => {
     if (!transferencia) return;
-    
+
     if (tipo === 'rejeitar' && !motivo.trim()) {
       setError('O motivo da rejeição é obrigatório');
       return;
     }
-    
+
     setSaving(true);
     setError(null);
-    
+
     try {
       if (tipo === 'aprovar') {
         await aprovarTransferencia(
-          transferencia.id, 
+          transferencia.id,
           observacoes || undefined,
-          efetivarAutomaticamente
+          efetivarAutomaticamente,
         );
       } else {
         await rejeitarTransferencia(transferencia.id, motivo);
       }
-      
+
       if (onSuccess) {
         onSuccess();
       }
-      
+
       // Reset form
       setObservacoes('');
       setMotivo('');
       setEfetivarAutomaticamente(false);
-      
+
       onClose();
     } catch (err: any) {
       console.error(`Erro ao ${tipo} transferência:`, err);
@@ -130,11 +136,11 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
   // ========================================
   // RENDER
   // ========================================
-  
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Overlay */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
@@ -190,32 +196,40 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
               <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
                 Resumo da Transferência
               </h3>
-              
+
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Patrimônio:</span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Patrimônio:
+                  </span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {getPatrimonioNome()}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Setor:</span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Setor:
+                  </span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {getSetorOrigemNome()} → {getSetorDestinoNome()}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between">
-                  <span className="text-gray-500 dark:text-gray-400">Responsável:</span>
+                  <span className="text-gray-500 dark:text-gray-400">
+                    Responsável:
+                  </span>
                   <span className="font-medium text-gray-900 dark:text-gray-100">
                     {getResponsavelOrigemNome()} → {getResponsavelDestinoNome()}
                   </span>
                 </div>
-                
+
                 {transferencia.motivo && (
                   <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                    <span className="text-gray-500 dark:text-gray-400">Motivo:</span>
+                    <span className="text-gray-500 dark:text-gray-400">
+                      Motivo:
+                    </span>
                     <p className="text-gray-700 dark:text-gray-300 mt-1">
                       {transferencia.motivo}
                     </p>
@@ -253,7 +267,9 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
                     type="checkbox"
                     id="efetivar"
                     checked={efetivarAutomaticamente}
-                    onChange={(e) => setEfetivarAutomaticamente(e.target.checked)}
+                    onChange={(e) =>
+                      setEfetivarAutomaticamente(e.target.checked)
+                    }
                     className="mt-1 w-4 h-4 text-blue-600 dark:text-blue-400 
                       bg-white dark:bg-[#2a2a2a]
                       border-gray-300 dark:border-gray-600
@@ -265,7 +281,8 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
                       Efetivar automaticamente após aprovação
                     </p>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      Ao marcar esta opção, o patrimônio será imediatamente transferido para o novo setor e responsável.
+                      Ao marcar esta opção, o patrimônio será imediatamente
+                      transferido para o novo setor e responsável.
                     </p>
                   </label>
                 </div>
@@ -273,8 +290,8 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
                 {/* Alerta */}
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                   <p className="text-sm text-green-700 dark:text-green-300">
-                    Ao aprovar, você autoriza a transferência deste patrimônio. 
-                    {efetivarAutomaticamente 
+                    Ao aprovar, você autoriza a transferência deste patrimônio.
+                    {efetivarAutomaticamente
                       ? ' A transferência será efetivada imediatamente.'
                       : ' A transferência ficará aguardando efetivação.'}
                   </p>
@@ -297,9 +314,10 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
                     className={`w-full px-3 py-2 border rounded-lg
                       bg-white dark:bg-[#2a2a2a]
                       text-gray-900 dark:text-gray-100
-                      ${error && !motivo.trim()
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
+                      ${
+                        error && !motivo.trim()
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
                       }
                       focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400
                       focus:border-transparent transition-colors`}
@@ -315,7 +333,8 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                   <p className="text-sm text-red-700 dark:text-red-300">
                     <AlertTriangle className="w-4 h-4 inline mr-1" />
-                    Esta ação não pode ser desfeita. A transferência será rejeitada e o solicitante será notificado.
+                    Esta ação não pode ser desfeita. A transferência será
+                    rejeitada e o solicitante será notificado.
                   </p>
                 </div>
               </div>
@@ -337,14 +356,15 @@ const TransferenciaAprovacao: React.FC<TransferenciaAprovacaoProps> = ({
             >
               Cancelar
             </button>
-            
+
             <button
               onClick={handleSubmit}
               disabled={saving || (tipo === 'rejeitar' && !motivo.trim())}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                ${tipo === 'aprovar' 
-                  ? 'bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600' 
-                  : 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600'
+                ${
+                  tipo === 'aprovar'
+                    ? 'bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600'
+                    : 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600'
                 }
                 rounded-lg shadow-sm hover:shadow-md
                 disabled:opacity-50 disabled:cursor-not-allowed
