@@ -185,15 +185,36 @@ export async function deletePatrimonio(id: number) {
 // 📄 TRANSFERÊNCIAS
 // ========================================
 
+// Listar todas as transferências
 export async function listTransferencias() {
   const { data } = await api.get("/transferencias/");
   return data;
 }
 
+// Criar nova transferência
 export async function createTransferencia(payload: any) {
   const { data } = await api.post("/transferencias/", payload);
   return data;
 }
+
+// Obter uma transferência específica
+export async function getTransferencia(id: number | string) {
+  const { data } = await api.get(`/transferencias/${id}`);
+  return data;
+}
+
+// Atualizar transferência
+export async function updateTransferencia(id: number | string, payload: any) {
+  const { data } = await api.put(`/transferencias/${id}`, payload);
+  return data;
+}
+
+// Excluir transferência
+export async function deleteTransferencia(id: number | string) {
+  const { data } = await api.delete(`/transferencias/${id}`);
+  return data;
+}
+
 
 // ========================================
 // 📉 BAIXAS

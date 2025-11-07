@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Patrimonios from "./pages/Patrimonios";
+import Transferencias from "./pages/Transferencias";
 import NotFound from "./pages/NotFound";
 import Logs from "./pages/Logs";
 
@@ -46,6 +47,15 @@ const AppRoutes: React.FC = () => (
       element={
         <ProtectedRoute>
           <Patrimonios />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/transferencias"
+      element={
+        <ProtectedRoute>
+          <Transferencias />
         </ProtectedRoute>
       }
     />

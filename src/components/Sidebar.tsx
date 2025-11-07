@@ -43,6 +43,18 @@ const Sidebar: React.FC = () => {
         />
       ),
     },
+    {
+      label: "Transferências",
+      to: "/transferencias",
+      icon: (isActive: boolean) => (
+        <img
+          src="https://img.icons8.com/?size=100&id=f6XnJbAyvoWg&format=png"
+          alt="Transferências"
+          className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'} 
+                  dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
+        />
+      ),
+    },
     ...(user?.role === "Administrador"
       ? [
           {
