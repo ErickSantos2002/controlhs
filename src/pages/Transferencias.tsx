@@ -116,8 +116,6 @@ const TransferenciasContent: React.FC = () => {
     setPaginaAtual(1);
   }, [
     filtros.status,
-    filtros.setorOrigem,
-    filtros.setorDestino,
     filtros.patrimonio,
     filtros.solicitante,
     filtros.aprovador,
@@ -223,8 +221,8 @@ const TransferenciasContent: React.FC = () => {
     setFiltros({
       busca: '',
       status: 'todos',
-      setorOrigem: 'todos',
-      setorDestino: 'todos',
+      setor: 'todos',           // ✅ Campo unificado
+      responsavel: 'todos',     // ✅ Campo unificado
       patrimonio: 'todos',
       solicitante: 'todos',
       aprovador: 'todos',
@@ -240,42 +238,41 @@ const TransferenciasContent: React.FC = () => {
       return;
     }
 
-    const dados: TransferenciaExportData[] = transferenciasFiltradas.map(
-      (t) => {
-        const patrimonio = patrimonios.find((p) => p.id === t.patrimonio_id);
-        const setorOrigem = setores.find((s) => s.id === t.setor_origem_id);
-        const setorDestino = setores.find((s) => s.id === t.setor_destino_id);
-        const responsavelOrigem = usuarios.find(
-          (u) => u.id === t.responsavel_origem_id,
-        );
-        const responsavelDestino = usuarios.find(
-          (u) => u.id === t.responsavel_destino_id,
-        );
-        const solicitante = usuarios.find((u) => u.id === t.solicitante_id);
-        const aprovador = t.aprovado_por
-          ? usuarios.find((u) => u.id === t.aprovado_por)
-          : null;
+    const dados: TransferenciaExportData[] = transferenciasFiltradas.map((t) => {
+      const patrimonio = patrimonios.find((p) => p.id === t.patrimonio_id);
+      const setorOrigem = setores.find((s) => s.id === t.setor_origem_id);
+      const setorDestino = setores.find((s) => s.id === t.setor_destino_id);
+      const responsavelOrigem = usuarios.find((u) => u.id === t.responsavel_origem_id);
+      const responsavelDestino = usuarios.find((u) => u.id === t.responsavel_destino_id);
+      const solicitante = usuarios.find((u) => u.id === t.solicitante_id);
+      const aprovador = t.aprovado_por
+        ? usuarios.find((u) => u.id === t.aprovado_por)
+        : null;
 
-        return {
-          ID: t.id,
-          Patrimônio: patrimonio?.nome || 'N/A',
-          'Setor Origem': setorOrigem?.nome || 'N/A',
-          'Setor Destino': setorDestino?.nome || 'N/A',
-          'Responsável Origem': responsavelOrigem?.username || 'N/A',
-          'Responsável Destino': responsavelDestino?.username || 'N/A',
-          Solicitante: solicitante?.username || 'N/A',
-          'Data Solicitação': t.data_transferencia
-            ? new Date(t.data_transferencia).toLocaleDateString('pt-BR')
-            : 'N/A',
-          Status: STATUS_LABELS[t.status],
-          Aprovador: aprovador?.username || '-',
-          'Data Aprovação': (t as any).data_aprovacao
-            ? new Date((t as any).data_aprovacao).toLocaleDateString('pt-BR')
-            : 'N/A',
-          Motivo: t.motivo || 'N/A',
-        };
-      },
-    );
+      return {
+        ID: t.id,
+        Patrimônio: patrimonio?.nome || 'N/A',
+        'Setor Origem': setorOrigem?.nome || 'N/A',
+        'Setor Destino': setorDestino?.nome || 'N/A',
+        'Responsável Origem': responsavelOrigem?.username || 'N/A',
+        'Responsável Destino': responsavelDestino?.username || 'N/A',
+        Solicitante: solicitante?.username || 'N/A',
+        'Data Solicitação': t.data_transferencia
+          ? new Date(t.data_transferencia).toLocaleDateString('pt-BR')
+          : 'N/A',
+        Status: STATUS_LABELS[t.status],
+        Aprovador: aprovador?.username || '-',
+        'Data Aprovação': t.data_aprovacao                    // ✅ Sem cast
+          ? new Date(t.data_aprovacao).toLocaleDateString('pt-BR')
+          : 'N/A',
+        'Data Efetivação': t.data_efetivacao                  // ✅ NOVO CAMPO
+          ? new Date(t.data_efetivacao).toLocaleDateString('pt-BR')
+          : 'N/A',
+        Motivo: t.motivo || 'N/A',
+        'Motivo Rejeição': t.motivo_rejeicao || '-',          // ✅ NOVO CAMPO
+        Observações: t.observacoes || '-',                     // ✅ NOVO CAMPO
+      };
+    });
 
     const ws = XLSX.utils.json_to_sheet(dados);
     const wb = XLSX.utils.book_new();
@@ -482,16 +479,14 @@ const TransferenciasContent: React.FC = () => {
 
         {/* Painel de Filtros fixo */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-gray-200 dark:border-[#2d2d2d]">
-          {/* Linha 1 */}
+          {/* Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Status
             </label>
             <select
               value={filtros.status}
-              onChange={(e) =>
-                setFiltros({ ...filtros, status: e.target.value })
-              }
+              onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -506,15 +501,14 @@ const TransferenciasContent: React.FC = () => {
             </select>
           </div>
 
+          {/* Setor Unificado */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Setor Origem
+              Setor (Origem ou Destino)
             </label>
             <select
-              value={filtros.setorOrigem}
-              onChange={(e) =>
-                setFiltros({ ...filtros, setorOrigem: e.target.value })
-              }
+              value={filtros.setor}
+              onChange={(e) => setFiltros({ ...filtros, setor: e.target.value })}
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -530,15 +524,14 @@ const TransferenciasContent: React.FC = () => {
             </select>
           </div>
 
+          {/* Responsável Unificado */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Setor Destino
+              Responsável (Origem ou Destino)
             </label>
             <select
-              value={filtros.setorDestino}
-              onChange={(e) =>
-                setFiltros({ ...filtros, setorDestino: e.target.value })
-              }
+              value={filtros.responsavel}
+              onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -546,24 +539,22 @@ const TransferenciasContent: React.FC = () => {
                   focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="todos">Todos</option>
-              {setores.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.nome}
+              {usuarios.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.username}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Linha 2 */}
+          {/* Patrimônio */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Patrimônio
             </label>
             <select
               value={filtros.patrimonio}
-              onChange={(e) =>
-                setFiltros({ ...filtros, patrimonio: e.target.value })
-              }
+              onChange={(e) => setFiltros({ ...filtros, patrimonio: e.target.value })}
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -579,6 +570,7 @@ const TransferenciasContent: React.FC = () => {
             </select>
           </div>
 
+          {/* Data Início */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Data Início
@@ -586,9 +578,7 @@ const TransferenciasContent: React.FC = () => {
             <input
               type="date"
               value={filtros.dataInicio || ''}
-              onChange={(e) =>
-                setFiltros({ ...filtros, dataInicio: e.target.value })
-              }
+              onChange={(e) => setFiltros({ ...filtros, dataInicio: e.target.value })}
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -597,6 +587,7 @@ const TransferenciasContent: React.FC = () => {
             />
           </div>
 
+          {/* Data Fim */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Data Fim
@@ -604,9 +595,7 @@ const TransferenciasContent: React.FC = () => {
             <input
               type="date"
               value={filtros.dataFim || ''}
-              onChange={(e) =>
-                setFiltros({ ...filtros, dataFim: e.target.value })
-              }
+              onChange={(e) => setFiltros({ ...filtros, dataFim: e.target.value })}
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100

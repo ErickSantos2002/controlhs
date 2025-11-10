@@ -95,15 +95,6 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
     });
   };
 
-  const getCategoriaNome = (): string => {
-    const patrimonio = patrimonios.find(
-      (p) => p.id === transferencia.patrimonio_id,
-    );
-    if (!patrimonio?.categoria_id) return 'N/A';
-    // Assumindo que temos categorias no contexto, senão retorna 'N/A'
-    return 'N/A'; // Poderia buscar de categorias se estivesse disponível
-  };
-
   const getSetorOrigemNome = (): string => {
     const setor = setores.find((s) => s.id === transferencia.setor_origem_id);
     return setor?.nome || 'N/A';
@@ -167,7 +158,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center">
+      <div className="flex min-h-full items-center justify-center p-4">
         <div className="relative w-full max-w-2xl bg-white dark:bg-[#1e1e1e] rounded-lg shadow-xl">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -209,25 +200,26 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                 </h3>
               </div>
 
-              <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4">
+                <div className="space-y-3">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                       Nome
                     </p>
-                    <p className="text-base font-medium text-gray-900 dark:text-gray-100">
+                    <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
                       {getPatrimonioNome()}
                     </p>
                   </div>
 
                   {getPatrimonioNumeroSerie() && (
-                    <div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Número de Série
-                      </p>
-                      <p className="text-base font-mono text-gray-700 dark:text-gray-300">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Hash className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600 dark:text-gray-400">
+                        NS:
+                      </span>
+                      <span className="text-gray-900 dark:text-gray-100">
                         {getPatrimonioNumeroSerie()}
-                      </p>
+                      </span>
                     </div>
                   )}
 
@@ -237,15 +229,6 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                     </p>
                     <p className="text-base font-medium text-gray-900 dark:text-gray-100">
                       {getPatrimonioValor()}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      ID do Patrimônio
-                    </p>
-                    <p className="text-base font-mono text-gray-700 dark:text-gray-300">
-                      #{transferencia.patrimonio_id}
                     </p>
                   </div>
                 </div>
@@ -263,84 +246,81 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
 
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-4">
                 {/* Setor */}
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Setor
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        De
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
-                        <Building className="w-4 h-4 text-gray-400" />
-                        {getSetorOrigemNome()}
+                {(transferencia.setor_origem_id ||
+                  transferencia.setor_destino_id) && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Building className="w-4 h-4 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Setor
                       </p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
-                    <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Para
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
-                        <Building className="w-4 h-4 text-gray-400" />
-                        {getSetorDestinoNome()}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 text-center">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Origem
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {getSetorOrigemNome()}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                      <div className="flex-1 text-center">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Destino
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {getSetorDestinoNome()}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* Responsável */}
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Responsável
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        De
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
-                        <User className="w-4 h-4 text-gray-400" />
-                        {getResponsavelOrigemNome()}
+                {(transferencia.responsavel_origem_id ||
+                  transferencia.responsavel_destino_id) && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Responsável
                       </p>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400 flex-shrink-0" />
-                    <div className="flex-1 text-center bg-white dark:bg-[#1e1e1e] rounded-lg p-3">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Para
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center justify-center gap-1">
-                        <User className="w-4 h-4 text-gray-400" />
-                        {getResponsavelDestinoNome()}
-                      </p>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 text-center">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Origem
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {getResponsavelOrigemNome()}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                      <div className="flex-1 text-center">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                          Destino
+                        </p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {getResponsavelDestinoNome()}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
-            {/* Seção: Informações da Solicitação */}
+            {/* Seção: Solicitação */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
-                <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <FileText className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  Informações da Solicitação
+                  Solicitação
                 </h3>
               </div>
 
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
-                {transferencia.motivo && (
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Motivo da Transferência
-                    </p>
-                    <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
-                      {transferencia.motivo}
-                    </p>
-                  </div>
-                )}
-
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -356,14 +336,25 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                       Data da Solicitação
                     </p>
                     <p className="text-base text-gray-700 dark:text-gray-300">
-                      {formatDate(transferencia.data_transferencia)}
+                      {formatDateTime(transferencia.criado_em)}
                     </p>
                   </div>
                 </div>
+
+                {transferencia.motivo && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Motivo
+                    </p>
+                    <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
+                      {transferencia.motivo}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Seção: Aprovação (se houver) */}
+            {/* Seção: Aprovação/Rejeição */}
             {transferencia.aprovado_por && (
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -396,7 +387,7 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                         {status === 'rejeitada' ? 'Rejeição' : 'Aprovação'}
                       </p>
                       <p className="text-base text-gray-700 dark:text-gray-300">
-                        {formatDate((transferencia as any).data_aprovacao)}
+                        {formatDateTime(transferencia.data_aprovacao)}
                       </p>
                     </div>
                   </div>
@@ -412,57 +403,101 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
                     </div>
                   )}
 
-                  {status === 'rejeitada' &&
-                    (transferencia as any).motivo_rejeicao && (
-                      <div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Motivo da Rejeição
-                        </p>
-                        <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
-                          {(transferencia as any).motivo_rejeicao}
-                        </p>
-                      </div>
-                    )}
+                  {status === 'rejeitada' && transferencia.motivo_rejeicao && (
+                    <div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Motivo da Rejeição
+                      </p>
+                      <p className="text-base text-gray-700 dark:text-gray-300 mt-1">
+                        {transferencia.motivo_rejeicao}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            {/* Seção: Datas */}
+            {/* 🆕 Seção: Timeline de Datas */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                  Datas
+                  Histórico
                 </h3>
               </div>
 
               <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Data da Transferência
-                    </p>
-                    <p className="text-base font-medium text-gray-700 dark:text-gray-300">
-                      {formatDate(transferencia.data_transferencia)}
-                    </p>
+                <div className="space-y-4">
+                  {/* Data de Criação */}
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">
+                      <div className="w-2 h-2 rounded-full bg-gray-400" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Solicitação Criada
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {formatDateTime(transferencia.criado_em)}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Data de Criação
-                    </p>
-                    <p className="text-base font-medium text-gray-700 dark:text-gray-300">
-                      {formatDateTime(transferencia.criado_em)}
-                    </p>
-                  </div>
+                  {/* Data de Aprovação/Rejeição */}
+                  {transferencia.data_aprovacao && (
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            status === 'rejeitada'
+                              ? 'bg-red-500'
+                              : 'bg-blue-500'
+                          }`}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {status === 'rejeitada'
+                            ? 'Transferência Rejeitada'
+                            : 'Transferência Aprovada'}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {formatDateTime(transferencia.data_aprovacao)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Última Atualização
-                    </p>
-                    <p className="text-base font-medium text-gray-700 dark:text-gray-300">
-                      {formatDateTime(transferencia.atualizado_em)}
-                    </p>
+                  {/* 🆕 Data de Efetivação */}
+                  {transferencia.data_efetivacao && (
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          Transferência Efetivada
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {formatDateTime(transferencia.data_efetivacao)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Última Atualização */}
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1">
+                      <div className="w-2 h-2 rounded-full bg-gray-300" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Última Atualização
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {formatDateTime(transferencia.atualizado_em)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -491,13 +526,36 @@ const TransferenciaDetalhes: React.FC<TransferenciaDetalhesProps> = ({
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5" />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm font-medium text-green-800 dark:text-green-200">
                       Transferência Concluída
                     </p>
                     <p className="text-sm text-green-600 dark:text-green-400 mt-1">
                       Esta transferência foi efetivada com sucesso. O patrimônio
                       já está atualizado com o novo setor e responsável.
+                    </p>
+                    {transferencia.data_efetivacao && (
+                      <p className="text-sm text-green-700 dark:text-green-300 mt-2 font-medium">
+                        📅 Efetivada em:{' '}
+                        {formatDateTime(transferencia.data_efetivacao)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {status === 'pendente' && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                      Aguardando Aprovação
+                    </p>
+                    <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-1">
+                      Esta transferência está aguardando análise de um gestor ou
+                      administrador.
                     </p>
                   </div>
                 </div>

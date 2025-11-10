@@ -1,4 +1,5 @@
 import axios from 'axios';
+import type { TransferenciaAprovar, TransferenciaRejeitar } from '../types/transferencias.types';
 
 const baseURL =
   import.meta.env.VITE_API_URL ||
@@ -213,7 +214,7 @@ export async function getTransferencia(id: number | string) {
   return data;
 }
 
-// Atualizar transferência
+// Atualizar transferência (uso geral - prefira usar os endpoints específicos)
 export async function updateTransferencia(id: number | string, payload: any) {
   const { data } = await api.put(`/transferencias/${id}`, payload);
   return data;
@@ -222,6 +223,66 @@ export async function updateTransferencia(id: number | string, payload: any) {
 // Excluir transferência
 export async function deleteTransferencia(id: number | string) {
   const { data } = await api.delete(`/transferencias/${id}`);
+  return data;
+}
+
+// ========================================
+// 🆕 NOVOS ENDPOINTS DE TRANSFERÊNCIAS
+// ========================================
+
+/**
+ * Aprovar uma transferência pendente
+ * 
+ * @param id - ID da transferência
+ * @param payload - Dados da aprovação (observações e se deve efetivar automaticamente)
+ * @returns Transferência atualizada
+ * 
+ * @example
+ * await aprovarTransferencia(1, {
+ *   observacoes: "Aprovado conforme solicitado",
+ *   efetivar_automaticamente: true
+ * });
+ */
+export async function aprovarTransferencia(
+  id: number | string,
+  payload: TransferenciaAprovar
+) {
+  const { data } = await api.post(`/transferencias/${id}/aprovar`, payload);
+  return data;
+}
+
+/**
+ * Rejeitar uma transferência pendente
+ * 
+ * @param id - ID da transferência
+ * @param payload - Dados da rejeição (motivo obrigatório)
+ * @returns Transferência atualizada
+ * 
+ * @example
+ * await rejeitarTransferencia(1, {
+ *   motivo_rejeicao: "Equipamento necessário no setor atual"
+ * });
+ */
+export async function rejeitarTransferencia(
+  id: number | string,
+  payload: TransferenciaRejeitar
+) {
+  const { data } = await api.post(`/transferencias/${id}/rejeitar`, payload);
+  return data;
+}
+
+/**
+ * Efetivar uma transferência aprovada
+ * Atualiza o setor e/ou responsável do patrimônio
+ * 
+ * @param id - ID da transferência
+ * @returns Transferência atualizada com efetivada = true
+ * 
+ * @example
+ * await efetivarTransferencia(1);
+ */
+export async function efetivarTransferencia(id: number | string) {
+  const { data } = await api.post(`/transferencias/${id}/efetivar`);
   return data;
 }
 

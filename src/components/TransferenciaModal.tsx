@@ -54,6 +54,45 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
   const [saveError, setSaveError] = useState<string | null>(null);
 
   // ========================================
+  // 🆕 OBTER DADOS DO USUÁRIO LOGADO
+  // ========================================
+
+  const getUserId = (): number => {
+    const id = localStorage.getItem('id');
+    return id ? parseInt(id) : 0;
+  };
+
+  const getUserRole = (): string => {
+    const role = localStorage.getItem('role');
+    return role || 'Usuário';
+  };
+
+  // ========================================
+  // 🆕 FILTRAR PATRIMÔNIOS DO USUÁRIO
+  // ========================================
+  
+  // ✅ PROBLEMA 1: Filtrar patrimônios baseado na role
+  // - Administrador e Gestor: veem TODOS os patrimônios ativos
+  // - Usuário comum: vê apenas patrimônios sob sua responsabilidade
+  const patrimoniosDoUsuario = patrimonios.filter((p) => {
+    // Remove patrimônios baixados para todos
+    if (p.status === 'baixado') {
+      return false;
+    }
+
+    const userRole = getUserRole();
+    const userId = getUserId();
+
+    // Administrador e Gestor veem todos os patrimônios ativos
+    if (userRole === 'Administrador' || userRole === 'Gestor') {
+      return true;
+    }
+
+    // Usuário comum vê apenas seus patrimônios
+    return p.responsavel_id === userId;
+  });
+
+  // ========================================
   // RESET DO MODAL
   // ========================================
 
@@ -96,10 +135,21 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
     if (!wizardData.patrimonio_id) {
       newErrors.patrimonio = 'Selecione um patrimônio';
     } else {
-      // Verifica se o patrimônio está ativo
       const patrimonio = patrimonios.find(
         (p) => p.id === wizardData.patrimonio_id,
       );
+      
+      // ✅ Verifica permissão baseada na role
+      const userId = getUserId();
+      const userRole = getUserRole();
+      
+      // Usuário comum só pode transferir patrimônios sob sua responsabilidade
+      if (userRole === 'Usuário' && patrimonio && patrimonio.responsavel_id !== userId) {
+        newErrors.patrimonio =
+          'Você não tem permissão para transferir este patrimônio';
+      }
+
+      // Verifica se o patrimônio está ativo
       if (patrimonio?.status === 'baixado') {
         newErrors.patrimonio =
           'Este patrimônio foi baixado e não pode ser transferido';
@@ -116,24 +166,44 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ PROBLEMA 3: Nova validação - permite apenas setor OU responsável mudar
   const validateStep2 = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!wizardData.setor_destino_id) {
-      newErrors.setor = 'Selecione o setor de destino';
-    } else if (wizardData.setor_destino_id === wizardData.setor_origem_id) {
-      newErrors.setor = 'O setor de destino deve ser diferente do setor atual';
+    // Verifica se pelo menos um campo foi preenchido
+    const temSetorDestino = !!wizardData.setor_destino_id;
+    const temResponsavelDestino = !!wizardData.responsavel_destino_id;
+
+    if (!temSetorDestino && !temResponsavelDestino) {
+      newErrors.geral = 'Selecione pelo menos um destino: setor ou responsável';
     }
 
-    if (!wizardData.responsavel_destino_id) {
-      newErrors.responsavel = 'Selecione o responsável de destino';
-    } else if (
-      wizardData.responsavel_destino_id === wizardData.responsavel_origem_id
-    ) {
-      newErrors.responsavel =
-        'O responsável de destino deve ser diferente do atual';
+    // Se setor foi informado, valida se é diferente do atual
+    if (temSetorDestino) {
+      if (wizardData.setor_destino_id === wizardData.setor_origem_id) {
+        newErrors.setor = 'O setor de destino deve ser diferente do setor atual';
+      }
     }
 
+    // Se responsável foi informado, valida se é diferente do atual
+    if (temResponsavelDestino) {
+      if (
+        wizardData.responsavel_destino_id === wizardData.responsavel_origem_id
+      ) {
+        newErrors.responsavel =
+          'O responsável de destino deve ser diferente do atual';
+      }
+    }
+
+    // Valida que pelo menos algo está mudando
+    const setorMudou = temSetorDestino && wizardData.setor_destino_id !== wizardData.setor_origem_id;
+    const responsavelMudou = temResponsavelDestino && wizardData.responsavel_destino_id !== wizardData.responsavel_origem_id;
+
+    if (!setorMudou && !responsavelMudou) {
+      newErrors.geral = 'É necessário alterar pelo menos o setor ou o responsável';
+    }
+
+    // Valida motivo
     if (!wizardData.motivo || wizardData.motivo.length < 10) {
       newErrors.motivo = 'O motivo deve ter pelo menos 10 caracteres';
     }
@@ -216,7 +286,7 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
 
   const getNomeSetorDestino = () => {
     const setor = setores.find((s) => s.id === wizardData.setor_destino_id);
-    return setor?.nome || 'N/A';
+    return setor?.nome || 'Manter atual';
   };
 
   const getNomeResponsavelOrigem = () => {
@@ -230,161 +300,112 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
     const user = usuarios.find(
       (u) => u.id === wizardData.responsavel_destino_id,
     );
-    return user?.username || 'N/A';
+    return user?.username || 'Manter atual';
   };
+
+  // ========================================
+  // RENDERIZAÇÃO CONDICIONAL
+  // ========================================
 
   if (!isOpen) return null;
 
-  // ========================================
-  // RENDER
-  // ========================================
-
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Overlay */}
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center">
-        <div className="relative w-full max-w-2xl bg-white dark:bg-[#1e1e1e] rounded-lg shadow-xl">
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative bg-white dark:bg-[#1e1e1e] rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-              <ArrowRightLeft className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              Solicitar Transferência de Patrimônio
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-lg">
+                <ArrowRightLeft className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  Nova Transferência
+                </h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Passo {currentStep} de 3
+                </p>
+              </div>
+            </div>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               disabled={saving}
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200
+                rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700
+                transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Progress Indicator */}
-          <div className="px-6 pt-6">
-            <div className="flex items-center justify-center mb-6">
-              {/* Step 1 */}
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                  currentStep >= 1
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                1
-              </div>
-
-              {/* Line 1-2 */}
-              <div
-                className={`h-1 w-16 transition-all ${
-                  currentStep >= 2
-                    ? 'bg-blue-600 dark:bg-blue-500'
-                    : 'bg-gray-200 dark:bg-gray-700'
-                }`}
-              />
-
-              {/* Step 2 */}
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                  currentStep >= 2
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                2
-              </div>
-
-              {/* Line 2-3 */}
-              <div
-                className={`h-1 w-16 transition-all ${
-                  currentStep >= 3
-                    ? 'bg-blue-600 dark:bg-blue-500'
-                    : 'bg-gray-200 dark:bg-gray-700'
-                }`}
-              />
-
-              {/* Step 3 */}
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                  currentStep >= 3
-                    ? 'bg-blue-600 dark:bg-blue-500 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                3
-              </div>
-            </div>
-
-            {/* Step Titles */}
-            <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-4">
-              <span
-                className={
-                  currentStep === 1
-                    ? 'font-semibold text-blue-600 dark:text-blue-400'
-                    : ''
-                }
-              >
-                Patrimônio
-              </span>
-              <span
-                className={
-                  currentStep === 2
-                    ? 'font-semibold text-blue-600 dark:text-blue-400'
-                    : ''
-                }
-              >
-                Destino
-              </span>
-              <span
-                className={
-                  currentStep === 3
-                    ? 'font-semibold text-blue-600 dark:text-blue-400'
-                    : ''
-                }
-              >
-                Confirmação
-              </span>
-            </div>
+          {/* Progress bar */}
+          <div className="w-full h-1 bg-gray-200 dark:bg-gray-700">
+            <div
+              className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-300"
+              style={{ width: `${(currentStep / 3) * 100}%` }}
+            />
           </div>
+
+          {/* Error Message */}
+          {saveError && (
+            <div className="mx-6 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                    Erro ao criar transferência
+                  </p>
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    {saveError}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Content */}
           <div className="p-6">
-            {/* Mensagem de erro */}
-            {saveError && (
-              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                      Erro ao solicitar transferência
-                    </p>
-                    <p className="text-sm text-red-600 dark:text-red-400 mt-1">
-                      {saveError}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* STEP 1: Seleção do Patrimônio */}
+            {/* STEP 1: Seleção de Patrimônio */}
             {currentStep === WizardStep.SELECAO_PATRIMONIO && (
               <div className="space-y-4">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Package className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Selecione o patrimônio
+                      </p>
+                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                        {getUserRole() === 'Usuário'
+                          ? 'Escolha o patrimônio que deseja transferir. Apenas patrimônios ativos dos quais você é responsável podem ser transferidos.'
+                          : 'Escolha o patrimônio que deseja transferir. Apenas patrimônios ativos podem ser transferidos.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Select de Patrimônio */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <Package className="w-4 h-4 inline mr-1" />
-                    Selecione o Patrimônio *
+                    Patrimônio *
                   </label>
                   <select
                     value={wizardData.patrimonio_id || ''}
                     onChange={(e) =>
                       setWizardData((prev) => ({
                         ...prev,
-                        patrimonio_id: parseInt(e.target.value),
+                        patrimonio_id: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
                       }))
                     }
                     className={`w-full px-3 py-2 border rounded-lg
@@ -398,85 +419,68 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
                   >
-                    <option value="">Selecione um patrimônio...</option>
-                    {patrimonios
-                      .filter((p) => p.status !== 'baixado')
-                      .map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.nome} {p.numero_serie ? `(${p.numero_serie})` : ''}
-                        </option>
-                      ))}
+                    <option value="">Selecione um patrimônio</option>
+                    {patrimoniosDoUsuario.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nome}
+                        {p.numero_serie && ` (NS: ${p.numero_serie})`}
+                      </option>
+                    ))}
                   </select>
                   {errors.patrimonio && (
                     <p className="mt-1 text-sm text-red-600 dark:text-red-400">
                       {errors.patrimonio}
                     </p>
                   )}
+                  
+                  {/* 🆕 Mensagem quando não há patrimônios disponíveis */}
+                  {patrimoniosDoUsuario.length === 0 && (
+                    <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+                      ⚠️ {getUserRole() === 'Usuário' 
+                        ? 'Você não possui patrimônios ativos sob sua responsabilidade.'
+                        : 'Não há patrimônios ativos disponíveis no sistema.'}
+                    </p>
+                  )}
                 </div>
 
-                {/* Informações do Patrimônio Selecionado */}
+                {/* Detalhes do Patrimônio Selecionado */}
                 {wizardData.patrimonio && (
-                  <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-3">
-                    <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
-                      Informações Atuais do Patrimônio
+                  <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4 space-y-2">
+                    <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-3">
+                      Detalhes do Patrimônio
                     </h3>
 
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          Categoria:
+                    {wizardData.patrimonio.numero_serie && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Hash className="w-4 h-4 text-gray-400" />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          NS:
                         </span>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {wizardData.patrimonio?.categoria_id
-                            ? patrimonios.find(
-                                (p) => p.id === wizardData.patrimonio?.id,
-                              )?.nome
-                            : 'N/A'}
-                        </p>
-                      </div>
-
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          Status:
+                        <span className="text-gray-900 dark:text-gray-100">
+                          {wizardData.patrimonio.numero_serie}
                         </span>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {wizardData.patrimonio.status === 'ativo'
-                            ? 'Ativo'
-                            : wizardData.patrimonio.status === 'manutencao'
-                              ? 'Em Manutenção'
-                              : 'Baixado'}
-                        </p>
-                      </div>
-
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          Setor Atual:
-                        </span>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {getNomeSetorOrigem()}
-                        </p>
-                      </div>
-
-                      <div>
-                        <span className="text-gray-500 dark:text-gray-400">
-                          Responsável Atual:
-                        </span>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
-                          {getNomeResponsavelOrigem()}
-                        </p>
-                      </div>
-                    </div>
-
-                    {wizardData.patrimonio.descricao && (
-                      <div>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">
-                          Descrição:
-                        </span>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                          {wizardData.patrimonio.descricao}
-                        </p>
                       </div>
                     )}
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <Building className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Setor Atual:
+                      </span>
+                      <span className="text-gray-900 dark:text-gray-100">
+                        {getNomeSetorOrigem()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Responsável Atual:
+                      </span>
+                      <span className="text-gray-900 dark:text-gray-100">
+                        {getNomeResponsavelOrigem()}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -485,43 +489,43 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
             {/* STEP 2: Destino da Transferência */}
             {currentStep === WizardStep.DESTINO_TRANSFERENCIA && (
               <div className="space-y-4">
-                {/* Informação de Origem (ReadOnly) */}
-                <div className="bg-gray-50 dark:bg-[#2a2a2a] rounded-lg p-4">
-                  <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
-                    Origem
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <ArrowRightLeft className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                     <div>
-                      <span className="text-gray-500 dark:text-gray-400">
-                        Setor:
-                      </span>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {getNomeSetorOrigem()}
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                        Defina o destino da transferência
                       </p>
-                    </div>
-                    <div>
-                      <span className="text-gray-500 dark:text-gray-400">
-                        Responsável:
-                      </span>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {getNomeResponsavelOrigem()}
+                      <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+                        Você pode transferir apenas o setor, apenas o responsável, ou ambos. Pelo menos um deve ser alterado.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Novo Setor */}
+                {/* 🆕 Erro geral (quando nenhum campo foi preenchido) */}
+                {errors.geral && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      {errors.geral}
+                    </p>
+                  </div>
+                )}
+
+                {/* Setor de Destino */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <Building className="w-4 h-4 inline mr-1" />
-                    Novo Setor *
+                    Setor de Destino (opcional)
                   </label>
                   <select
                     value={wizardData.setor_destino_id || ''}
                     onChange={(e) =>
                       setWizardData((prev) => ({
                         ...prev,
-                        setor_destino_id: parseInt(e.target.value),
+                        setor_destino_id: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
                       }))
                     }
                     className={`w-full px-3 py-2 border rounded-lg
@@ -535,7 +539,7 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
                   >
-                    <option value="">Selecione o setor de destino...</option>
+                    <option value="">Manter setor atual</option>
                     {setores
                       .filter((s) => s.id !== wizardData.setor_origem_id)
                       .map((s) => (
@@ -551,18 +555,20 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                   )}
                 </div>
 
-                {/* Novo Responsável */}
+                {/* Responsável de Destino */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     <User className="w-4 h-4 inline mr-1" />
-                    Novo Responsável *
+                    Responsável de Destino (opcional)
                   </label>
                   <select
                     value={wizardData.responsavel_destino_id || ''}
                     onChange={(e) =>
                       setWizardData((prev) => ({
                         ...prev,
-                        responsavel_destino_id: parseInt(e.target.value),
+                        responsavel_destino_id: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
                       }))
                     }
                     className={`w-full px-3 py-2 border rounded-lg
@@ -576,9 +582,7 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                       focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400
                       focus:border-transparent transition-colors`}
                   >
-                    <option value="">
-                      Selecione o responsável de destino...
-                    </option>
+                    <option value="">Manter responsável atual</option>
                     {usuarios
                       .filter((u) => u.id !== wizardData.responsavel_origem_id)
                       .map((u) => (
@@ -669,47 +673,63 @@ const TransferenciaModal: React.FC<TransferenciaModalProps> = ({
                     </p>
                   </div>
 
-                  {/* Transferência de Setor */}
-                  <div className="flex items-center gap-3 py-2">
-                    <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        De
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {getNomeSetorOrigem()}
-                      </p>
+                  {/* Transferência de Setor (só mostra se mudou) */}
+                  {wizardData.setor_destino_id && (
+                    <div className="flex items-center gap-3 py-2">
+                      <div className="text-center flex-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Setor Atual
+                        </p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                          {getNomeSetorOrigem()}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                      <div className="text-center flex-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Novo Setor
+                        </p>
+                        <p className="font-medium text-green-600 dark:text-green-400">
+                          {getNomeSetorDestino()}
+                        </p>
+                      </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                    <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Para
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {getNomeSetorDestino()}
-                      </p>
-                    </div>
-                  </div>
+                  )}
 
-                  {/* Transferência de Responsável */}
-                  <div className="flex items-center gap-3 py-2">
-                    <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        De
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {getNomeResponsavelOrigem()}
-                      </p>
+                  {/* Transferência de Responsável (só mostra se mudou) */}
+                  {wizardData.responsavel_destino_id && (
+                    <div className="flex items-center gap-3 py-2">
+                      <div className="text-center flex-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Responsável Atual
+                        </p>
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                          {getNomeResponsavelOrigem()}
+                        </p>
+                      </div>
+                      <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                      <div className="text-center flex-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Novo Responsável
+                        </p>
+                        <p className="font-medium text-green-600 dark:text-green-400">
+                          {getNomeResponsavelDestino()}
+                        </p>
+                      </div>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                    <div className="text-center flex-1">
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Para
-                      </p>
-                      <p className="font-medium text-gray-900 dark:text-gray-100">
-                        {getNomeResponsavelDestino()}
-                      </p>
+                  )}
+
+                  {/* 🆕 Indicadores de "mantém atual" */}
+                  {!wizardData.setor_destino_id && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                      • Setor: mantém atual ({getNomeSetorOrigem()})
                     </div>
-                  </div>
+                  )}
+                  {!wizardData.responsavel_destino_id && (
+                    <div className="text-sm text-gray-500 dark:text-gray-400 italic">
+                      • Responsável: mantém atual ({getNomeResponsavelOrigem()})
+                    </div>
+                  )}
 
                   {/* Motivo */}
                   <div className="pt-2 border-t border-gray-200 dark:border-gray-600">

@@ -9,14 +9,16 @@ import React, {
 import {
   listTransferencias,
   createTransferencia as apiCreateTransferencia,
-  updateTransferencia as apiUpdateTransferencia,
   deleteTransferencia as apiDeleteTransferencia,
   listPatrimonios,
-  updatePatrimonio as apiUpdatePatrimonio,
   listCategorias,
   listSetores,
   listUsuarios,
   createLog,
+  // 🆕 NOVOS IMPORTS
+  aprovarTransferencia as apiAprovarTransferencia,
+  rejeitarTransferencia as apiRejeitarTransferencia,
+  efetivarTransferencia as apiEfetivarTransferencia,
 } from '../services/controlapi';
 import type {
   Transferencia,
@@ -33,6 +35,7 @@ import type {
   OrdenacaoTransferencia,
   TransferenciasContextData,
 } from '../types/transferencias.types';
+import { calcularStatusTransferencia } from '../types/transferencias.types';
 
 // ========================================
 // CONTEXT & PROVIDER
@@ -65,11 +68,12 @@ export const TransferenciasProvider: React.FC<{
   // FILTROS E ORDENAÇÃO
   // ========================================
 
+  // 🆕 MODIFICADO: Filtros unificados
   const [filtros, setFiltros] = useState<FiltrosTransferencia>({
     busca: '',
     status: 'todos',
-    setorOrigem: 'todos',
-    setorDestino: 'todos',
+    setor: 'todos',           // 🆕 UNIFICADO
+    responsavel: 'todos',     // 🆕 UNIFICADO
     patrimonio: 'todos',
     solicitante: 'todos',
     aprovador: 'todos',
@@ -103,38 +107,33 @@ export const TransferenciasProvider: React.FC<{
   }, [usuarios]);
 
   // ========================================
-  // CÁLCULO DE STATUS
+  // 🆕 CÁLCULO DE STATUS (NOVA LÓGICA)
   // ========================================
 
   const getTransferenciaStatus = useCallback(
     (transferencia: Transferencia): TransferenciaStatus => {
-      // Se foi rejeitada (assumindo que tem campo motivo_rejeicao ou similar)
-      if ((transferencia as any).motivo_rejeicao) {
+      // ✅ Nova lógica baseada em campos fixos
+      // NÃO compara mais com patrimônio atual
+      
+      // 1. Rejeitada tem prioridade
+      if (transferencia.motivo_rejeicao) {
         return 'rejeitada';
       }
-
-      // Se não tem aprovador → pendente
-      if (!transferencia.aprovado_por) {
-        return 'pendente';
+      
+      // 2. Se foi efetivada, está concluída
+      if (transferencia.efetivada) {
+        return 'concluida';
       }
-
-      // Se tem aprovador, verificar se patrimônio foi atualizado
-      const patrimonio = patrimonios.find(
-        (p) => p.id === transferencia.patrimonio_id,
-      );
-      if (patrimonio) {
-        const setorOk = patrimonio.setor_id === transferencia.setor_destino_id;
-        const responsavelOk =
-          patrimonio.responsavel_id === transferencia.responsavel_destino_id;
-
-        if (setorOk && responsavelOk) {
-          return 'concluida'; // Transferência efetivada
-        }
+      
+      // 3. Se tem aprovador, está aprovada
+      if (transferencia.aprovado_por) {
+        return 'aprovada';
       }
-
-      return 'aprovada'; // Aprovada mas não efetivada
+      
+      // 4. Caso contrário, pendente
+      return 'pendente';
     },
-    [patrimonios],
+    [] // 🆕 SEM DEPENDÊNCIAS! Não usa mais patrimonios
   );
 
   // ========================================
@@ -248,15 +247,9 @@ export const TransferenciasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        // Adiciona o solicitante_id automaticamente
-        const { id: solicitante_id } = getUserInfo();
-        const payload = {
-          ...data,
-          solicitante_id,
-          data_transferencia: new Date().toISOString().split('T')[0],
-        };
-
-        const novaTransferencia = await apiCreateTransferencia(payload);
+        // 🆕 solicitante_id é preenchido automaticamente pela API agora
+        // Não precisa mais adicionar aqui
+        const novaTransferencia = await apiCreateTransferencia(data);
         setTransferencias((prev) => [...prev, novaTransferencia]);
 
         // Log de auditoria
@@ -278,7 +271,7 @@ export const TransferenciasProvider: React.FC<{
         setLoading(false);
       }
     },
-    [getUserInfo],
+    [],
   );
 
   const updateTransferencia = useCallback(
@@ -287,11 +280,9 @@ export const TransferenciasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        const transferenciaAtualizada = await apiUpdateTransferencia(id, data);
-
-        setTransferencias((prev) =>
-          prev.map((t) => (t.id === id ? transferenciaAtualizada : t)),
-        );
+        // ⚠️ Este método não é mais recomendado
+        // Use aprovarTransferencia, rejeitarTransferencia ou efetivarTransferencia
+        console.warn('updateTransferencia está deprecated. Use os métodos específicos.');
 
         console.log('Transferência atualizada com sucesso!');
       } catch (err: any) {
@@ -335,7 +326,7 @@ export const TransferenciasProvider: React.FC<{
   }, []);
 
   // ========================================
-  // FUNÇÕES ESPECIAIS DE APROVAÇÃO
+  // 🆕 FUNÇÕES ESPECIAIS DE APROVAÇÃO (REESCRITAS)
   // ========================================
 
   const aprovarTransferencia = useCallback(
@@ -348,37 +339,35 @@ export const TransferenciasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        const { id: aprovador_id } = getUserInfo();
-
-        // Atualiza a transferência com aprovação
-        const updateData: TransferenciaUpdate = {
-          aprovado_por: aprovador_id,
+        // 🆕 Usa novo endpoint
+        const transferenciaAtualizada = await apiAprovarTransferencia(id, {
           observacoes,
-          data_aprovacao: new Date().toISOString(),
-        };
-
-        await updateTransferencia(id, updateData);
-
-        // Log de auditoria
-        await createLog({
-          acao: 'aprovar_transferencia',
-          entidade: 'transferencia',
-          entidade_id: id,
-          detalhes: { aprovador_id, observacoes },
+          efetivar_automaticamente: efetivarAutomaticamente,
         });
 
-        // Se marcou para efetivar automaticamente
+        // Atualiza estado local
+        setTransferencias((prev) =>
+          prev.map((t) => (t.id === id ? transferenciaAtualizada : t)),
+        );
+
+        // 🆕 Se efetivou, recarrega patrimônios
         if (efetivarAutomaticamente) {
-          await efetivarTransferencia(id);
+          const patrimoniosAtualizados = await listPatrimonios();
+          setPatrimonios(patrimoniosAtualizados || []);
         }
 
         console.log('Transferência aprovada com sucesso!');
       } catch (err: any) {
         console.error('Erro ao aprovar transferência:', err);
+        setError(
+          err.response?.data?.detail || 'Erro ao aprovar transferência',
+        );
         throw err;
+      } finally {
+        setLoading(false);
       }
     },
-    [getUserInfo, updateTransferencia],
+    [],
   );
 
   const rejeitarTransferencia = useCallback(
@@ -387,32 +376,28 @@ export const TransferenciasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        const { id: rejeitador_id } = getUserInfo();
-
-        // Atualiza a transferência com rejeição
-        const updateData: any = {
-          aprovado_por: rejeitador_id,
+        // 🆕 Usa novo endpoint
+        const transferenciaAtualizada = await apiRejeitarTransferencia(id, {
           motivo_rejeicao: motivo,
-          data_aprovacao: new Date().toISOString(),
-        };
-
-        await updateTransferencia(id, updateData);
-
-        // Log de auditoria
-        await createLog({
-          acao: 'rejeitar_transferencia',
-          entidade: 'transferencia',
-          entidade_id: id,
-          detalhes: { rejeitador_id, motivo },
         });
+
+        // Atualiza estado local
+        setTransferencias((prev) =>
+          prev.map((t) => (t.id === id ? transferenciaAtualizada : t)),
+        );
 
         console.log('Transferência rejeitada.');
       } catch (err: any) {
         console.error('Erro ao rejeitar transferência:', err);
+        setError(
+          err.response?.data?.detail || 'Erro ao rejeitar transferência',
+        );
         throw err;
+      } finally {
+        setLoading(false);
       }
     },
-    [getUserInfo, updateTransferencia],
+    [],
   );
 
   const efetivarTransferencia = useCallback(
@@ -421,52 +406,28 @@ export const TransferenciasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        // Busca a transferência
-        const transferencia = transferencias.find((t) => t.id === id);
-        if (!transferencia) {
-          throw new Error('Transferência não encontrada');
-        }
+        // 🆕 Usa novo endpoint
+        const transferenciaAtualizada = await apiEfetivarTransferencia(id);
 
-        // Verifica se pode efetivar
-        const status = getTransferenciaStatus(transferencia);
-        if (status !== 'aprovada') {
-          throw new Error(
-            'Apenas transferências aprovadas podem ser efetivadas',
-          );
-        }
+        // Atualiza estado local
+        setTransferencias((prev) =>
+          prev.map((t) => (t.id === id ? transferenciaAtualizada : t)),
+        );
 
-        // Atualiza o patrimônio com novo setor e responsável
-        await apiUpdatePatrimonio(transferencia.patrimonio_id, {
-          setor_id: transferencia.setor_destino_id,
-          responsavel_id: transferencia.responsavel_destino_id,
-        });
-
-        // Recarrega os patrimônios para refletir a mudança
+        // 🆕 Recarrega patrimônios (foram atualizados)
         const patrimoniosAtualizados = await listPatrimonios();
         setPatrimonios(patrimoniosAtualizados || []);
-
-        // Log de auditoria
-        await createLog({
-          acao: 'efetivar_transferencia',
-          entidade: 'patrimonio',
-          entidade_id: transferencia.patrimonio_id,
-          detalhes: {
-            transferencia_id: id,
-            novo_setor_id: transferencia.setor_destino_id,
-            novo_responsavel_id: transferencia.responsavel_destino_id,
-          },
-        });
 
         console.log('Transferência efetivada com sucesso!');
       } catch (err: any) {
         console.error('Erro ao efetivar transferência:', err);
-        setError(err.message || 'Erro ao efetivar transferência');
+        setError(err.response?.data?.detail || 'Erro ao efetivar transferência');
         throw err;
       } finally {
         setLoading(false);
       }
     },
-    [transferencias, getTransferenciaStatus],
+    [],
   );
 
   // ========================================
@@ -510,7 +471,7 @@ export const TransferenciasProvider: React.FC<{
   }, [transferencias, getTransferenciaStatus]);
 
   // ========================================
-  // FILTRAGEM E ORDENAÇÃO
+  // 🆕 FILTRAGEM E ORDENAÇÃO (MODIFICADO)
   // ========================================
 
   const transferenciasFiltradas = useMemo((): TransferenciaComStatus[] => {
@@ -536,19 +497,26 @@ export const TransferenciasProvider: React.FC<{
       filtradas = filtradas.filter((t) => t.status === filtros.status);
     }
 
-    // Filtro por setor origem
-    if (filtros.setorOrigem !== 'todos') {
-      const setorId = parseInt(filtros.setorOrigem);
+    // 🆕 Filtro por setor UNIFICADO (origem OU destino)
+    if (filtros.setor !== 'todos') {
+      const setorId = parseInt(filtros.setor);
       if (!isNaN(setorId)) {
-        filtradas = filtradas.filter((t) => t.setor_origem_id === setorId);
+        filtradas = filtradas.filter(
+          (t) =>
+            t.setor_origem_id === setorId || t.setor_destino_id === setorId,
+        );
       }
     }
 
-    // Filtro por setor destino
-    if (filtros.setorDestino !== 'todos') {
-      const setorId = parseInt(filtros.setorDestino);
-      if (!isNaN(setorId)) {
-        filtradas = filtradas.filter((t) => t.setor_destino_id === setorId);
+    // 🆕 Filtro por responsável UNIFICADO (origem OU destino)
+    if (filtros.responsavel !== 'todos') {
+      const responsavelId = parseInt(filtros.responsavel);
+      if (!isNaN(responsavelId)) {
+        filtradas = filtradas.filter(
+          (t) =>
+            t.responsavel_origem_id === responsavelId ||
+            t.responsavel_destino_id === responsavelId,
+        );
       }
     }
 
@@ -625,6 +593,10 @@ export const TransferenciasProvider: React.FC<{
             usuarios.find((u) => u.id === b.responsavel_destino_id)?.username ||
             '';
           break;
+        case 'solicitante_nome': // 🆕 NOVO CAMPO
+          aVal = usuarios.find((u) => u.id === a.solicitante_id)?.username || '';
+          bVal = usuarios.find((u) => u.id === b.solicitante_id)?.username || '';
+          break;
         case 'aprovador_nome':
           aVal = usuarios.find((u) => u.id === a.aprovado_por)?.username || '';
           bVal = usuarios.find((u) => u.id === b.aprovado_por)?.username || '';
@@ -632,6 +604,14 @@ export const TransferenciasProvider: React.FC<{
         case 'status':
           aVal = a.status;
           bVal = b.status;
+          break;
+        case 'data_aprovacao': // 🆕 NOVO CAMPO
+          aVal = a.data_aprovacao || '';
+          bVal = b.data_aprovacao || '';
+          break;
+        case 'data_efetivacao': // 🆕 NOVO CAMPO
+          aVal = a.data_efetivacao || '';
+          bVal = b.data_efetivacao || '';
           break;
         default:
           aVal = a[ordenacao.campo as keyof TransferenciaComStatus];

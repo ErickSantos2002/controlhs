@@ -1,6 +1,10 @@
 /**
  * Tipos TypeScript para o módulo de Transferências
  * Sistema ControlHS
+ * 
+ * 🆕 ATUALIZADO: Novos campos da API
+ * - solicitante_id, efetivada, data_efetivacao
+ * - motivo_rejeicao, data_aprovacao, observacoes
  */
 
 // ========================================
@@ -18,11 +22,19 @@ export interface Transferencia {
   setor_destino_id?: number;
   responsavel_origem_id?: number;
   responsavel_destino_id?: number;
-  solicitante_id?: number;
+  
+  // 🆕 NOVOS CAMPOS DA API
+  solicitante_id?: number;           // Quem solicitou a transferência
+  efetivada: boolean;                 // Se foi efetivada (campo fixo para status)
+  data_efetivacao?: string;           // Quando foi efetivada
+  motivo_rejeicao?: string;           // Motivo da rejeição (se rejeitada)
+  data_aprovacao?: string;            // Quando foi aprovada/rejeitada
+  observacoes?: string;               // Observações do aprovador
+  
+  // Campos existentes
   aprovado_por?: number;
   data_transferencia?: string;
   motivo?: string;
-  observacoes?: string;
   criado_em?: string;
   atualizado_em?: string;
 }
@@ -39,6 +51,7 @@ export interface TransferenciaCreate {
   responsavel_destino_id?: number;
   motivo: string;
   observacoes?: string;
+  // 🆕 solicitante_id é preenchido automaticamente pela API
 }
 
 /**
@@ -50,17 +63,36 @@ export interface TransferenciaUpdate {
   observacoes?: string;
   data_aprovacao?: string;
   motivo_rejeicao?: string;
+  efetivada?: boolean;              // 🆕
+  data_efetivacao?: string;         // 🆕
+}
+
+/**
+ * 🆕 Interface para aprovar transferência
+ * Payload enviado para POST /transferencias/{id}/aprovar
+ */
+export interface TransferenciaAprovar {
+  observacoes?: string;
+  efetivar_automaticamente?: boolean;
+}
+
+/**
+ * 🆕 Interface para rejeitar transferência
+ * Payload enviado para POST /transferencias/{id}/rejeitar
+ */
+export interface TransferenciaRejeitar {
+  motivo_rejeicao: string;          // Obrigatório
 }
 
 /**
  * Status calculado da transferência
- * NÃO existe na API - deve ser calculado no frontend
+ * ✅ Agora baseado em campos fixos (não compara mais com patrimônio)
  */
 export type TransferenciaStatus =
-  | 'pendente'
-  | 'aprovada'
-  | 'concluida'
-  | 'rejeitada';
+  | 'pendente'      // aprovado_por = null, motivo_rejeicao = null, efetivada = false
+  | 'aprovada'      // aprovado_por != null, efetivada = false, motivo_rejeicao = null
+  | 'concluida'     // efetivada = true
+  | 'rejeitada';    // motivo_rejeicao != null
 
 // ========================================
 // INTERFACES DE APOIO
@@ -109,11 +141,12 @@ export interface Setor {
 
 /**
  * Interface do Usuário
+ * 🆕 Adicionado setor_id
  */
 export interface Usuario {
   id: number;
   username: string;
-  setor_id?: number;
+  setor_id?: number;                // 🆕 Setor do usuário
   role?: {
     id: number;
     name: string;
@@ -128,12 +161,13 @@ export interface Usuario {
 
 /**
  * Interface para filtros da página de transferências
+ * 🆕 MODIFICADO: Filtros unificados de setor e responsável
  */
 export interface FiltrosTransferencia {
   busca: string;
-  status: string; // 'todos' | 'pendente' | 'aprovada' | 'concluida' | 'rejeitada'
-  setorOrigem: string;
-  setorDestino: string;
+  status: string;           // 'todos' | 'pendente' | 'aprovada' | 'concluida' | 'rejeitada'
+  setor: string;            // 🆕 UNIFICADO: busca em origem OU destino
+  responsavel: string;      // 🆕 UNIFICADO: busca em origem OU destino
   patrimonio: string;
   solicitante: string;
   aprovador: string;
@@ -159,7 +193,10 @@ export type OrdenacaoCampo =
   | 'setor_destino_nome'
   | 'responsavel_origem_nome'
   | 'responsavel_destino_nome'
+  | 'solicitante_nome'          // 🆕
   | 'data_transferencia'
+  | 'data_aprovacao'            // 🆕
+  | 'data_efetivacao'           // 🆕
   | 'status'
   | 'aprovador_nome';
 
@@ -271,6 +308,7 @@ export interface WizardTransferenciaData {
 
 /**
  * Interface para exportação Excel
+ * 🆕 Adicionados novos campos
  */
 export interface TransferenciaExportData {
   ID: number;
@@ -284,7 +322,10 @@ export interface TransferenciaExportData {
   Status: string;
   Aprovador: string;
   'Data Aprovação': string;
+  'Data Efetivação': string;      // 🆕
   Motivo: string;
+  'Motivo Rejeição': string;      // 🆕
+  Observações: string;            // 🆕
 }
 
 // ========================================
@@ -352,7 +393,63 @@ export type TipoAprovacao = 'aprovar' | 'rejeitar';
  * Type para ação de confirmação
  */
 export type ConfirmAction = {
-  type: 'delete' | 'approve' | 'reject' | 'transfer';
+  type: 'delete' | 'approve' | 'reject' | 'transfer' | 'efetivar';  // 🆕 adicionado 'efetivar'
   transferencia: Transferencia;
   callback?: () => void;
 };
+
+// ========================================
+// 🆕 HELPERS DE VALIDAÇÃO
+// ========================================
+
+/**
+ * Helper: Verifica se transferência está pendente
+ */
+export function isTransferenciaPendente(t: Transferencia): boolean {
+  return !t.aprovado_por && !t.motivo_rejeicao && !t.efetivada;
+}
+
+/**
+ * Helper: Verifica se transferência está aprovada (mas não efetivada)
+ */
+export function isTransferenciaAprovada(t: Transferencia): boolean {
+  return !!t.aprovado_por && !t.efetivada && !t.motivo_rejeicao;
+}
+
+/**
+ * Helper: Verifica se transferência está concluída (efetivada)
+ */
+export function isTransferenciaConcluida(t: Transferencia): boolean {
+  return t.efetivada;
+}
+
+/**
+ * Helper: Verifica se transferência está rejeitada
+ */
+export function isTransferenciaRejeitada(t: Transferencia): boolean {
+  return !!t.motivo_rejeicao;
+}
+
+/**
+ * Helper: Calcula status da transferência
+ * ✅ Nova lógica baseada em campos fixos
+ */
+export function calcularStatusTransferencia(t: Transferencia): TransferenciaStatus {
+  // 1. Rejeitada tem prioridade
+  if (t.motivo_rejeicao) {
+    return 'rejeitada';
+  }
+  
+  // 2. Se foi efetivada, está concluída
+  if (t.efetivada) {
+    return 'concluida';
+  }
+  
+  // 3. Se tem aprovador, está aprovada
+  if (t.aprovado_por) {
+    return 'aprovada';
+  }
+  
+  // 4. Caso contrário, pendente
+  return 'pendente';
+}
