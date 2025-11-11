@@ -83,9 +83,9 @@ const PatrimoniosContent: React.FC = () => {
 
   const userRole = user?.role?.toLowerCase() || '';
   const canCreate = ['administrador', 'gestor'].includes(userRole);
-  const canEdit = ['administrador', 'gestor'].includes(userRole);
+  const canEdit = ['administrador', 'gestor', 'gerente'].includes(userRole);
   const canDelete = userRole === 'administrador';
-  const isAdmin = ['gestor', 'administrador'].includes(userRole);
+  const isAdmin = ['gestor', 'administrador', 'gerente'].includes(userRole);
 
   // ========================================
   // EFEITOS

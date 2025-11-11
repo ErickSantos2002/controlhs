@@ -57,13 +57,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // ✅ Busca dados do usuário logado (o token já está configurado)
       const me = await getMe();
 
-      const { id, username: userNameFromAPI, role } = me;
+      const { id, username: userNameFromAPI, role, setor_id } = me; // 🆕 pega setor_id
       const roleName = typeof role === 'string' ? role : role?.name || '';
 
       // salva no localStorage
       localStorage.setItem('id', id.toString());
       localStorage.setItem('username', userNameFromAPI);
       localStorage.setItem('role', roleName);
+      localStorage.setItem('setor_id', setor_id?.toString() || ''); // 🆕 ADICIONAR ESTA LINHA
 
       // atualiza state
       setUser({ id, username: userNameFromAPI, role: roleName });
@@ -93,6 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem('username');
     localStorage.removeItem('role');
     localStorage.removeItem('id');
+    localStorage.removeItem('setor_id'); // 🆕 ADICIONAR ESTA LINHA
     setUser(null);
     setToken(null);
     setError(null);

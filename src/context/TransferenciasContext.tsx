@@ -62,13 +62,15 @@ const getInitialFilters = (): FiltrosTransferencia => {
   const userRole = getUserRoleFromStorage();
   const userId = getUserIdFromStorage();
 
-  // Se for usuário comum, já inicializa com filtro do usuário
-  if (userId && !['gestor', 'administrador'].includes(userRole)) {
+  // 🎯 NOVA LÓGICA DE FILTROS POR ROLE
+
+  // Administrador e Gerente: veem tudo
+  if (['administrador', 'gerente'].includes(userRole)) {
     return {
       busca: '',
       status: 'todos',
       setor: 'todos',
-      responsavel: userId, // 🎯 JÁ FILTRA DESDE O INÍCIO
+      responsavel: 'todos',
       patrimonio: 'todos',
       solicitante: 'todos',
       aprovador: 'todos',
@@ -77,7 +79,39 @@ const getInitialFilters = (): FiltrosTransferencia => {
     };
   }
 
-  // Caso contrário, filtros padrão
+  // Gestor: vê apenas transferências do setor dele
+  if (userRole === 'gestor') {
+    const setorId = localStorage.getItem('setor_id');
+    
+    return {
+      busca: '',
+      status: 'todos',
+      setor: setorId || 'todos', // 🎯 Filtra por setor (origem OU destino)
+      responsavel: 'todos',
+      patrimonio: 'todos',
+      solicitante: 'todos',
+      aprovador: 'todos',
+      dataInicio: undefined,
+      dataFim: undefined,
+    };
+  }
+
+  // Usuario comum: vê apenas transferências onde ele é responsável
+  if (userId) {
+    return {
+      busca: '',
+      status: 'todos',
+      setor: 'todos',
+      responsavel: userId, // 🎯 Filtra por responsável (origem OU destino)
+      patrimonio: 'todos',
+      solicitante: 'todos',
+      aprovador: 'todos',
+      dataInicio: undefined,
+      dataFim: undefined,
+    };
+  }
+
+  // Fallback: sem filtro
   return {
     busca: '',
     status: 'todos',

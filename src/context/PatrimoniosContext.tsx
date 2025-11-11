@@ -72,20 +72,50 @@ export const PatrimoniosProvider: React.FC<{ children: React.ReactNode }> = ({
     const userRole = getUserRoleFromStorage();
     const userId = getUserIdFromStorage();
 
-    // Se for usuário comum, já inicializa com filtro do usuário
-    if (userId && !['gestor', 'administrador'].includes(userRole)) {
+    // 🎯 NOVA LÓGICA DE FILTROS POR ROLE
+    
+    // Administrador e Gerente: veem tudo
+    if (['administrador', 'gerente'].includes(userRole)) {
       return {
         busca: '',
         categoria: 'todas',
         setor: 'todos',
         status: 'todos',
-        responsavel: userId, // 🎯 JÁ FILTRA DESDE O INÍCIO
+        responsavel: 'todos',
         dataInicio: undefined,
         dataFim: undefined,
       };
     }
 
-    // Caso contrário, filtros padrão
+    // Gestor: vê apenas do setor dele (precisa buscar o setor do usuário)
+    if (userRole === 'gestor') {
+      const setorId = localStorage.getItem('setor_id'); // 🆕 Precisa salvar no login!
+      
+      return {
+        busca: '',
+        categoria: 'todas',
+        setor: setorId || 'todos', // 🎯 Filtra por setor
+        status: 'todos',
+        responsavel: 'todos',
+        dataInicio: undefined,
+        dataFim: undefined,
+      };
+    }
+
+    // Usuario comum: vê apenas os patrimônios dele
+    if (userId) {
+      return {
+        busca: '',
+        categoria: 'todas',
+        setor: 'todos',
+        status: 'todos',
+        responsavel: userId, // 🎯 Filtra por responsável
+        dataInicio: undefined,
+        dataFim: undefined,
+      };
+    }
+
+    // Fallback: sem filtro
     return {
       busca: '',
       categoria: 'todas',

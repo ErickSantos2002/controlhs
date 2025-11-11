@@ -98,7 +98,7 @@ const TransferenciasContent: React.FC = () => {
   // ========================================
 
   const userRole = user?.role?.toLowerCase() || '';
-  const isAdmin = ['gestor', 'administrador'].includes(userRole);
+  const isAdmin = ['gestor', 'administrador', 'gerente'].includes(userRole);
   const canCreate = true; // Todos podem solicitar transferências
   const canDelete = userRole === 'administrador';
 
