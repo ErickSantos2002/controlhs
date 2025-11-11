@@ -42,6 +42,8 @@ const DashboardPatrimonio: React.FC = () => {
     patrimoniosFiltrados,
     kpis,
     refreshData,
+    initializeData,  // <- ADICIONAR
+    initialized,      // <- ADICIONAR
   } = useDashboard();
 
   // Estados locais para paginação
@@ -50,6 +52,14 @@ const DashboardPatrimonio: React.FC = () => {
   const itensPorPagina = 10;
 
   const CORES_GRAFICO = ['#3b82f6', '#22c55e', '#facc15', '#ef4444', '#a855f7'];
+
+  // 2. ADICIONAR este useEffect ANTES do useEffect de busca:
+  // Inicializa dados quando o componente monta (após login)
+  useEffect(() => {
+    if (user && !initialized) {
+      initializeData();
+    }
+  }, [user, initialized, initializeData]);
 
   // Atualiza busca no contexto com debounce
   useEffect(() => {

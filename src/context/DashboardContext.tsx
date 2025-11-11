@@ -73,12 +73,14 @@ interface DashboardContextData {
   // Estados
   loading: boolean;
   error: string | null;
+  initialized: boolean;
 
   // Dados filtrados
   patrimoniosFiltrados: Patrimonio[];
 
   // Funções
   refreshData: () => Promise<void>;
+  initializeData: () => Promise<void>;
 
   // KPIs calculados
   kpis: {
@@ -105,9 +107,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [setores, setSetores] = useState<Setor[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number>(0);
+  const [initialized, setInitialized] = useState(false);
 
   // Filtros
   const [filtros, setFiltros] = useState<FiltrosDashboard>({
@@ -148,6 +151,7 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
         setSetores(setoresData || []);
         setUsuarios(usuariosData || []);
         setLastFetch(now);
+        setInitialized(true);
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
         setError(
@@ -160,10 +164,15 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
     [lastFetch],
   );
 
-  // Carrega dados iniciais
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Função para inicializar dados (chamada manualmente pelo componente)
+  const initializeData = useCallback(async () => {
+    if (!initialized) {
+      await fetchData(true);
+    }
+  }, [initialized, fetchData]);
+
+  // REMOVIDO: useEffect que carregava dados automaticamente
+  // Agora os dados só são carregados quando initializeData() é chamado
 
   // Filtra patrimônios baseado nos filtros ativos
   const patrimoniosFiltrados = useMemo(() => {
@@ -304,8 +313,10 @@ export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({
     setFiltros,
     loading,
     error,
+    initialized,
     patrimoniosFiltrados,
     refreshData: () => fetchData(true),
+    initializeData,
     kpis,
   };
 
