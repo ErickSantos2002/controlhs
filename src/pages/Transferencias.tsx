@@ -26,6 +26,7 @@ import {
 import TransferenciaModal from '../components/TransferenciaModal';
 import TransferenciaDetalhes from '../components/TransferenciaDetalhes';
 import TransferenciaAprovacao from '../components/TransferenciaAprovacao';
+import { useAuth } from '../hooks/useAuth';
 import * as XLSX from 'xlsx';
 import {
   Transferencia,
@@ -43,6 +44,7 @@ import {
 // ========================================
 
 const TransferenciasContent: React.FC = () => {
+  const { user } = useAuth();
   const {
     transferenciasFiltradas,
     patrimonios,
@@ -90,11 +92,13 @@ const TransferenciasContent: React.FC = () => {
   const [efetivandoId, setEfetivandoId] = useState<number | null>(null);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
+
   // ========================================
   // PERMISSÕES
   // ========================================
 
-  const userRole = localStorage.getItem('role')?.toLowerCase() || '';
+  const userRole = user?.role?.toLowerCase() || '';
+  const isAdmin = ['gestor', 'administrador'].includes(userRole);
   const canCreate = true; // Todos podem solicitar transferências
   const canDelete = userRole === 'administrador';
 
@@ -532,18 +536,25 @@ const TransferenciasContent: React.FC = () => {
             <select
               value={filtros.responsavel}
               onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
+              disabled={!isAdmin}
               className="w-full px-3 py-2 rounded-lg
-                  bg-white/95 dark:bg-[#2a2a2a]/95
-                  text-gray-900 dark:text-gray-100
-                  border border-gray-300 dark:border-[#3a3a3a]
-                  focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-[#3a3a3a]
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="todos">Todos</option>
-              {usuarios.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.username}
-                </option>
-              ))}
+              {isAdmin ? (
+                <>
+                  <option value="todos">Todos os responsáveis</option>
+                  {usuarios.map((usuario) => (
+                    <option key={usuario.id} value={usuario.id}>
+                      {usuario.username}
+                    </option>
+                  ))}
+                </>
+              ) : (
+                <option value={user?.id}>{user?.username}</option>
+              )}
             </select>
           </div>
 

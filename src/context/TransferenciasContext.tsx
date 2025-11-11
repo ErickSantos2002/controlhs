@@ -48,6 +48,49 @@ const TransferenciasContext = createContext<
 // Cache configuration
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutos
 
+// 🆕 Funções auxiliares para obter dados do localStorage
+const getUserRoleFromStorage = (): string => {
+  return localStorage.getItem('role')?.toLowerCase() || '';
+};
+
+const getUserIdFromStorage = (): string | null => {
+  return localStorage.getItem('id');
+};
+
+// 🆕 Inicializa filtros com base no usuário
+const getInitialFilters = (): FiltrosTransferencia => {
+  const userRole = getUserRoleFromStorage();
+  const userId = getUserIdFromStorage();
+
+  // Se for usuário comum, já inicializa com filtro do usuário
+  if (userId && !['gestor', 'administrador'].includes(userRole)) {
+    return {
+      busca: '',
+      status: 'todos',
+      setor: 'todos',
+      responsavel: userId, // 🎯 JÁ FILTRA DESDE O INÍCIO
+      patrimonio: 'todos',
+      solicitante: 'todos',
+      aprovador: 'todos',
+      dataInicio: undefined,
+      dataFim: undefined,
+    };
+  }
+
+  // Caso contrário, filtros padrão
+  return {
+    busca: '',
+    status: 'todos',
+    setor: 'todos',
+    responsavel: 'todos',
+    patrimonio: 'todos',
+    solicitante: 'todos',
+    aprovador: 'todos',
+    dataInicio: undefined,
+    dataFim: undefined,
+  };
+};
+
 export const TransferenciasProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
@@ -68,18 +111,8 @@ export const TransferenciasProvider: React.FC<{
   // FILTROS E ORDENAÇÃO
   // ========================================
 
-  // 🆕 MODIFICADO: Filtros unificados
-  const [filtros, setFiltros] = useState<FiltrosTransferencia>({
-    busca: '',
-    status: 'todos',
-    setor: 'todos',           // 🆕 UNIFICADO
-    responsavel: 'todos',     // 🆕 UNIFICADO
-    patrimonio: 'todos',
-    solicitante: 'todos',
-    aprovador: 'todos',
-    dataInicio: undefined,
-    dataFim: undefined,
-  });
+  // 🆕 Filtros inicializados de forma inteligente
+  const [filtros, setFiltros] = useState<FiltrosTransferencia>(getInitialFilters());
 
   const [ordenacao, setOrdenacao] = useState<OrdenacaoTransferencia>({
     campo: 'id',

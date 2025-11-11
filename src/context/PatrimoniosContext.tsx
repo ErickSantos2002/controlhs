@@ -38,6 +38,16 @@ const PatrimoniosContext = createContext<PatrimoniosContextData | undefined>(
 // Cache configuration
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutos
 
+// 🆕 Função auxiliar para obter role do usuário do localStorage
+const getUserRoleFromStorage = (): string => {
+  return localStorage.getItem('role')?.toLowerCase() || '';
+};
+
+// 🆕 Função auxiliar para obter ID do usuário do localStorage
+const getUserIdFromStorage = (): string | null => {
+  return localStorage.getItem('id');
+};
+
 export const PatrimoniosProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -54,18 +64,40 @@ export const PatrimoniosProvider: React.FC<{ children: React.ReactNode }> = ({
   const [lastFetch, setLastFetch] = useState<number>(0);
 
   // ========================================
-  // FILTROS E ORDENAÇÃO
+  // FILTROS E ORDENAÇÃO - 🆕 INICIALIZAÇÃO INTELIGENTE
   // ========================================
 
-  const [filtros, setFiltros] = useState<FiltrosPatrimonio>({
-    busca: '',
-    categoria: 'todas',
-    setor: 'todos',
-    status: 'todos',
-    responsavel: 'todos',
-    dataInicio: undefined,
-    dataFim: undefined,
-  });
+  // 🔥 SOLUÇÃO: Inicializa filtros ANTES do carregamento
+  const getInitialFilters = (): FiltrosPatrimonio => {
+    const userRole = getUserRoleFromStorage();
+    const userId = getUserIdFromStorage();
+
+    // Se for usuário comum, já inicializa com filtro do usuário
+    if (userId && !['gestor', 'administrador'].includes(userRole)) {
+      return {
+        busca: '',
+        categoria: 'todas',
+        setor: 'todos',
+        status: 'todos',
+        responsavel: userId, // 🎯 JÁ FILTRA DESDE O INÍCIO
+        dataInicio: undefined,
+        dataFim: undefined,
+      };
+    }
+
+    // Caso contrário, filtros padrão
+    return {
+      busca: '',
+      categoria: 'todas',
+      setor: 'todos',
+      status: 'todos',
+      responsavel: 'todos',
+      dataInicio: undefined,
+      dataFim: undefined,
+    };
+  };
+
+  const [filtros, setFiltros] = useState<FiltrosPatrimonio>(getInitialFilters());
 
   const [ordenacao, setOrdenacao] = useState<OrdenacaoPatrimonio>({
     campo: 'id',
@@ -133,12 +165,11 @@ export const PatrimoniosProvider: React.FC<{ children: React.ReactNode }> = ({
         const novoPatrimonio = await apiCreatePatrimonio(data);
         setPatrimonios((prev) => [...prev, novoPatrimonio]);
 
-        // Toast de sucesso seria disparado aqui
         console.log('Patrimônio criado com sucesso!');
       } catch (err: any) {
         console.error('Erro ao criar patrimônio:', err);
         setError(err.response?.data?.detail || 'Erro ao criar patrimônio');
-        throw err; // Re-throw para o componente tratar
+        throw err;
       } finally {
         setLoading(false);
       }
@@ -158,12 +189,11 @@ export const PatrimoniosProvider: React.FC<{ children: React.ReactNode }> = ({
           prev.map((p) => (p.id === id ? patrimonioAtualizado : p)),
         );
 
-        // Toast de sucesso seria disparado aqui
         console.log('Patrimônio atualizado com sucesso!');
       } catch (err: any) {
         console.error('Erro ao atualizar patrimônio:', err);
         setError(err.response?.data?.detail || 'Erro ao atualizar patrimônio');
-        throw err; // Re-throw para o componente tratar
+        throw err;
       } finally {
         setLoading(false);
       }
@@ -180,12 +210,11 @@ export const PatrimoniosProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setPatrimonios((prev) => prev.filter((p) => p.id !== id));
 
-      // Toast de sucesso seria disparado aqui
       console.log('Patrimônio excluído com sucesso!');
     } catch (err: any) {
       console.error('Erro ao excluir patrimônio:', err);
       setError(err.response?.data?.detail || 'Erro ao excluir patrimônio');
-      throw err; // Re-throw para o componente tratar
+      throw err;
     } finally {
       setLoading(false);
     }

@@ -37,7 +37,7 @@ import type {
 // ========================================
 
 const PatrimoniosContent: React.FC = () => {
-  const { user } = useAuth(); // <- ADICIONAR AQUI
+  const { user } = useAuth();
   const {
     patrimoniosFiltrados,
     categorias,
@@ -90,32 +90,6 @@ const PatrimoniosContent: React.FC = () => {
   // ========================================
   // EFEITOS
   // ========================================
-
-  // Logo após os estados locais (depois da linha 76)
-  useEffect(() => {
-    if (!user) return;
-
-    const userRole = user.role?.toLowerCase() || '';
-
-    // Se for usuário comum (não gestor nem admin)
-    if (!['gestor', 'administrador'].includes(userRole)) {
-      const userId = user.id.toString();
-
-      // Só aplica se ainda não estiver filtrando por ele
-      if (filtros.responsavel !== userId) {
-        setFiltros({
-          ...filtros,
-          responsavel: userId,
-          busca: '',
-          categoria: 'todas',
-          setor: 'todos',
-          status: 'todos',
-          dataInicio: undefined,
-          dataFim: undefined,
-        });
-      }
-    }
-  }, [user, filtros.responsavel, setFiltros])
 
   // Atualiza busca no contexto com debounce
   useEffect(() => {
@@ -230,18 +204,36 @@ const PatrimoniosContent: React.FC = () => {
     }
   };
 
+  // ✅ ADICIONADO: Lógica no limparFiltros
   const limparFiltros = () => {
-    setFiltros({
-      busca: '',
-      categoria: 'todas',
-      setor: 'todos',
-      status: 'todos',
-      responsavel: 'todos',
-      dataInicio: undefined,
-      dataFim: undefined,
-    });
-    setBuscaLocal('');
+    // Se for usuário comum, mantém o filtro dele
+    if (!isAdmin && user) {
+      setFiltros({
+        busca: '',
+        categoria: 'todas',
+        setor: 'todos',
+        status: 'todos',
+        responsavel: user.id.toString(), // Mantém filtrado pelo usuário
+        dataInicio: undefined,
+        dataFim: undefined,
+      });
+      setBuscaLocal('');
+    } else {
+      // Admin pode limpar tudo
+      setFiltros({
+        busca: '',
+        categoria: 'todas',
+        setor: 'todos',
+        status: 'todos',
+        responsavel: 'todos',
+        dataInicio: undefined,
+        dataFim: undefined,
+      });
+      setBuscaLocal('');
+    }
+    // ...
   };
+
 
   const handleExportarExcel = () => {
     if (patrimoniosFiltrados.length === 0) {
