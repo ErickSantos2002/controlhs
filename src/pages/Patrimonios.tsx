@@ -23,6 +23,7 @@ import {
 } from '../context/PatrimoniosContext';
 import PatrimonioModal from '../components/PatrimonioModal';
 import PatrimonioDetalhes from '../components/PatrimonioDetalhes';
+import { useAuth } from '../hooks/useAuth';
 import * as XLSX from 'xlsx';
 import type {
   Patrimonio,
@@ -36,6 +37,7 @@ import type {
 // ========================================
 
 const PatrimoniosContent: React.FC = () => {
+  const { user } = useAuth(); // <- ADICIONAR AQUI
   const {
     patrimoniosFiltrados,
     categorias,
@@ -79,14 +81,41 @@ const PatrimoniosContent: React.FC = () => {
   // PERMISSÕES
   // ========================================
 
-  const userRole = localStorage.getItem('role')?.toLowerCase() || '';
+  const userRole = user?.role?.toLowerCase() || '';
   const canCreate = ['administrador', 'gestor'].includes(userRole);
   const canEdit = ['administrador', 'gestor'].includes(userRole);
   const canDelete = userRole === 'administrador';
+  const isAdmin = ['gestor', 'administrador'].includes(userRole);
 
   // ========================================
   // EFEITOS
   // ========================================
+
+  // Logo após os estados locais (depois da linha 76)
+  useEffect(() => {
+    if (!user) return;
+
+    const userRole = user.role?.toLowerCase() || '';
+
+    // Se for usuário comum (não gestor nem admin)
+    if (!['gestor', 'administrador'].includes(userRole)) {
+      const userId = user.id.toString();
+
+      // Só aplica se ainda não estiver filtrando por ele
+      if (filtros.responsavel !== userId) {
+        setFiltros({
+          ...filtros,
+          responsavel: userId,
+          busca: '',
+          categoria: 'todas',
+          setor: 'todos',
+          status: 'todos',
+          dataInicio: undefined,
+          dataFim: undefined,
+        });
+      }
+    }
+  }, [user, filtros.responsavel, setFiltros])
 
   // Atualiza busca no contexto com debounce
   useEffect(() => {
@@ -566,21 +595,26 @@ const PatrimoniosContent: React.FC = () => {
             </label>
             <select
               value={filtros.responsavel}
-              onChange={(e) =>
-                setFiltros({ ...filtros, responsavel: e.target.value })
-              }
+              onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
+              disabled={!isAdmin}
               className="w-full px-3 py-2 rounded-lg
                 bg-white/95 dark:bg-[#2a2a2a]/95
                 text-gray-900 dark:text-gray-100
                 border border-gray-300 dark:border-[#3a3a3a]
                 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="todos">Todos</option>
-              {usuarios.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.username}
-                </option>
-              ))}
+              {isAdmin ? (
+                <>
+                  <option value="todos">Todos os responsáveis</option>
+                  {usuarios.map((usuario) => (
+                    <option key={usuario.id} value={usuario.id}>
+                      {usuario.username}
+                    </option>
+                  ))}
+                </>
+              ) : (
+                <option value={user?.id}>{user?.username}</option>
+              )}
             </select>
           </div>
         </div>
