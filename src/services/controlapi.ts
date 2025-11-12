@@ -318,16 +318,116 @@ export async function createInventario(payload: any) {
 // 📎 ANEXOS
 // ========================================
 
-export async function listAnexos() {
-  const { data } = await api.get('/anexos/');
+/**
+ * Lista todos os anexos ou anexos de um patrimônio específico
+ * 
+ * @param patrimonioId - (Opcional) ID do patrimônio para filtrar anexos
+ * @returns Lista de anexos
+ * 
+ * @example
+ * // Listar todos os anexos
+ * await listAnexos();
+ * 
+ * // Listar anexos de um patrimônio específico
+ * await listAnexos(1);
+ */
+export async function listAnexos(patrimonioId?: number) {
+  const params = patrimonioId ? { patrimonio_id: patrimonioId } : {};
+  const { data } = await api.get('/anexos/', { params });
   return data;
 }
 
+/**
+ * Faz upload de um novo anexo
+ * 
+ * @param formData - FormData contendo o arquivo e metadados
+ * @returns Anexo criado
+ * 
+ * @example
+ * const formData = new FormData();
+ * formData.append('file', file);
+ * formData.append('tipo', 'nota_fiscal');
+ * formData.append('patrimonio_id', '1');
+ * formData.append('descricao', 'Nota fiscal de aquisição');
+ * 
+ * await uploadAnexo(formData);
+ */
 export async function uploadAnexo(formData: FormData) {
   const { data } = await api.post('/anexos/', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
   return data;
+}
+
+/**
+ * Obtém informações de um anexo específico
+ * 
+ * @param id - ID do anexo
+ * @returns Dados do anexo
+ */
+export async function getAnexo(id: number) {
+  const { data } = await api.get(`/anexos/${id}`);
+  return data;
+}
+
+/**
+ * Atualiza metadados de um anexo
+ * ⚠️ NOTA: Não permite alterar o arquivo, apenas tipo e descrição
+ * 
+ * @param id - ID do anexo
+ * @param payload - Dados a atualizar (tipo, descricao)
+ * @returns Anexo atualizado
+ */
+export async function updateAnexo(id: number, payload: any) {
+  const { data } = await api.put(`/anexos/${id}`, payload);
+  return data;
+}
+
+/**
+ * Exclui um anexo (registro e arquivo físico)
+ * ⚠️ CUIDADO: Esta ação é irreversível!
+ * 
+ * @param id - ID do anexo
+ */
+export async function deleteAnexo(id: number) {
+  await api.delete(`/anexos/${id}`);
+}
+
+/**
+ * Faz download de um arquivo anexo
+ * 
+ * @param id - ID do anexo
+ * @param nomeOriginal - (Opcional) Nome do arquivo para salvar
+ * 
+ * @example
+ * await downloadAnexo(1, 'nota_fiscal.pdf');
+ */
+export async function downloadAnexo(id: number, nomeOriginal?: string) {
+  try {
+    const response = await api.get(`/anexos/${id}/download`, {
+      responseType: 'blob', // Importante para arquivos binários
+    });
+
+    // Cria um blob com os dados do arquivo
+    const blob = new Blob([response.data]);
+    
+    // Cria uma URL temporária para o blob
+    const url = window.URL.createObjectURL(blob);
+    
+    // Cria um link temporário e simula o clique
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomeOriginal || `anexo_${id}`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Limpa a URL temporária e remove o link
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+  } catch (error: any) {
+    console.error('Erro ao fazer download do anexo:', error);
+    throw error;
+  }
 }
 
 // ========================================

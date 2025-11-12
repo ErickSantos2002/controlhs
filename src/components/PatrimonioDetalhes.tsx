@@ -15,6 +15,8 @@ import {
   Info,
 } from 'lucide-react';
 import { usePatrimonios } from '../context/PatrimoniosContext';
+import { AnexosProvider } from '../context/AnexosContext';
+import AnexosSection from './AnexosSection';
 import type {
   Patrimonio,
   STATUS_LABELS,
@@ -353,6 +355,13 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Seção: Anexos */}
+            <div className="mb-6">
+              <AnexosProvider>
+                <AnexosSection patrimonioId={patrimonio.id} />
+              </AnexosProvider>
+            </div>
           </div>
 
           {/* Footer com botões */}
@@ -367,22 +376,6 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
             >
               Fechar
             </button>
-
-            {onEdit && (
-              <button
-                onClick={() => {
-                  onEdit(patrimonio);
-                  onClose();
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white
-                  bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
-                  rounded-lg shadow-sm hover:shadow-md
-                  transition-all duration-200"
-              >
-                <Edit className="w-4 h-4" />
-                Editar Patrimônio
-              </button>
-            )}
           </div>
         </div>
       </div>
