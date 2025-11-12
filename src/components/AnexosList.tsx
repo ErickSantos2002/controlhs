@@ -14,6 +14,7 @@ import {
   User,
 } from 'lucide-react';
 import { useAnexos } from '../context/AnexosContext';
+import { useAuth } from '../hooks/useAuth';
 import {
   TIPO_ANEXO_LABELS,
   TIPO_ANEXO_COLORS,
@@ -33,6 +34,7 @@ const AnexosList: React.FC<AnexosListProps> = ({
   showEmpty = true,
 }) => {
   const { anexos, loading, downloadAnexo, deleteAnexo } = useAnexos();
+  const { user } = useAuth();
 
   // ========================================
   // ESTADOS LOCAIS
@@ -205,10 +207,12 @@ const AnexosList: React.FC<AnexosListProps> = ({
                   </div>
                   {anexo.enviado_por && (
                     <div className="flex items-center gap-1">
-                      <User className="w-3.5 h-3.5" />
-                      ID: {anexo.enviado_por}
+                        <User className="w-3.5 h-3.5" />
+                        {anexo.enviado_por === user?.id
+                        ? user?.username
+                        : `ID: ${anexo.enviado_por}`}
                     </div>
-                  )}
+                    )}
                 </div>
               </div>
             </div>
