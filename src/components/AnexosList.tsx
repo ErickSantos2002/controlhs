@@ -14,6 +14,7 @@ import {
   User,
 } from 'lucide-react';
 import { useAnexos } from '../context/AnexosContext';
+import { usePatrimonios } from '../context/PatrimoniosContext'; // ← ADICIONAR ESTA LINHA
 import { useAuth } from '../hooks/useAuth';
 import {
   TIPO_ANEXO_LABELS,
@@ -34,6 +35,7 @@ const AnexosList: React.FC<AnexosListProps> = ({
   showEmpty = true,
 }) => {
   const { anexos, loading, downloadAnexo, deleteAnexo } = useAnexos();
+  const { usuarios } = usePatrimonios(); // ← ADICIONAR ESTA LINHA
   const { user } = useAuth();
 
   // ========================================
@@ -53,6 +55,16 @@ const AnexosList: React.FC<AnexosListProps> = ({
   const anexosFiltrados = patrimonioId
     ? anexos.filter((a) => a.patrimonio_id === patrimonioId)
     : anexos;
+
+  // ========================================
+  // OBTER NOME DO USUÁRIO
+  // ========================================
+
+  const getUsuarioNome = (userId?: number): string => {
+    if (!userId) return 'Desconhecido';
+    const usuario = usuarios.find((u) => u.id === userId);
+    return usuario?.username || `ID: ${userId}`;
+  };
 
   // ========================================
   // HANDLERS
@@ -207,12 +219,10 @@ const AnexosList: React.FC<AnexosListProps> = ({
                   </div>
                   {anexo.enviado_por && (
                     <div className="flex items-center gap-1">
-                        <User className="w-3.5 h-3.5" />
-                        {anexo.enviado_por === user?.id
-                        ? user?.username
-                        : `ID: ${anexo.enviado_por}`}
+                      <User className="w-3.5 h-3.5" />
+                      {getUsuarioNome(anexo.enviado_por)}
                     </div>
-                    )}
+                  )}
                 </div>
               </div>
             </div>
@@ -259,7 +269,9 @@ const AnexosList: React.FC<AnexosListProps> = ({
               ) : (
                 <button
                   onClick={() => setShowDeleteConfirm(anexo.id)}
-                  disabled={downloadingId === anexo.id || deletingId === anexo.id}
+                  disabled={
+                    downloadingId === anexo.id || deletingId === anexo.id
+                  }
                   className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Excluir anexo"
                 >
