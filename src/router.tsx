@@ -7,6 +7,7 @@ import Patrimonios from './pages/Patrimonios';
 import Transferencias from './pages/Transferencias';
 import NotFound from './pages/NotFound';
 import Logs from './pages/Logs';
+import CadastrosBasicos from './pages/CadastrosBasicos';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
@@ -59,6 +60,15 @@ const AppRoutes: React.FC = () => (
       element={
         <ProtectedRoute>
           <Transferencias />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/cadastros"
+      element={
+        <ProtectedRoute>
+          <CadastrosBasicos />
         </ProtectedRoute>
       }
     />
