@@ -4,6 +4,7 @@ import {
   Edit,
   Trash2,
   Search,
+  Eye,
   RefreshCw,
   Tag,
   ChevronUp,
@@ -308,7 +309,7 @@ const CategoriasTab: React.FC = () => {
                         className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                         aria-label="Visualizar categoria"
                       >
-                        👁️
+                        <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       </button>
 
                       {/* Editar - apenas para admin/gerente */}
@@ -318,7 +319,7 @@ const CategoriasTab: React.FC = () => {
                           className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           aria-label="Editar categoria"
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                         </button>
                       )}
 
