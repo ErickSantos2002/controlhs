@@ -119,10 +119,7 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
             {/* Seção de Anexos */}
             <div>
               <AnexosProvider>
-                <AnexosSection
-                  patrimonioId={baixa.patrimonio_id}
-                  baixaId={baixa.id}
-                />
+                <AnexosSection baixaId={baixa.id} />
               </AnexosProvider>
             </div>
           </div>

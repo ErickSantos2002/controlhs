@@ -29,8 +29,12 @@ const AnexosSection: React.FC<AnexosSectionProps> = ({
   // ========================================
 
   useEffect(() => {
-    listAnexos(patrimonioId);
-  }, [patrimonioId, listAnexos]);
+    // Se tiver patrimonioId, carrega anexos daquele patrimonio
+    // Se tiver apenas baixaId, carrega todos os anexos (filtro será aplicado localmente)
+    if (patrimonioId || baixaId) {
+      listAnexos(patrimonioId);
+    }
+  }, [patrimonioId, baixaId, listAnexos]);
 
   // ========================================
   // HANDLERS
