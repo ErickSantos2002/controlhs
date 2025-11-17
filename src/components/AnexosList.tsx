@@ -27,11 +27,13 @@ import type { Anexo } from '../types/anexos.types';
 
 interface AnexosListProps {
   patrimonioId?: number;
+  baixaId?: number;
   showEmpty?: boolean;
 }
 
 const AnexosList: React.FC<AnexosListProps> = ({
   patrimonioId,
+  baixaId,
   showEmpty = true,
 }) => {
   const { anexos, loading, downloadAnexo, deleteAnexo } = useAnexos();
@@ -49,12 +51,21 @@ const AnexosList: React.FC<AnexosListProps> = ({
   );
 
   // ========================================
-  // FILTRAR ANEXOS (se patrimonioId fornecido)
+  // FILTRAR ANEXOS
   // ========================================
 
-  const anexosFiltrados = patrimonioId
-    ? anexos.filter((a) => a.patrimonio_id === patrimonioId)
-    : anexos;
+  const anexosFiltrados = anexos.filter((a) => {
+    if (patrimonioId && baixaId) {
+      return a.patrimonio_id === patrimonioId && a.baixa_id === baixaId;
+    }
+    if (patrimonioId) {
+      return a.patrimonio_id === patrimonioId;
+    }
+    if (baixaId) {
+      return a.baixa_id === baixaId;
+    }
+    return true; // Se nenhum filtro, mostra todos
+  });
 
   // ========================================
   // OBTER NOME DO USUÁRIO

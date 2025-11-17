@@ -19,7 +19,6 @@ export interface Baixa {
   tipo: TipoBaixa;
   motivo: string;
   aprovado_por?: number;
-  documento_anexo?: string;
   criado_em?: string;
   atualizado_em?: string;
 }
@@ -33,7 +32,21 @@ export interface BaixaCreate {
   tipo: string;
   motivo: string;
   aprovado_por?: number;
-  documento_anexo?: string;
+}
+
+/**
+ * Interface para anexo de baixa
+ */
+export interface AnexoBaixa {
+  id: number;
+  patrimonio_id: number;
+  baixa_id: number;
+  tipo: string;
+  caminho_arquivo: string;
+  descricao?: string;
+  enviado_por: number;
+  criado_em?: string;
+  atualizado_em?: string;
 }
 
 /**
@@ -265,7 +278,6 @@ export interface BaixaExportData {
   Motivo: string;
   Status: string;
   Aprovador: string;
-  'Documento Anexo': string;
 }
 
 // ========================================

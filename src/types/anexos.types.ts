@@ -14,6 +14,7 @@
 export interface Anexo {
   id: number;
   patrimonio_id?: number;
+  baixa_id?: number;
   tipo: string; // Ex: "nota_fiscal", "manual", "foto", "laudo"
   caminho_arquivo: string; // Caminho no servidor
   descricao?: string;
@@ -25,11 +26,12 @@ export interface Anexo {
 /**
  * Interface para criação de novo anexo
  * Payload enviado para POST /anexos/
- * 
+ *
  * ⚠️ NOTA: O upload real usa FormData, não JSON
  */
 export interface AnexoCreate {
   patrimonio_id?: number;
+  baixa_id?: number;
   tipo: string; // obrigatório
   descricao?: string;
   file: File; // Arquivo a ser enviado
@@ -57,6 +59,7 @@ export interface AnexoUpdate {
  */
 export interface AnexoUploadData {
   patrimonio_id?: number;
+  baixa_id?: number;
   tipo: string;
   descricao?: string;
   file: File;

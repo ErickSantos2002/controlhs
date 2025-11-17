@@ -101,6 +101,10 @@ export const AnexosProvider: React.FC<{ children: React.ReactNode }> = ({
           formData.append('patrimonio_id', data.patrimonio_id.toString());
         }
 
+        if (data.baixa_id) {
+          formData.append('baixa_id', data.baixa_id.toString());
+        }
+
         if (data.descricao) {
           formData.append('descricao', data.descricao);
         }

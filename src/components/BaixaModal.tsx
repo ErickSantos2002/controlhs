@@ -20,7 +20,6 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
     patrimonio_id: 0,
     tipo: 'descarte',
     motivo: '',
-    documento_anexo: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -33,7 +32,6 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
         patrimonio_id: 0,
         tipo: 'descarte',
         motivo: '',
-        documento_anexo: '',
       });
       setErrors({});
     }
@@ -179,22 +177,6 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
               {errors.motivo && (
                 <p className="text-red-500 text-sm mt-1">{errors.motivo}</p>
               )}
-            </div>
-
-            {/* Documento Anexo */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Documento Anexo (URL)
-              </label>
-              <input
-                type="text"
-                value={formData.documento_anexo}
-                onChange={(e) =>
-                  setFormData({ ...formData, documento_anexo: e.target.value })
-                }
-                placeholder="URL do documento (opcional)..."
-                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-[#3a3a3a] focus:ring-2 focus:ring-blue-500"
-              />
             </div>
 
             {/* Botões */}

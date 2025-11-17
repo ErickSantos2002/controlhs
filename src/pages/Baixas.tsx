@@ -174,7 +174,6 @@ const BaixasContent: React.FC = () => {
         Motivo: b.motivo || 'N/A',
         Status: STATUS_LABELS[b.status],
         Aprovador: aprovador?.username || '-',
-        'Documento Anexo': b.documento_anexo || '-',
       };
     });
 

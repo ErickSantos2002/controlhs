@@ -5,12 +5,14 @@ import AnexoUpload from './AnexoUpload';
 import AnexosList from './AnexosList';
 
 interface AnexosSectionProps {
-  patrimonioId: number;
+  patrimonioId?: number;
+  baixaId?: number;
   showUploadByDefault?: boolean;
 }
 
 const AnexosSection: React.FC<AnexosSectionProps> = ({
   patrimonioId,
+  baixaId,
   showUploadByDefault = false,
 }) => {
   const { listAnexos, anexos } = useAnexos();
@@ -46,12 +48,21 @@ const AnexosSection: React.FC<AnexosSectionProps> = ({
   };
 
   // ========================================
-  // CONTAGEM DE ANEXOS DO PATRIMÔNIO
+  // CONTAGEM DE ANEXOS
   // ========================================
 
-  const anexosCount = anexos.filter(
-    (a) => a.patrimonio_id === patrimonioId,
-  ).length;
+  const anexosCount = anexos.filter((a) => {
+    if (patrimonioId && baixaId) {
+      return a.patrimonio_id === patrimonioId && a.baixa_id === baixaId;
+    }
+    if (patrimonioId) {
+      return a.patrimonio_id === patrimonioId;
+    }
+    if (baixaId) {
+      return a.baixa_id === baixaId;
+    }
+    return false;
+  }).length;
 
   // ========================================
   // RENDER
@@ -104,6 +115,7 @@ const AnexosSection: React.FC<AnexosSectionProps> = ({
               </div>
               <AnexoUpload
                 patrimonioId={patrimonioId}
+                baixaId={baixaId}
                 onUploadSuccess={handleUploadSuccess}
                 onCancel={handleCancelUpload}
               />
@@ -139,7 +151,11 @@ const AnexosSection: React.FC<AnexosSectionProps> = ({
                     </h3>
                   </div>
                 )}
-                <AnexosList patrimonioId={patrimonioId} showEmpty={false} />
+                <AnexosList
+                  patrimonioId={patrimonioId}
+                  baixaId={baixaId}
+                  showEmpty={false}
+                />
               </>
             )}
           </div>

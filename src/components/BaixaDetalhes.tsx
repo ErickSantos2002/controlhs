@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Check, XCircle, User, FileText } from 'lucide-react';
 import { useBaixas } from '../context/BaixasContext';
+import { AnexosProvider } from '../context/AnexosContext';
+import AnexosSection from './AnexosSection';
 import type { Baixa } from '../types/baixas.types';
 import {
   STATUS_LABELS,
@@ -101,23 +103,6 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
                   </p>
                 </div>
               )}
-
-              {baixa.documento_anexo && (
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    <FileText className="w-4 h-4" />
-                    Documento
-                  </div>
-                  <a
-                    href={baixa.documento_anexo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:underline"
-                  >
-                    Ver documento
-                  </a>
-                </div>
-              )}
             </div>
 
             {/* Motivo */}
@@ -129,6 +114,16 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
               <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#2a2a2a] p-3 rounded-lg">
                 {baixa.motivo}
               </p>
+            </div>
+
+            {/* Seção de Anexos */}
+            <div>
+              <AnexosProvider>
+                <AnexosSection
+                  patrimonioId={baixa.patrimonio_id}
+                  baixaId={baixa.id}
+                />
+              </AnexosProvider>
             </div>
           </div>
 

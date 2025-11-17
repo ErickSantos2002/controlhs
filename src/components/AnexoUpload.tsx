@@ -20,12 +20,14 @@ import type { AnexoUploadData } from '../types/anexos.types';
 
 interface AnexoUploadProps {
   patrimonioId?: number;
+  baixaId?: number;
   onUploadSuccess?: () => void;
   onCancel?: () => void;
 }
 
 const AnexoUpload: React.FC<AnexoUploadProps> = ({
   patrimonioId,
+  baixaId,
   onUploadSuccess,
   onCancel,
 }) => {
@@ -147,6 +149,7 @@ const AnexoUpload: React.FC<AnexoUploadProps> = ({
         tipo,
         descricao: descricao.trim() || undefined,
         patrimonio_id: patrimonioId,
+        baixa_id: baixaId,
       };
 
       await uploadAnexo(uploadData);
