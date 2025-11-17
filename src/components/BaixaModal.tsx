@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, FileText, DollarSign, Calendar } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useBaixas } from '../context/BaixasContext';
-import type { BaixaCreate, TipoBaixa } from '../types/baixas.types';
+import type { BaixaCreate } from '../types/baixas.types';
 
 interface BaixaModalProps {
   isOpen: boolean;
@@ -18,11 +18,9 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
 
   const [formData, setFormData] = useState<BaixaCreate>({
     patrimonio_id: 0,
-    tipo_baixa: 'descarte',
+    tipo: 'descarte',
     motivo: '',
-    valor_baixa: undefined,
-    data_baixa: new Date().toISOString().split('T')[0],
-    observacoes: '',
+    documento_anexo: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -33,11 +31,9 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
     if (isOpen) {
       setFormData({
         patrimonio_id: 0,
-        tipo_baixa: 'descarte',
+        tipo: 'descarte',
         motivo: '',
-        valor_baixa: undefined,
-        data_baixa: new Date().toISOString().split('T')[0],
-        observacoes: '',
+        documento_anexo: '',
       });
       setErrors({});
     }
@@ -50,16 +46,12 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
       newErrors.patrimonio_id = 'Selecione um patrimônio';
     }
 
-    if (!formData.tipo_baixa) {
-      newErrors.tipo_baixa = 'Selecione o tipo de baixa';
+    if (!formData.tipo) {
+      newErrors.tipo = 'Selecione o tipo de baixa';
     }
 
     if (!formData.motivo?.trim()) {
       newErrors.motivo = 'O motivo é obrigatório';
-    }
-
-    if (!formData.data_baixa) {
-      newErrors.data_baixa = 'A data da baixa é obrigatória';
     }
 
     setErrors(newErrors);
@@ -74,13 +66,7 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
     setSubmitting(true);
 
     try {
-      const userId = parseInt(localStorage.getItem('id') || '0');
-
-      await createBaixa({
-        ...formData,
-        solicitante_id: userId,
-      } as any);
-
+      await createBaixa(formData);
       onSuccess();
     } catch (error) {
       console.error('Erro ao criar baixa:', error);
@@ -156,11 +142,11 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
                 Tipo de Baixa *
               </label>
               <select
-                value={formData.tipo_baixa}
+                value={formData.tipo}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    tipo_baixa: e.target.value as TipoBaixa,
+                    tipo: e.target.value,
                   })
                 }
                 className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-[#3a3a3a] focus:ring-2 focus:ring-blue-500"
@@ -171,44 +157,6 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
                 <option value="doacao">Doação</option>
               </select>
             </div>
-
-            {/* Data da Baixa */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Data da Baixa *
-              </label>
-              <input
-                type="date"
-                value={formData.data_baixa}
-                onChange={(e) =>
-                  setFormData({ ...formData, data_baixa: e.target.value })
-                }
-                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-[#3a3a3a] focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            {/* Valor da Baixa */}
-            {(formData.tipo_baixa === 'venda' ||
-              formData.tipo_baixa === 'perda') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Valor {formData.tipo_baixa === 'venda' ? 'da Venda' : 'do Prejuízo'}
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.valor_baixa || ''}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      valor_baixa: parseFloat(e.target.value) || undefined,
-                    })
-                  }
-                  placeholder="0.00"
-                  className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-[#3a3a3a] focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            )}
 
             {/* Motivo */}
             <div>
@@ -233,18 +181,18 @@ const BaixaModal: React.FC<BaixaModalProps> = ({
               )}
             </div>
 
-            {/* Observações */}
+            {/* Documento Anexo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Observações
+                Documento Anexo (URL)
               </label>
-              <textarea
-                value={formData.observacoes}
+              <input
+                type="text"
+                value={formData.documento_anexo}
                 onChange={(e) =>
-                  setFormData({ ...formData, observacoes: e.target.value })
+                  setFormData({ ...formData, documento_anexo: e.target.value })
                 }
-                rows={2}
-                placeholder="Observações adicionais (opcional)..."
+                placeholder="URL do documento (opcional)..."
                 className="w-full px-3 py-2 rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-[#3a3a3a] focus:ring-2 focus:ring-blue-500"
               />
             </div>

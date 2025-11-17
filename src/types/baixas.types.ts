@@ -16,14 +16,9 @@
 export interface Baixa {
   id: number;
   patrimonio_id: number;
-  tipo_baixa: TipoBaixa;
+  tipo: TipoBaixa;
   motivo: string;
-  valor_baixa?: number;
-  data_baixa: string;
-  solicitante_id: number;
   aprovado_por?: number;
-  data_aprovacao?: string;
-  observacoes?: string;
   documento_anexo?: string;
   criado_em?: string;
   atualizado_em?: string;
@@ -35,11 +30,9 @@ export interface Baixa {
  */
 export interface BaixaCreate {
   patrimonio_id: number;
-  tipo_baixa: TipoBaixa;
+  tipo: string;
   motivo: string;
-  valor_baixa?: number;
-  data_baixa: string;
-  observacoes?: string;
+  aprovado_por?: number;
   documento_anexo?: string;
 }
 
@@ -270,13 +263,9 @@ export interface BaixaExportData {
   Patrimônio: string;
   'Tipo de Baixa': string;
   Motivo: string;
-  'Valor da Baixa': string;
-  'Data da Baixa': string;
-  Solicitante: string;
   Status: string;
   Aprovador: string;
-  'Data Aprovação': string;
-  Observações: string;
+  'Documento Anexo': string;
 }
 
 // ========================================

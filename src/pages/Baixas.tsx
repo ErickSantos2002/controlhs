@@ -6,7 +6,6 @@ import {
   X,
   Eye,
   Check,
-  Trash2,
   ChevronUp,
   ChevronDown,
   Loader2,
@@ -15,7 +14,6 @@ import {
   TrendingDown,
   Clock,
   CheckCircle,
-  DollarSign,
 } from 'lucide-react';
 import { BaixasProvider, useBaixas } from '../context/BaixasContext';
 import BaixaModal from '../components/BaixaModal';
@@ -172,24 +170,11 @@ const BaixasContent: React.FC = () => {
       return {
         ID: b.id,
         Patrimônio: patrimonio?.nome || 'N/A',
-        'Tipo de Baixa': TIPO_BAIXA_LABELS[b.tipo_baixa],
+        'Tipo de Baixa': TIPO_BAIXA_LABELS[b.tipo],
         Motivo: b.motivo || 'N/A',
-        'Valor da Baixa': b.valor_baixa
-          ? b.valor_baixa.toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            })
-          : 'N/A',
-        'Data da Baixa': b.data_baixa
-          ? new Date(b.data_baixa).toLocaleDateString('pt-BR')
-          : 'N/A',
-        Solicitante: solicitante?.username || 'N/A',
         Status: STATUS_LABELS[b.status],
         Aprovador: aprovador?.username || '-',
-        'Data Aprovação': b.data_aprovacao
-          ? new Date(b.data_aprovacao).toLocaleDateString('pt-BR')
-          : 'N/A',
-        Observações: b.observacoes || '-',
+        'Documento Anexo': b.documento_anexo || '-',
       };
     });
 
@@ -212,18 +197,6 @@ const BaixasContent: React.FC = () => {
     return user?.username || 'N/A';
   };
 
-  const formatDate = (date?: string): string => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('pt-BR');
-  };
-
-  const formatCurrency = (value?: number): string => {
-    if (!value) return 'N/A';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
 
   // ========================================
   // RENDER
@@ -335,14 +308,14 @@ const BaixasContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-700 dark:text-gray-400">
-                Valor Total (Mês)
+                Rejeitadas (Mês)
               </p>
-              <p className="text-3xl font-semibold text-blue-600 dark:text-blue-400 mt-2 tracking-tight">
-                {formatCurrency(kpis.valorTotalMes)}
+              <p className="text-3xl font-semibold text-red-600 dark:text-red-400 mt-2 tracking-tight">
+                {kpis.rejeitadasMes?.toLocaleString('pt-BR')}
               </p>
             </div>
-            <div className="bg-blue-100/70 dark:bg-blue-900/40 p-3 rounded-full">
-              <DollarSign className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="bg-red-100/70 dark:bg-red-900/40 p-3 rounded-full">
+              <X className="w-6 h-6 text-red-600 dark:text-red-400" />
             </div>
           </div>
         </div>
@@ -511,19 +484,11 @@ const BaixasContent: React.FC = () => {
                     </th>
 
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
-                      Data
-                    </th>
-
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
-                      Valor
-                    </th>
-
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
 
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
-                      Solicitante
+                      Aprovador
                     </th>
 
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
@@ -547,18 +512,10 @@ const BaixasContent: React.FC = () => {
 
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${TIPO_BAIXA_COLORS[b.tipo_baixa]}`}
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${TIPO_BAIXA_COLORS[b.tipo]}`}
                         >
-                          {TIPO_BAIXA_LABELS[b.tipo_baixa]}
+                          {TIPO_BAIXA_LABELS[b.tipo]}
                         </span>
-                      </td>
-
-                      <td className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
-                        {formatDate(b.data_baixa)}
-                      </td>
-
-                      <td className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
-                        {formatCurrency(b.valor_baixa)}
                       </td>
 
                       <td className="px-4 py-3 text-center">
@@ -570,7 +527,7 @@ const BaixasContent: React.FC = () => {
                       </td>
 
                       <td className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
-                        {getUsuarioNome(b.solicitante_id)}
+                        {b.aprovado_por ? getUsuarioNome(b.aprovado_por) : '-'}
                       </td>
 
                       <td className="px-4 py-3">

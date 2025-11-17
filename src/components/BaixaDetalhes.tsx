@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Check, XCircle, Calendar, User, FileText, DollarSign } from 'lucide-react';
+import { X, Check, XCircle, User, FileText } from 'lucide-react';
 import { useBaixas } from '../context/BaixasContext';
 import type { Baixa } from '../types/baixas.types';
 import {
@@ -30,23 +30,9 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
 
   const status = getBaixaStatus(baixa);
   const patrimonio = patrimonios.find((p) => p.id === baixa.patrimonio_id);
-  const solicitante = usuarios.find((u) => u.id === baixa.solicitante_id);
   const aprovador = baixa.aprovado_por
     ? usuarios.find((u) => u.id === baixa.aprovado_por)
     : null;
-
-  const formatDate = (date?: string) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString('pt-BR');
-  };
-
-  const formatCurrency = (value?: number) => {
-    if (!value) return 'N/A';
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
 
   const podeAprovarBaixa = podeAprovar(baixa) && status === 'pendente';
 
@@ -71,9 +57,9 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
                   {STATUS_LABELS[status]}
                 </span>
                 <span
-                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${TIPO_BAIXA_COLORS[baixa.tipo_baixa]}`}
+                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${TIPO_BAIXA_COLORS[baixa.tipo]}`}
                 >
-                  {TIPO_BAIXA_LABELS[baixa.tipo_baixa]}
+                  {TIPO_BAIXA_LABELS[baixa.tipo]}
                 </span>
               </div>
             </div>
@@ -104,38 +90,6 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
 
             {/* Informações da Baixa */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  <Calendar className="w-4 h-4" />
-                  Data da Baixa
-                </div>
-                <p className="text-gray-900 dark:text-gray-100">
-                  {formatDate(baixa.data_baixa)}
-                </p>
-              </div>
-
-              {baixa.valor_baixa && (
-                <div>
-                  <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                    <DollarSign className="w-4 h-4" />
-                    Valor
-                  </div>
-                  <p className="text-gray-900 dark:text-gray-100">
-                    {formatCurrency(baixa.valor_baixa)}
-                  </p>
-                </div>
-              )}
-
-              <div>
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-                  <User className="w-4 h-4" />
-                  Solicitante
-                </div>
-                <p className="text-gray-900 dark:text-gray-100">
-                  {solicitante?.username || 'N/A'}
-                </p>
-              </div>
-
               {aprovador && (
                 <div>
                   <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -145,11 +99,23 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
                   <p className="text-gray-900 dark:text-gray-100">
                     {aprovador.username}
                   </p>
-                  {baixa.data_aprovacao && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {formatDate(baixa.data_aprovacao)}
-                    </p>
-                  )}
+                </div>
+              )}
+
+              {baixa.documento_anexo && (
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <FileText className="w-4 h-4" />
+                    Documento
+                  </div>
+                  <a
+                    href={baixa.documento_anexo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    Ver documento
+                  </a>
                 </div>
               )}
             </div>
@@ -164,18 +130,6 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
                 {baixa.motivo}
               </p>
             </div>
-
-            {/* Observações */}
-            {baixa.observacoes && (
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
-                  Observações
-                </h3>
-                <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#2a2a2a] p-3 rounded-lg">
-                  {baixa.observacoes}
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Footer com botões de ação */}

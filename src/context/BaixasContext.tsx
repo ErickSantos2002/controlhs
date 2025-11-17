@@ -399,28 +399,24 @@ export const BaixasProvider: React.FC<{
 
     const aprovadasMes = baixasComStatus.filter((b) => {
       if (b.status !== 'aprovada') return false;
-      if (!b.data_baixa) return false;
-      const data = new Date(b.data_baixa);
+      if (!b.criado_em) return false;
+      const data = new Date(b.criado_em);
       return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
     }).length;
 
-    const rejeitadasMes = 0; // Implementar quando houver rejeições
-
-    const valorTotalMes = baixasComStatus
-      .filter((b) => {
-        if (b.status !== 'aprovada') return false;
-        if (!b.data_baixa) return false;
-        const data = new Date(b.data_baixa);
-        return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
-      })
-      .reduce((acc, b) => acc + (b.valor_baixa || 0), 0);
+    const rejeitadasMes = baixasComStatus.filter((b) => {
+      if (b.status !== 'rejeitada') return false;
+      if (!b.criado_em) return false;
+      const data = new Date(b.criado_em);
+      return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+    }).length;
 
     return {
       total,
       pendentes,
       aprovadasMes,
       rejeitadasMes,
-      valorTotalMes,
+      valorTotalMes: 0, // Removido, mantido para compatibilidade
     };
   }, [baixas, getBaixaStatus]);
 
@@ -464,13 +460,13 @@ export const BaixasProvider: React.FC<{
       }
     }
 
-    // Filtro por solicitante
-    if (filtros.solicitante !== 'todos') {
-      const solicitanteId = parseInt(filtros.solicitante);
-      if (!isNaN(solicitanteId)) {
-        filtradas = filtradas.filter((b) => b.solicitante_id === solicitanteId);
-      }
-    }
+    // Filtro por solicitante (removido - campo não existe na API)
+    // if (filtros.solicitante !== 'todos') {
+    //   const solicitanteId = parseInt(filtros.solicitante);
+    //   if (!isNaN(solicitanteId)) {
+    //     filtradas = filtradas.filter((b) => b.solicitante_id === solicitanteId);
+    //   }
+    // }
 
     // Filtro por aprovador
     if (filtros.aprovador !== 'todos') {
@@ -480,18 +476,18 @@ export const BaixasProvider: React.FC<{
       }
     }
 
-    // Filtro por período
+    // Filtro por período (usando criado_em)
     if (filtros.dataInicio) {
       filtradas = filtradas.filter((b) => {
-        if (!b.data_baixa) return false;
-        return new Date(b.data_baixa) >= new Date(filtros.dataInicio!);
+        if (!b.criado_em) return false;
+        return new Date(b.criado_em) >= new Date(filtros.dataInicio!);
       });
     }
 
     if (filtros.dataFim) {
       filtradas = filtradas.filter((b) => {
-        if (!b.data_baixa) return false;
-        return new Date(b.data_baixa) <= new Date(filtros.dataFim!);
+        if (!b.criado_em) return false;
+        return new Date(b.criado_em) <= new Date(filtros.dataFim!);
       });
     }
 
