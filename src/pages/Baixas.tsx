@@ -162,7 +162,6 @@ const BaixasContent: React.FC = () => {
 
     const dados: BaixaExportData[] = baixasFiltradas.map((b) => {
       const patrimonio = patrimonios.find((p) => p.id === b.patrimonio_id);
-      const solicitante = usuarios.find((u) => u.id === b.solicitante_id);
       const aprovador = b.aprovado_por
         ? usuarios.find((u) => u.id === b.aprovado_por)
         : null;

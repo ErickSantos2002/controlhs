@@ -19,6 +19,11 @@ export interface Baixa {
   tipo: TipoBaixa;
   motivo: string;
   aprovado_por?: number;
+  data_aprovacao?: string;
+  rejeitado_por?: number;
+  data_rejeicao?: string;
+  motivo_rejeicao?: string;
+  observacoes?: string;
   criado_em?: string;
   atualizado_em?: string;
 }
@@ -351,7 +356,10 @@ export function isBaixaAprovada(b: Baixa): boolean {
  * Helper: Calcula status da baixa
  */
 export function calcularStatusBaixa(b: Baixa): BaixaStatus {
-  if (b.aprovado_por) {
+  if (b.rejeitado_por || b.data_rejeicao) {
+    return 'rejeitada';
+  }
+  if (b.aprovado_por || b.data_aprovacao) {
     return 'aprovada';
   }
   return 'pendente';

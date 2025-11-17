@@ -300,6 +300,21 @@ export async function createBaixa(payload: any) {
   return data;
 }
 
+export async function updateBaixa(id: number, payload: any) {
+  const { data } = await api.put(`/baixas/${id}`, payload);
+  return data;
+}
+
+export async function aprovarBaixa(id: number, payload: any) {
+  const { data } = await api.post(`/baixas/${id}/aprovar`, payload);
+  return data;
+}
+
+export async function rejeitarBaixa(id: number, payload: any) {
+  const { data } = await api.post(`/baixas/${id}/rejeitar`, payload);
+  return data;
+}
+
 // ========================================
 // 📦 INVENTÁRIOS
 // ========================================

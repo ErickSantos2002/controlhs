@@ -9,6 +9,9 @@ import React, {
 import {
   listBaixas,
   createBaixa as apiCreateBaixa,
+  aprovarBaixa as apiAprovarBaixa,
+  rejeitarBaixa as apiRejeitarBaixa,
+  updatePatrimonio,
   listPatrimonios,
   listCategorias,
   listSetores,
@@ -162,7 +165,10 @@ export const BaixasProvider: React.FC<{
   // ========================================
 
   const getBaixaStatus = useCallback((baixa: Baixa): BaixaStatus => {
-    if (baixa.aprovado_por) {
+    if (baixa.rejeitado_por || baixa.data_rejeicao) {
+      return 'rejeitada';
+    }
+    if (baixa.aprovado_por || baixa.data_aprovacao) {
       return 'aprovada';
     }
     return 'pendente';
@@ -256,7 +262,7 @@ export const BaixasProvider: React.FC<{
         entidade_id: novaBaixa.id,
         detalhes: {
           patrimonio_id: data.patrimonio_id,
-          tipo_baixa: data.tipo_baixa,
+          tipo: data.tipo,
           motivo: data.motivo,
         },
       });
@@ -330,22 +336,44 @@ export const BaixasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        const userId = parseInt(localStorage.getItem('id') || '0');
-        const agora = new Date().toISOString();
+        // Encontra a baixa para pegar o patrimonio_id
+        const baixa = baixas.find((b) => b.id === id);
+        if (!baixa) {
+          throw new Error('Baixa não encontrada');
+        }
 
-        // Atualiza localmente (API não implementada ainda)
+        // Chama a API para aprovar a baixa
+        const baixaAprovada = await apiAprovarBaixa(id, {
+          observacoes: observacoes || undefined,
+        });
+
+        // Atualiza o patrimônio para status "baixado"
+        await updatePatrimonio(baixa.patrimonio_id, {
+          status: 'baixado',
+        });
+
+        // Atualiza a lista de baixas localmente
         setBaixas((prev) =>
-          prev.map((b) =>
-            b.id === id
-              ? {
-                  ...b,
-                  aprovado_por: userId,
-                  data_aprovacao: agora,
-                  observacoes: observacoes || b.observacoes,
-                }
-              : b,
+          prev.map((b) => (b.id === id ? baixaAprovada : b)),
+        );
+
+        // Atualiza a lista de patrimônios localmente
+        setPatrimonios((prev) =>
+          prev.map((p) =>
+            p.id === baixa.patrimonio_id ? { ...p, status: 'baixado' } : p,
           ),
         );
+
+        // Log de auditoria
+        await createLog({
+          acao: 'aprovar_baixa',
+          entidade: 'baixa',
+          entidade_id: id,
+          detalhes: {
+            patrimonio_id: baixa.patrimonio_id,
+            observacoes: observacoes,
+          },
+        });
 
         console.log('Baixa aprovada com sucesso!');
       } catch (err: any) {
@@ -356,7 +384,7 @@ export const BaixasProvider: React.FC<{
         setLoading(false);
       }
     },
-    [],
+    [baixas],
   );
 
   const rejeitarBaixa = useCallback(
@@ -365,10 +393,34 @@ export const BaixasProvider: React.FC<{
         setLoading(true);
         setError(null);
 
-        // API não implementada - apenas remove localmente por enquanto
-        setBaixas((prev) => prev.filter((b) => b.id !== id));
+        // Encontra a baixa para pegar o patrimonio_id
+        const baixa = baixas.find((b) => b.id === id);
+        if (!baixa) {
+          throw new Error('Baixa não encontrada');
+        }
 
-        console.log('Baixa rejeitada.');
+        // Chama a API para rejeitar a baixa
+        const baixaRejeitada = await apiRejeitarBaixa(id, {
+          motivo_rejeicao: motivo,
+        });
+
+        // Atualiza a lista de baixas localmente (marca como rejeitada)
+        setBaixas((prev) =>
+          prev.map((b) => (b.id === id ? baixaRejeitada : b)),
+        );
+
+        // Log de auditoria
+        await createLog({
+          acao: 'rejeitar_baixa',
+          entidade: 'baixa',
+          entidade_id: id,
+          detalhes: {
+            patrimonio_id: baixa.patrimonio_id,
+            motivo_rejeicao: motivo,
+          },
+        });
+
+        console.log('Baixa rejeitada com sucesso!');
       } catch (err: any) {
         console.error('Erro ao rejeitar baixa:', err);
         setError(err.response?.data?.detail || 'Erro ao rejeitar baixa');
@@ -377,7 +429,7 @@ export const BaixasProvider: React.FC<{
         setLoading(false);
       }
     },
-    [],
+    [baixas],
   );
 
   // ========================================
@@ -449,7 +501,7 @@ export const BaixasProvider: React.FC<{
 
     // Filtro por tipo
     if (filtros.tipo !== 'todos') {
-      filtradas = filtradas.filter((b) => b.tipo_baixa === filtros.tipo);
+      filtradas = filtradas.filter((b) => b.tipo === filtros.tipo);
     }
 
     // Filtro por patrimônio
@@ -502,8 +554,9 @@ export const BaixasProvider: React.FC<{
           bVal = patrimonios.find((p) => p.id === b.patrimonio_id)?.nome || '';
           break;
         case 'solicitante_nome':
-          aVal = usuarios.find((u) => u.id === a.solicitante_id)?.username || '';
-          bVal = usuarios.find((u) => u.id === b.solicitante_id)?.username || '';
+          // Campo solicitante_id não existe na API
+          aVal = '';
+          bVal = '';
           break;
         case 'aprovador_nome':
           aVal = usuarios.find((u) => u.id === a.aprovado_por)?.username || '';
