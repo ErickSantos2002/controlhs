@@ -182,8 +182,8 @@ export const BaixasProvider: React.FC<{
     (baixa: Baixa): boolean => {
       const { role } = getUserInfo();
 
-      // Apenas administradores podem aprovar baixas
-      return role === 'administrador';
+      // Apenas administradores e gerentes podem aprovar baixas
+      return role === 'administrador' || role === 'gerente';
     },
     [getUserInfo],
   );
