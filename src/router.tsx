@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Patrimonios from './pages/Patrimonios';
 import Transferencias from './pages/Transferencias';
+import Baixas from './pages/Baixas';
 import NotFound from './pages/NotFound';
 import Logs from './pages/Logs';
 import CadastrosBasicos from './pages/CadastrosBasicos';
@@ -65,6 +66,15 @@ const AppRoutes: React.FC = () => (
     />
 
     <Route
+      path="/baixas"
+      element={
+        <ProtectedRoute>
+          <Baixas />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
       path="/cadastros"
       element={
         <ProtectedRoute>
@@ -84,7 +94,7 @@ const AppRoutes: React.FC = () => (
       }
     />
 
-    <Route path="/" element={<Navigate to="/inicio" />} />
+    <Route path="/" element={<Navigate to="/dashboard" />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
