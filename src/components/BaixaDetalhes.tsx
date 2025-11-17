@@ -35,6 +35,9 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
   const aprovador = baixa.aprovado_por
     ? usuarios.find((u) => u.id === baixa.aprovado_por)
     : null;
+  const rejeitador = baixa.rejeitado_por
+    ? usuarios.find((u) => u.id === baixa.rejeitado_por)
+    : null;
 
   const podeAprovarBaixa = podeAprovar(baixa) && status === 'pendente';
 
@@ -101,9 +104,44 @@ const BaixaDetalhes: React.FC<BaixaDetalhesProps> = ({
                   <p className="text-gray-900 dark:text-gray-100">
                     {aprovador.username}
                   </p>
+                  {baixa.data_aprovacao && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {new Date(baixa.data_aprovacao).toLocaleDateString('pt-BR')}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {rejeitador && (
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    <User className="w-4 h-4" />
+                    Rejeitado por
+                  </div>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {rejeitador.username}
+                  </p>
+                  {baixa.data_rejeicao && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {new Date(baixa.data_rejeicao).toLocaleDateString('pt-BR')}
+                    </p>
+                  )}
                 </div>
               )}
             </div>
+
+            {/* Motivo de Rejeição */}
+            {baixa.motivo_rejeicao && (
+              <div>
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+                  <FileText className="w-4 h-4" />
+                  Motivo da Rejeição
+                </div>
+                <p className="text-gray-900 dark:text-gray-100 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                  {baixa.motivo_rejeicao}
+                </p>
+              </div>
+            )}
 
             {/* Motivo */}
             <div>

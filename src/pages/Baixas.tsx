@@ -64,6 +64,12 @@ const BaixasContent: React.FC = () => {
   const userRole = user?.role?.toLowerCase() || '';
   const isAdmin = userRole === 'administrador';
 
+  // Verificação de permissão para criar baixa (apenas Gerente e Administrador)
+  const podeCriarBaixa = useMemo(() => {
+    const role = user?.role || '';
+    return role === 'Administrador' || role === 'Gerente';
+  }, [user]);
+
   // ========================================
   // EFEITOS
   // ========================================
@@ -172,7 +178,11 @@ const BaixasContent: React.FC = () => {
         'Tipo de Baixa': TIPO_BAIXA_LABELS[b.tipo],
         Motivo: b.motivo || 'N/A',
         Status: STATUS_LABELS[b.status],
-        Aprovador: aprovador?.username || '-',
+        Responsável:
+          aprovador?.username ||
+          (b.rejeitado_por
+            ? usuarios.find((u) => u.id === b.rejeitado_por)?.username || '-'
+            : '-'),
       };
     });
 
@@ -239,15 +249,17 @@ const BaixasContent: React.FC = () => {
               Exportar
             </button>
 
-            <button
-              onClick={() => setModalCriar(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700
-                  dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium text-sm
-                  rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <Plus className="w-4 h-4" />
-              Nova Baixa
-            </button>
+            {podeCriarBaixa && (
+              <button
+                onClick={() => setModalCriar(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700
+                    dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium text-sm
+                    rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                <Plus className="w-4 h-4" />
+                Nova Baixa
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -486,7 +498,7 @@ const BaixasContent: React.FC = () => {
                     </th>
 
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
-                      Aprovador
+                      Responsável
                     </th>
 
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
@@ -525,7 +537,11 @@ const BaixasContent: React.FC = () => {
                       </td>
 
                       <td className="px-4 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
-                        {b.aprovado_por ? getUsuarioNome(b.aprovado_por) : '-'}
+                        {b.aprovado_por
+                          ? getUsuarioNome(b.aprovado_por)
+                          : b.rejeitado_por
+                            ? getUsuarioNome(b.rejeitado_por)
+                            : '-'}
                       </td>
 
                       <td className="px-4 py-3">

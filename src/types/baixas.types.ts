@@ -282,7 +282,7 @@ export interface BaixaExportData {
   'Tipo de Baixa': string;
   Motivo: string;
   Status: string;
-  Aprovador: string;
+  Responsável: string;
 }
 
 // ========================================
