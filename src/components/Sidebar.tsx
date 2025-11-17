@@ -68,6 +68,18 @@ const Sidebar: React.FC = () => {
       ),
     },
     {
+      label: 'Inventário',
+      to: '/inventarios',
+      icon: (isActive: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=87&format=png&color=${getColor(isActive)}`}
+          alt="Inventário"
+          className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'}
+            dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
+        />
+      ),
+    },
+    {
       label: 'Cadastros',
       to: '/cadastros',
       icon: (isActive: boolean) => (

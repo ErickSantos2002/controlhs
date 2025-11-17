@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Patrimonios from './pages/Patrimonios';
 import Transferencias from './pages/Transferencias';
 import Baixas from './pages/Baixas';
+import Inventarios from './pages/Inventarios';
 import NotFound from './pages/NotFound';
 import Logs from './pages/Logs';
 import CadastrosBasicos from './pages/CadastrosBasicos';
@@ -70,6 +71,15 @@ const AppRoutes: React.FC = () => (
       element={
         <ProtectedRoute>
           <Baixas />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/inventarios"
+      element={
+        <ProtectedRoute>
+          <Inventarios />
         </ProtectedRoute>
       }
     />

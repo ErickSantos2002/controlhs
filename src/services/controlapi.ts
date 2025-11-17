@@ -319,14 +319,52 @@ export async function rejeitarBaixa(id: number, payload: any) {
 // 📦 INVENTÁRIOS
 // ========================================
 
+/**
+ * Lista todos os registros de inventário
+ * @returns Lista de inventários
+ */
 export async function listInventarios() {
   const { data } = await api.get('/inventarios/');
   return data;
 }
 
+/**
+ * Cria um novo registro de inventário
+ * @param payload - Dados do inventário
+ * @returns Inventário criado
+ */
 export async function createInventario(payload: any) {
   const { data } = await api.post('/inventarios/', payload);
   return data;
+}
+
+/**
+ * Obtém um inventário específico
+ * @param id - ID do inventário
+ * @returns Dados do inventário
+ */
+export async function getInventario(id: number) {
+  const { data } = await api.get(`/inventarios/${id}`);
+  return data;
+}
+
+/**
+ * Atualiza informações de um inventário
+ * @param id - ID do inventário
+ * @param payload - Dados a atualizar
+ * @returns Inventário atualizado
+ */
+export async function updateInventario(id: number, payload: any) {
+  const { data } = await api.put(`/inventarios/${id}`, payload);
+  return data;
+}
+
+/**
+ * Remove um registro de inventário
+ * @param id - ID do inventário
+ */
+export async function deleteInventario(id: number) {
+  await api.delete(`/inventarios/${id}`);
 }
 
 // ========================================
