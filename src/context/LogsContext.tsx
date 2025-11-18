@@ -8,6 +8,7 @@ import React, {
 } from 'react';
 import {
   listLogs,
+  listUsuarios,
 } from '../services/controlapi';
 import type {
   Log,
@@ -36,6 +37,7 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number>(0);
+  const [usuariosMap, setUsuariosMap] = useState<Map<number, string>>(new Map());
 
   // ========================================
   // FILTROS E PAGINAÇÃO
@@ -56,6 +58,27 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
     totalPaginas: 1,
     totalRegistros: 0,
   });
+
+  // ========================================
+  // FUNÇÃO PARA CARREGAR USUÁRIOS
+  // ========================================
+
+  const carregarUsuarios = useCallback(async () => {
+    try {
+      const usuarios = await listUsuarios();
+      const map = new Map<number, string>();
+
+      usuarios.forEach((usuario: any) => {
+        map.set(usuario.id, usuario.username || usuario.nome || `Usuário ${usuario.id}`);
+      });
+
+      setUsuariosMap(map);
+      console.log('👥 Mapeamento de usuários criado:', Object.fromEntries(map));
+    } catch (err) {
+      console.error('Erro ao carregar usuários para logs:', err);
+      // Não bloqueia o carregamento dos logs
+    }
+  }, []);
 
   // ========================================
   // FUNÇÃO PARA BUSCAR LOGS
@@ -94,13 +117,35 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // 🔄 Função para normalizar os dados e mapear campo de usuário
       const normalizarLogs = (logs: any[]): Log[] => {
-        return logs.map(log => ({
-          ...log,
-          // Tenta mapear o campo usuario de diferentes possíveis nomes
-          usuario: log.usuario || log.usuario_nome || log.username || log.created_by ||
-                   (log.user && typeof log.user === 'string' ? log.user : log.user?.nome || log.user?.username) ||
-                   'Usuário Desconhecido',
-        }));
+        return logs.map(log => {
+          // Tenta obter o nome do usuário do mapa, se tiver usuario_id
+          let nomeUsuario = 'Usuário Desconhecido';
+
+          if (log.usuario_id && usuariosMap.has(log.usuario_id)) {
+            nomeUsuario = usuariosMap.get(log.usuario_id)!;
+          } else if (log.usuario) {
+            nomeUsuario = log.usuario;
+          } else if (log.usuario_nome) {
+            nomeUsuario = log.usuario_nome;
+          } else if (log.username) {
+            nomeUsuario = log.username;
+          } else if (log.created_by) {
+            nomeUsuario = log.created_by;
+          } else if (log.user) {
+            if (typeof log.user === 'string') {
+              nomeUsuario = log.user;
+            } else if (log.user?.nome) {
+              nomeUsuario = log.user.nome;
+            } else if (log.user?.username) {
+              nomeUsuario = log.user.username;
+            }
+          }
+
+          return {
+            ...log,
+            usuario: nomeUsuario,
+          };
+        });
       };
 
       // Verifica se a API retorna um objeto com logs ou array direto
@@ -137,7 +182,7 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setLoading(false);
     }
-  }, [filtros, paginacao.paginaAtual, paginacao.itensPorPagina]);
+  }, [filtros, paginacao.paginaAtual, paginacao.itensPorPagina, usuariosMap]);
 
   // ========================================
   // FUNÇÃO PARA REFRESH MANUAL
@@ -160,6 +205,14 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
       buscarLogs();
     }
   }, [buscarLogs, lastFetch]);
+
+  // ========================================
+  // EFEITO PARA CARREGAR USUÁRIOS (UMA VEZ)
+  // ========================================
+
+  useEffect(() => {
+    carregarUsuarios();
+  }, [carregarUsuarios]);
 
   // ========================================
   // FILTROS APLICADOS LOCALMENTE
