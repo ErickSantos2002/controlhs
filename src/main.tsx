@@ -10,6 +10,7 @@ import { DashboardProvider } from './context/DashboardContext';
 import { TransferenciasProvider } from './context/TransferenciasContext';
 import { PatrimoniosProvider } from './context/PatrimoniosContext';
 import { CadastrosProvider } from './context/CadastrosContext';
+import { InventarioProvider } from './context/InventarioContext';
 import './styles/index.css'; // Importa o Tailwind e estilos globais
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -19,11 +20,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <TransferenciasProvider>
           <PatrimoniosProvider>
             <CadastrosProvider>
-              <DashboardProvider>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </DashboardProvider>
+              <InventarioProvider>
+                <DashboardProvider>
+                  <BrowserRouter>
+                    <App />
+                  </BrowserRouter>
+                </DashboardProvider>
+              </InventarioProvider>
             </CadastrosProvider>
           </PatrimoniosProvider>
         </TransferenciasProvider>
