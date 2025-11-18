@@ -15,6 +15,7 @@ import {
   Clock,
   ClipboardCheck,
   PlayCircle,
+  FileDown,
 } from 'lucide-react';
 import {
   InventarioProvider,
@@ -24,6 +25,13 @@ import InventarioModal from '../components/InventarioModal';
 import InventarioDetalhes from '../components/InventarioDetalhes';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import {
+  getInventario,
+  getEstatisticasInventario,
+  listPatrimonios,
+} from '../services/controlapi';
 
 // ========================================
 // COMPONENTE INTERNO COM LÓGICA
@@ -174,6 +182,172 @@ const InventariosContent: React.FC = () => {
       data_fim: '',
     });
     setBuscaLocal('');
+  };
+
+  const handleExportarPDF = async (inventario: any) => {
+    try {
+      // Buscar dados completos
+      const [inventarioCompleto, stats, patrimonios] = await Promise.all([
+        getInventario(inventario.id),
+        getEstatisticasInventario(inventario.id),
+        listPatrimonios(),
+      ]);
+
+      // Criar PDF
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // Cabeçalho
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RELATÓRIO DE INVENTÁRIO', pageWidth / 2, 20, {
+        align: 'center',
+      });
+
+      // Informações da Sessão
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Informações da Sessão:', 14, 35);
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      let yPos = 45;
+
+      doc.text(`Título: ${inventario.titulo}`, 14, yPos);
+      yPos += 7;
+
+      if (inventario.descricao) {
+        doc.text(`Descrição: ${inventario.descricao}`, 14, yPos);
+        yPos += 7;
+      }
+
+      doc.text(`Tipo: ${getTipoLabel(inventario.tipo)}`, 14, yPos);
+      yPos += 7;
+
+      doc.text(`Status: ${getStatusLabel(inventario.status)}`, 14, yPos);
+      yPos += 7;
+
+      const responsavelNome = getResponsavelNome(inventario.responsavel_id);
+      doc.text(`Responsável: ${responsavelNome}`, 14, yPos);
+      yPos += 7;
+
+      doc.text(
+        `Data Início: ${formatDate(inventario.data_inicio)}`,
+        14,
+        yPos,
+      );
+      yPos += 7;
+
+      if (inventario.data_fim) {
+        doc.text(
+          `Data Finalização: ${formatDate(inventario.data_fim)}`,
+          14,
+          yPos,
+        );
+        yPos += 7;
+      }
+
+      yPos += 5;
+
+      // Estatísticas
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Estatísticas:', 14, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+
+      const estatisticas = [
+        ['Total de Itens', stats.total_itens.toString()],
+        ['Encontrados', stats.encontrados.toString()],
+        ['Não Encontrados', stats.nao_encontrados.toString()],
+        ['Divergências', stats.divergencias.toString()],
+        ['Conferidos', stats.conferidos.toString()],
+        ['Pendentes', stats.pendentes.toString()],
+      ];
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Indicador', 'Quantidade']],
+        body: estatisticas,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202] },
+        margin: { left: 14, right: 14 },
+      });
+
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+
+      // Tabela de Itens
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Itens do Inventário:', 14, yPos);
+      yPos += 5;
+
+      const itensData = inventarioCompleto.itens.map((item: any) => {
+        const patrimonio = patrimonios.find(
+          (p: any) => p.id === item.patrimonio_id,
+        );
+        return [
+          patrimonio?.nome || 'N/A',
+          patrimonio?.numero_serie || '-',
+          getSituacaoLabel(item.situacao),
+          item.observacoes || '-',
+        ];
+      });
+
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Patrimônio', 'Nº Série', 'Situação', 'Observações']],
+        body: itensData,
+        theme: 'grid',
+        headStyles: { fillColor: [66, 139, 202] },
+        styles: { fontSize: 8 },
+        columnStyles: {
+          0: { cellWidth: 50 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 30 },
+          3: { cellWidth: 60 },
+        },
+        margin: { left: 14, right: 14 },
+      });
+
+      // Rodapé
+      const pageCount = doc.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(
+          `Página ${i} de ${pageCount}`,
+          pageWidth / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          { align: 'center' },
+        );
+        doc.text(
+          `Gerado em: ${new Date().toLocaleString('pt-BR')}`,
+          14,
+          doc.internal.pageSize.getHeight() - 10,
+        );
+      }
+
+      // Salvar PDF
+      const fileName = `inventario_${inventario.id}_${inventario.titulo.replace(/\s+/g, '_')}.pdf`;
+      doc.save(fileName);
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+      alert('Erro ao gerar PDF. Tente novamente.');
+    }
+  };
+
+  const getSituacaoLabel = (situacao: string) => {
+    const labels: { [key: string]: string } = {
+      encontrado: 'Encontrado',
+      nao_encontrado: 'Não Encontrado',
+      divergencia: 'Divergência',
+      conferido: 'Conferido',
+    };
+    return labels[situacao] || situacao;
   };
 
   // ========================================
@@ -558,6 +732,15 @@ const InventariosContent: React.FC = () => {
                             title="Conferir Itens"
                           >
                             <ClipboardCheck className="w-4 h-4" />
+                          </button>
+                        )}
+                        {inv.status === 'concluido' && (
+                          <button
+                            onClick={() => handleExportarPDF(inv)}
+                            className="p-1 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded transition-colors"
+                            title="Salvar como PDF"
+                          >
+                            <FileDown className="w-4 h-4" />
                           </button>
                         )}
                         <button
