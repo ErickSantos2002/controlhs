@@ -84,16 +84,37 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await listLogs(params);
 
+      // 🔍 DEBUG: Log para ver estrutura dos dados
+      console.log('📋 Dados recebidos da API de logs:', data);
+      if (Array.isArray(data) && data.length > 0) {
+        console.log('📋 Primeiro log (exemplo):', data[0]);
+      } else if (data.logs && data.logs.length > 0) {
+        console.log('📋 Primeiro log (exemplo):', data.logs[0]);
+      }
+
+      // 🔄 Função para normalizar os dados e mapear campo de usuário
+      const normalizarLogs = (logs: any[]): Log[] => {
+        return logs.map(log => ({
+          ...log,
+          // Tenta mapear o campo usuario de diferentes possíveis nomes
+          usuario: log.usuario || log.usuario_nome || log.username || log.created_by ||
+                   (log.user && typeof log.user === 'string' ? log.user : log.user?.nome || log.user?.username) ||
+                   'Usuário Desconhecido',
+        }));
+      };
+
       // Verifica se a API retorna um objeto com logs ou array direto
       if (Array.isArray(data)) {
-        setLogs(data);
+        const logsNormalizados = normalizarLogs(data);
+        setLogs(logsNormalizados);
         setPaginacaoState(prev => ({
           ...prev,
           totalRegistros: data.length,
           totalPaginas: Math.ceil(data.length / prev.itensPorPagina),
         }));
       } else if (data.logs && Array.isArray(data.logs)) {
-        setLogs(data.logs);
+        const logsNormalizados = normalizarLogs(data.logs);
+        setLogs(logsNormalizados);
         setPaginacaoState(prev => ({
           ...prev,
           totalRegistros: data.total || data.logs.length,
