@@ -443,99 +443,135 @@ const InventariosContent: React.FC = () => {
   // ========================================
 
   return (
-    <div className="p-6">
+    <div className="space-y-6 p-6">
       {/* Cabeçalho */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Inventário
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Gerenciamento de sessões de inventário patrimonial
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => refreshData()}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Atualizar
-          </button>
-          {canCreate && (
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl shadow-md border border-gray-200 dark:border-[#2d2d2d] p-6 mb-6 transition-colors">
+
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+          {/* Título e descrição */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
+              Inventário
+            </h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
+              Gerenciamento de sessões de inventário patrimonial
+            </p>
+          </div>
+
+          {/* Botões */}
+          <div className="flex flex-wrap gap-2">
+
+            {/* Atualizar */}
             <button
-              onClick={() => {
-                setInventarioSelecionado(null);
-                setModalMode('create');
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              onClick={() => refreshData()}
+              disabled={loading}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+                text-gray-700 dark:text-gray-300
+                bg-white dark:bg-[#1f1f1f]
+                border border-gray-300 dark:border-gray-600
+                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-sm hover:shadow-md
+                transition-all duration-200"
             >
-              <Plus className="w-4 h-4" />
-              Nova Sessão
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Atualizar
             </button>
-          )}
+
+            {/* Nova Sessão */}
+            {canCreate && (
+              <button
+                onClick={() => {
+                  setInventarioSelecionado(null);
+                  setModalMode('create');
+                }}
+                className="flex items-center gap-2 px-4 py-2 
+                  bg-gradient-to-r from-blue-600 to-blue-700
+                  text-white font-medium rounded-lg shadow-md
+                  hover:from-blue-500 hover:to-blue-600
+                  dark:hover:from-blue-500 dark:hover:to-blue-600
+                  transition-all duration-300"
+              >
+                <Plus className="w-4 h-4" />
+                Nova Sessão
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+        {/* Total de Sessões */}
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
                 Total de Sessões
               </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                {kpis.total}
+              <p className="text-3xl font-semibold text-blue-600 dark:text-blue-400 mt-2 tracking-tight">
+                {kpis.total?.toLocaleString('pt-BR')}
               </p>
             </div>
-            <Package className="w-8 h-8 text-gray-600" />
+            <div className="bg-blue-100/70 dark:bg-blue-900/40 p-3 rounded-full">
+              <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+        {/* Em Andamento */}
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
                 Em Andamento
               </p>
-              <p className="text-2xl font-bold text-blue-600">
-                {kpis.em_andamento}
+              <p className="text-3xl font-semibold text-yellow-600 dark:text-yellow-400 mt-2 tracking-tight">
+                {kpis.em_andamento?.toLocaleString('pt-BR')}
               </p>
             </div>
-            <PlayCircle className="w-8 h-8 text-blue-600" />
+            <div className="bg-yellow-100/70 dark:bg-yellow-900/40 p-3 rounded-full">
+              <PlayCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+        {/* Concluídos */}
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
                 Concluídos
               </p>
-              <p className="text-2xl font-bold text-green-600">
-                {kpis.concluidos}
+              <p className="text-3xl font-semibold text-green-600 dark:text-green-400 mt-2 tracking-tight">
+                {kpis.concluidos?.toLocaleString('pt-BR')}
               </p>
             </div>
-            <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="bg-green-100/70 dark:bg-green-900/40 p-3 rounded-full">
+              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+            </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+        {/* Cancelados */}
+        <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
                 Cancelados
               </p>
-              <p className="text-2xl font-bold text-red-600">
-                {kpis.cancelados}
+              <p className="text-3xl font-semibold text-red-600 dark:text-red-400 mt-2 tracking-tight">
+                {kpis.cancelados?.toLocaleString('pt-BR')}
               </p>
             </div>
-            <XCircle className="w-8 h-8 text-red-600" />
+            <div className="bg-red-100/70 dark:bg-red-900/40 p-3 rounded-full">
+              <XCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+            </div>
           </div>
         </div>
       </div>
+
 
       {/* Filtros */}
       <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4 mb-6">

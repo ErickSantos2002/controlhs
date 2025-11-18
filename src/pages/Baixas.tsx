@@ -213,8 +213,9 @@ const BaixasContent: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       {/* Cabeçalho */}
-      <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-md border border-gray-200 dark:border-[#2d2d2d] p-6 mb-6 transition-colors">
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl shadow-md border border-gray-200 dark:border-[#2d2d2d] p-6 mb-6 transition-colors">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          {/* Título e descrição */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
               Baixas Patrimoniais
@@ -224,37 +225,50 @@ const BaixasContent: React.FC = () => {
             </p>
           </div>
 
+          {/* Botões de ação */}
           <div className="flex flex-wrap gap-2">
+            
+            {/* Atualizar */}
             <button
               onClick={() => refreshData()}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300
-                  bg-white dark:bg-[#2a2a2a] border border-gray-300 dark:border-[#3a3a3a]
-                  hover:bg-gray-50 dark:hover:bg-[#333333]
-                  font-medium text-sm rounded-lg transition-all duration-200"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+                text-gray-700 dark:text-gray-300
+                bg-white dark:bg-[#1f1f1f]
+                border border-gray-300 dark:border-gray-600
+                hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-sm hover:shadow-md
+                transition-all duration-200"
             >
-              <RefreshCw
-                className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
-              />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               Atualizar
             </button>
 
+            {/* Exportar */}
             <button
               onClick={handleExportarExcel}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700
-                  dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium text-sm
-                  rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+              className="flex items-center justify-center gap-2 px-4 py-2 
+                bg-gradient-to-r from-green-500 to-emerald-600
+                text-white font-medium rounded-lg shadow-md
+                hover:from-green-400 hover:to-emerald-500
+                dark:hover:from-green-600 dark:hover:to-green-500
+                transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Exportar
             </button>
 
+            {/* Criar nova baixa */}
             {podeCriarBaixa && (
               <button
                 onClick={() => setModalCriar(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700
-                    dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium text-sm
-                    rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                  text-white 
+                  bg-red-600 hover:bg-red-700
+                  dark:bg-red-500 dark:hover:bg-red-600
+                  shadow-sm hover:shadow-md
+                  transition-all duration-200"
               >
                 <Plus className="w-4 h-4" />
                 Nova Baixa

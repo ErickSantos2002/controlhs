@@ -307,40 +307,61 @@ const InventarioConferencia: React.FC = () => {
   // ========================================
 
   return (
-    <div className="p-6">
+    <div className="space-y-6 p-6">
       {/* Cabeçalho */}
-      <div className="mb-6">
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl shadow-md border border-gray-200 dark:border-[#2d2d2d] p-6 mb-6 transition-colors">
+
+        {/* Botão Voltar */}
         <button
           onClick={() => navigate('/inventarios')}
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar para Inventários
         </button>
 
-        <div className="flex items-start justify-between">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+          {/* Título e descrição */}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
               {inventario.titulo}
             </h1>
+
             {inventario.descricao && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
                 {inventario.descricao}
               </p>
             )}
           </div>
 
+          {/* Botões de ação */}
           {canEdit && inventario.status === 'em_andamento' && (
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
+
+              {/* Cancelar */}
               <button
                 onClick={handleCancelar}
-                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+                  text-gray-700 dark:text-gray-300
+                  bg-white dark:bg-[#1f1f1f]
+                  border border-gray-300 dark:border-gray-600
+                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                  shadow-sm hover:shadow-md
+                  transition-all duration-200"
               >
                 Cancelar Inventário
               </button>
+
+              {/* Finalizar */}
               <button
                 onClick={() => setShowFinalizarModal(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 
+                  bg-gradient-to-r from-green-500 to-emerald-600
+                  text-white font-medium rounded-lg shadow-md
+                  hover:from-green-400 hover:to-emerald-500
+                  dark:hover:from-green-600 dark:hover:to-green-500
+                  transition-all duration-300"
               >
                 Finalizar Inventário
               </button>

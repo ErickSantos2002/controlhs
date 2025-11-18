@@ -92,7 +92,6 @@ const TransferenciasContent: React.FC = () => {
   const [efetivandoId, setEfetivandoId] = useState<number | null>(null);
   const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
-
   // ========================================
   // PERMISSÕES
   // ========================================
@@ -225,8 +224,8 @@ const TransferenciasContent: React.FC = () => {
     setFiltros({
       busca: '',
       status: 'todos',
-      setor: 'todos',           // ✅ Campo unificado
-      responsavel: 'todos',     // ✅ Campo unificado
+      setor: 'todos', // ✅ Campo unificado
+      responsavel: 'todos', // ✅ Campo unificado
       patrimonio: 'todos',
       solicitante: 'todos',
       aprovador: 'todos',
@@ -242,41 +241,47 @@ const TransferenciasContent: React.FC = () => {
       return;
     }
 
-    const dados: TransferenciaExportData[] = transferenciasFiltradas.map((t) => {
-      const patrimonio = patrimonios.find((p) => p.id === t.patrimonio_id);
-      const setorOrigem = setores.find((s) => s.id === t.setor_origem_id);
-      const setorDestino = setores.find((s) => s.id === t.setor_destino_id);
-      const responsavelOrigem = usuarios.find((u) => u.id === t.responsavel_origem_id);
-      const responsavelDestino = usuarios.find((u) => u.id === t.responsavel_destino_id);
-      const solicitante = usuarios.find((u) => u.id === t.solicitante_id);
-      const aprovador = t.aprovado_por
-        ? usuarios.find((u) => u.id === t.aprovado_por)
-        : null;
+    const dados: TransferenciaExportData[] = transferenciasFiltradas.map(
+      (t) => {
+        const patrimonio = patrimonios.find((p) => p.id === t.patrimonio_id);
+        const setorOrigem = setores.find((s) => s.id === t.setor_origem_id);
+        const setorDestino = setores.find((s) => s.id === t.setor_destino_id);
+        const responsavelOrigem = usuarios.find(
+          (u) => u.id === t.responsavel_origem_id,
+        );
+        const responsavelDestino = usuarios.find(
+          (u) => u.id === t.responsavel_destino_id,
+        );
+        const solicitante = usuarios.find((u) => u.id === t.solicitante_id);
+        const aprovador = t.aprovado_por
+          ? usuarios.find((u) => u.id === t.aprovado_por)
+          : null;
 
-      return {
-        ID: t.id,
-        Patrimônio: patrimonio?.nome || 'N/A',
-        'Setor Origem': setorOrigem?.nome || 'N/A',
-        'Setor Destino': setorDestino?.nome || 'N/A',
-        'Responsável Origem': responsavelOrigem?.username || 'N/A',
-        'Responsável Destino': responsavelDestino?.username || 'N/A',
-        Solicitante: solicitante?.username || 'N/A',
-        'Data Solicitação': t.data_transferencia
-          ? new Date(t.data_transferencia).toLocaleDateString('pt-BR')
-          : 'N/A',
-        Status: STATUS_LABELS[t.status],
-        Aprovador: aprovador?.username || '-',
-        'Data Aprovação': t.data_aprovacao                    // ✅ Sem cast
-          ? new Date(t.data_aprovacao).toLocaleDateString('pt-BR')
-          : 'N/A',
-        'Data Efetivação': t.data_efetivacao                  // ✅ NOVO CAMPO
-          ? new Date(t.data_efetivacao).toLocaleDateString('pt-BR')
-          : 'N/A',
-        Motivo: t.motivo || 'N/A',
-        'Motivo Rejeição': t.motivo_rejeicao || '-',          // ✅ NOVO CAMPO
-        Observações: t.observacoes || '-',                     // ✅ NOVO CAMPO
-      };
-    });
+        return {
+          ID: t.id,
+          Patrimônio: patrimonio?.nome || 'N/A',
+          'Setor Origem': setorOrigem?.nome || 'N/A',
+          'Setor Destino': setorDestino?.nome || 'N/A',
+          'Responsável Origem': responsavelOrigem?.username || 'N/A',
+          'Responsável Destino': responsavelDestino?.username || 'N/A',
+          Solicitante: solicitante?.username || 'N/A',
+          'Data Solicitação': t.data_transferencia
+            ? new Date(t.data_transferencia).toLocaleDateString('pt-BR')
+            : 'N/A',
+          Status: STATUS_LABELS[t.status],
+          Aprovador: aprovador?.username || '-',
+          'Data Aprovação': t.data_aprovacao // ✅ Sem cast
+            ? new Date(t.data_aprovacao).toLocaleDateString('pt-BR')
+            : 'N/A',
+          'Data Efetivação': t.data_efetivacao // ✅ NOVO CAMPO
+            ? new Date(t.data_efetivacao).toLocaleDateString('pt-BR')
+            : 'N/A',
+          Motivo: t.motivo || 'N/A',
+          'Motivo Rejeição': t.motivo_rejeicao || '-', // ✅ NOVO CAMPO
+          Observações: t.observacoes || '-', // ✅ NOVO CAMPO
+        };
+      },
+    );
 
     const ws = XLSX.utils.json_to_sheet(dados);
     const wb = XLSX.utils.book_new();
@@ -337,10 +342,14 @@ const TransferenciasContent: React.FC = () => {
             <button
               onClick={() => refreshData()}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 dark:text-gray-300
-                  bg-white dark:bg-[#2a2a2a] border border-gray-300 dark:border-[#3a3a3a]
-                  hover:bg-gray-50 dark:hover:bg-[#333333]
-                  font-medium text-sm rounded-lg transition-all duration-200"
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg
+            text-gray-700 dark:text-gray-300
+            bg-white dark:bg-[#1f1f1f]
+            border border-gray-300 dark:border-gray-600
+            hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+            disabled:opacity-50 disabled:cursor-not-allowed
+            shadow-sm hover:shadow-md
+            transition-all duration-200"
             >
               <RefreshCw
                 className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`}
@@ -350,9 +359,12 @@ const TransferenciasContent: React.FC = () => {
 
             <button
               onClick={handleExportarExcel}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700
-                  dark:bg-green-500 dark:hover:bg-green-600 text-white font-medium text-sm
-                  rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+              className="flex items-center justify-center gap-2 px-4 py-2 
+              bg-gradient-to-r from-green-500 to-emerald-600
+              text-white font-medium rounded-lg shadow-md
+              hover:from-green-400 hover:to-emerald-500
+              dark:hover:from-green-600 dark:hover:to-green-500
+              transition-all duration-300"
             >
               <Download className="w-4 h-4" />
               Exportar
@@ -361,9 +373,12 @@ const TransferenciasContent: React.FC = () => {
             {canCreate && (
               <button
                 onClick={() => setModalCriar(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 
-                    dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium text-sm 
-                    rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+              text-white
+              bg-blue-600 hover:bg-blue-700
+              dark:bg-blue-500 dark:hover:bg-blue-600
+              shadow-sm hover:shadow-md
+              transition-all duration-200"
               >
                 <Plus className="w-4 h-4" />
                 Nova Transferência
@@ -490,7 +505,9 @@ const TransferenciasContent: React.FC = () => {
             </label>
             <select
               value={filtros.status}
-              onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, status: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -512,7 +529,9 @@ const TransferenciasContent: React.FC = () => {
             </label>
             <select
               value={filtros.setor}
-              onChange={(e) => setFiltros({ ...filtros, setor: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, setor: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -535,7 +554,9 @@ const TransferenciasContent: React.FC = () => {
             </label>
             <select
               value={filtros.responsavel}
-              onChange={(e) => setFiltros({ ...filtros, responsavel: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, responsavel: e.target.value })
+              }
               disabled={!isAdmin}
               className="w-full px-3 py-2 rounded-lg
                 bg-white/95 dark:bg-[#2a2a2a]/95
@@ -565,7 +586,9 @@ const TransferenciasContent: React.FC = () => {
             </label>
             <select
               value={filtros.patrimonio}
-              onChange={(e) => setFiltros({ ...filtros, patrimonio: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, patrimonio: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -589,7 +612,9 @@ const TransferenciasContent: React.FC = () => {
             <input
               type="date"
               value={filtros.dataInicio || ''}
-              onChange={(e) => setFiltros({ ...filtros, dataInicio: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, dataInicio: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
@@ -606,7 +631,9 @@ const TransferenciasContent: React.FC = () => {
             <input
               type="date"
               value={filtros.dataFim || ''}
-              onChange={(e) => setFiltros({ ...filtros, dataFim: e.target.value })}
+              onChange={(e) =>
+                setFiltros({ ...filtros, dataFim: e.target.value })
+              }
               className="w-full px-3 py-2 rounded-lg
                   bg-white/95 dark:bg-[#2a2a2a]/95
                   text-gray-900 dark:text-gray-100
