@@ -381,7 +381,7 @@ const InventarioDetalhes: React.FC<InventarioDetalhesProps> = ({
                             Patrimônio
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                            Tag
+                            Número de Série
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                             Situação
@@ -405,7 +405,7 @@ const InventarioDetalhes: React.FC<InventarioDetalhesProps> = ({
                                 {patrimonio?.nome || 'N/A'}
                               </td>
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                {patrimonio?.tag || '-'}
+                                {patrimonio?.numero_serie || '-'}
                               </td>
                               <td className="px-4 py-3 text-sm">
                                 <span

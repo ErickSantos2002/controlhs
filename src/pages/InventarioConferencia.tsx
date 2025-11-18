@@ -122,8 +122,7 @@ const InventarioConferencia: React.FC = () => {
         );
         return (
           patrimonio?.nome?.toLowerCase().includes(buscaLower) ||
-          patrimonio?.numero_serie?.toLowerCase().includes(buscaLower) ||
-          patrimonio?.tag?.toLowerCase().includes(buscaLower)
+          patrimonio?.numero_serie?.toLowerCase().includes(buscaLower)
         );
       });
     }
@@ -438,7 +437,7 @@ const InventarioConferencia: React.FC = () => {
                 type="text"
                 value={buscaLocal}
                 onChange={(e) => setBuscaLocal(e.target.value)}
-                placeholder="Nome, tag ou número de série..."
+                placeholder="Nome ou número de série..."
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -501,15 +500,7 @@ const InventarioConferencia: React.FC = () => {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                        <div>
-                          <p className="text-gray-500 dark:text-gray-400">
-                            Tag
-                          </p>
-                          <p className="font-medium text-gray-900 dark:text-gray-100">
-                            {patrimonio?.tag || '-'}
-                          </p>
-                        </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                         <div>
                           <p className="text-gray-500 dark:text-gray-400">
                             Número de Série
