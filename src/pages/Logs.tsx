@@ -1,179 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { useLogs } from '../hooks/useLogs';
 import { Navigate } from 'react-router-dom';
-
-interface LogItem {
-  acao: string;
-  entidade: string;
-  entidade_id: number;
-  usuario: string;
-  criado_em: string;
-  detalhes: any;
-}
+import type { Log } from '../types/logs.types';
 
 const Logs: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const {
+    logsFiltrados,
+    loading,
+    error,
+    filtros,
+    setFiltros,
+    paginacao,
+    setPaginacao,
+    refreshLogs
+  } = useLogs();
+
   const [modalAberto, setModalAberto] = useState(false);
   const [detalheSelecionado, setDetalheSelecionado] = useState<any>(null);
+  const [buscaLocal, setBuscaLocal] = useState('');
 
-  // --- Paginação ESTÁTICA (somente visual) ---
-  const PAGINA_ATUAL = 1; // mude aqui pra simular outra página
-  const ITENS_POR_PAGINA = 10; // tamanho da página (visual)
-  const TOTAL_REGISTROS = 48; // total mockado
+  // ========================================
+  // PROTEÇÃO DE ROTA (ADMIN ONLY)
+  // ========================================
 
-  const TOTAL_PAGINAS = Math.ceil(TOTAL_REGISTROS / ITENS_POR_PAGINA);
-  const INICIO = (PAGINA_ATUAL - 1) * ITENS_POR_PAGINA + 1;
-  const FIM = Math.min(PAGINA_ATUAL * ITENS_POR_PAGINA, TOTAL_REGISTROS);
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // janelinha de até 5 páginas
-  const WINDOW = Math.min(5, TOTAL_PAGINAS);
+  if (!user || user.role?.toLowerCase() !== 'administrador') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // ========================================
+  // DEBOUNCE DA BUSCA
+  // ========================================
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFiltros({ ...filtros, busca: buscaLocal });
+      setPaginacao({ paginaAtual: 1 }); // Reset para primeira página
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [buscaLocal]);
+
+  // ========================================
+  // PAGINAÇÃO LOCAL
+  // ========================================
+
+  const dadosPaginados = useMemo(() => {
+    const inicio = (paginacao.paginaAtual - 1) * paginacao.itensPorPagina;
+    const fim = inicio + paginacao.itensPorPagina;
+    return logsFiltrados.slice(inicio, fim);
+  }, [logsFiltrados, paginacao.paginaAtual, paginacao.itensPorPagina]);
+
+  // Atualiza total de páginas baseado nos logs filtrados
+  useEffect(() => {
+    const totalPaginas = Math.ceil(logsFiltrados.length / paginacao.itensPorPagina);
+    const totalRegistros = logsFiltrados.length;
+
+    if (totalPaginas !== paginacao.totalPaginas || totalRegistros !== paginacao.totalRegistros) {
+      setPaginacao({
+        totalPaginas: Math.max(1, totalPaginas),
+        totalRegistros
+      });
+    }
+  }, [logsFiltrados.length, paginacao.itensPorPagina]);
+
+  // Garante que página atual não ultrapasse total de páginas
+  useEffect(() => {
+    if (paginacao.paginaAtual > paginacao.totalPaginas && paginacao.totalPaginas > 0) {
+      setPaginacao({ paginaAtual: paginacao.totalPaginas });
+    }
+  }, [paginacao.totalPaginas]);
+
+  // ========================================
+  // CÁLCULOS DE PAGINAÇÃO
+  // ========================================
+
+  const INICIO = (paginacao.paginaAtual - 1) * paginacao.itensPorPagina + 1;
+  const FIM = Math.min(paginacao.paginaAtual * paginacao.itensPorPagina, paginacao.totalRegistros);
+
+  // Janela de páginas (mostra até 5 páginas)
+  const WINDOW = Math.min(5, paginacao.totalPaginas);
   let start = 1;
-  if (TOTAL_PAGINAS > 5) {
-    if (PAGINA_ATUAL <= 3) start = 1;
-    else if (PAGINA_ATUAL >= TOTAL_PAGINAS - 2) start = TOTAL_PAGINAS - 4;
-    else start = PAGINA_ATUAL - 2;
+  if (paginacao.totalPaginas > 5) {
+    if (paginacao.paginaAtual <= 3) start = 1;
+    else if (paginacao.paginaAtual >= paginacao.totalPaginas - 2) start = paginacao.totalPaginas - 4;
+    else start = paginacao.paginaAtual - 2;
   }
   const PAGES = Array.from({ length: WINDOW }, (_, i) => start + i);
 
-  // 🔹 Logs fictícios — depois pode substituir por fetch real da API
-  const logs: LogItem[] = [
-    {
-      acao: 'Atualização de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 12,
-      usuario: 'Welton',
-      criado_em: '2025-10-09 14:21:32',
-      detalhes: {
-        antes: { status: 'ativo' },
-        depois: { status: 'baixado' },
-      },
-    },
-    {
-      acao: 'Exclusão de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 9,
-      usuario: 'Erick',
-      criado_em: '2025-10-09 10:11:52',
-      detalhes: {
-        registro_removido: { id: 9, nome: 'Notebook Dell', valor: 6500 },
-      },
-    },
-    {
-      acao: 'Atualização de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 5,
-      usuario: 'Djalma',
-      criado_em: '2025-10-08 16:05:14',
-      detalhes: {
-        antes: { status: 'manutenção' },
-        depois: { status: 'ativo' },
-      },
-    },
-    {
-      acao: 'Atualização de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 3,
-      usuario: 'Gabriel',
-      criado_em: '2025-10-08 12:32:47',
-      detalhes: {
-        antes: { valor: 2500 },
-        depois: { valor: 2700 },
-      },
-    },
-    {
-      acao: 'Atualização de usuário',
-      entidade: 'users',
-      entidade_id: 4,
-      usuario: 'Admin',
-      criado_em: '2025-10-07 18:41:20',
-      detalhes: {
-        antes: { role: 'comum' },
-        depois: { role: 'admin' },
-      },
-    },
-    {
-      acao: 'Criação de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 25,
-      usuario: 'Welton',
-      criado_em: '2025-10-06 11:07:15',
-      detalhes: {
-        novo_registro: {
-          nome: 'Impressora HP LaserJet 4200',
-          categoria: 'Equipamento',
-          valor: 3500,
-        },
-      },
-    },
-    {
-      acao: 'Atualização de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 12,
-      usuario: 'Welton',
-      criado_em: '2025-10-09 14:21:32',
-      detalhes: {
-        antes: { status: 'ativo' },
-        depois: { status: 'baixado' },
-      },
-    },
-    {
-      acao: 'Exclusão de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 9,
-      usuario: 'Erick',
-      criado_em: '2025-10-09 10:11:52',
-      detalhes: {
-        registro_removido: { id: 9, nome: 'Notebook Dell', valor: 6500 },
-      },
-    },
-    {
-      acao: 'Atualização de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 5,
-      usuario: 'Djalma',
-      criado_em: '2025-10-08 16:05:14',
-      detalhes: {
-        antes: { status: 'manutenção' },
-        depois: { status: 'ativo' },
-      },
-    },
-    {
-      acao: 'Atualização de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 3,
-      usuario: 'Gabriel',
-      criado_em: '2025-10-08 12:32:47',
-      detalhes: {
-        antes: { valor: 2500 },
-        depois: { valor: 2700 },
-      },
-    },
-    {
-      acao: 'Atualização de usuário',
-      entidade: 'users',
-      entidade_id: 4,
-      usuario: 'Admin',
-      criado_em: '2025-10-07 18:41:20',
-      detalhes: {
-        antes: { role: 'comum' },
-        depois: { role: 'admin' },
-      },
-    },
-    {
-      acao: 'Criação de patrimônio',
-      entidade: 'patrimonios',
-      entidade_id: 25,
-      usuario: 'Welton',
-      criado_em: '2025-10-06 11:07:15',
-      detalhes: {
-        novo_registro: {
-          nome: 'Impressora HP LaserJet 4200',
-          categoria: 'Equipamento',
-          valor: 3500,
-        },
-      },
-    },
-  ];
+  // ========================================
+  // HANDLERS
+  // ========================================
 
   const abrirModal = (detalhes: any) => {
     setDetalheSelecionado(detalhes);
@@ -185,18 +114,69 @@ const Logs: React.FC = () => {
     setDetalheSelecionado(null);
   };
 
-  if (loading) {
-    return (
-      <div className="p-6 text-gray-500 dark:text-gray-300">
-        Verificando permissões...
-      </div>
-    );
-  }
+  const handlePageChange = (novaPagina: number) => {
+    if (novaPagina >= 1 && novaPagina <= paginacao.totalPaginas) {
+      setPaginacao({ paginaAtual: novaPagina });
+    }
+  };
+
+  // ========================================
+  // RENDERIZAÇÃO
+  // ========================================
 
   return (
-    <div className="p-6">
-      {/* Card título */}
-      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md transition-colors mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#0f0f0f] dark:to-[#1a1a1a] py-6 px-4">
+      {/* Modal de Detalhes */}
+      {modalAberto && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={fecharModal}
+        >
+          <div
+            className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-2xl
+                      max-w-2xl w-full max-h-[80vh] overflow-y-auto
+                      border border-gray-200 dark:border-[#2d2d2d]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header do Modal */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-[#2d2d2d]">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Detalhes do Log
+              </h3>
+              <button
+                onClick={fecharModal}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400
+                          dark:hover:text-gray-200 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Conteúdo do Modal */}
+            <div className="p-6">
+              <pre className="bg-gray-50 dark:bg-[#0f0f0f] p-4 rounded-lg
+                            overflow-x-auto text-sm text-gray-800 dark:text-gray-200
+                            border border-gray-200 dark:border-[#2d2d2d]">
+                {JSON.stringify(detalheSelecionado, null, 2)}
+              </pre>
+            </div>
+
+            {/* Footer do Modal */}
+            <div className="flex justify-end p-6 border-t border-gray-200 dark:border-[#2d2d2d]">
+              <button
+                onClick={fecharModal}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white
+                          rounded-lg transition-colors font-medium"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cabeçalho da Página */}
+      <div className="mb-6 bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md transition-colors">
         <div className="px-6 py-4">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
             Log de Auditoria
@@ -226,8 +206,10 @@ const Logs: React.FC = () => {
             <div className="relative flex-1 md:flex-initial">
               <input
                 type="text"
+                value={buscaLocal}
+                onChange={(e) => setBuscaLocal(e.target.value)}
                 placeholder="Pesquisar log..."
-                className="pl-3 pr-3 py-2 w-full md:w-64 rounded-lg border 
+                className="pl-3 pr-3 py-2 w-full md:w-64 rounded-lg border
                           focus:outline-none focus:ring-2 focus:ring-blue-500
                           bg-white dark:bg-darkGray
                           text-gray-800 dark:text-gray-200
@@ -236,205 +218,243 @@ const Logs: React.FC = () => {
                           transition-colors"
               />
             </div>
+
+            {/* Botão Atualizar */}
+            <button
+              onClick={refreshLogs}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white
+                        rounded-lg transition-colors font-medium disabled:opacity-50
+                        disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  Carregando...
+                </>
+              ) : (
+                <>
+                  🔄 Atualizar
+                </>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Tabela sem scroll */}
-        <div className="overflow-x-auto overflow-y-auto rounded-lg max-h-screen-md border border-gray-200 dark:border-[#2a2a2a]">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
-                {[
-                  'Ação',
-                  'Entidade',
-                  'ID Entidade',
-                  'Usuário',
-                  'Data',
-                  'Detalhes',
-                ].map((header, idx) => (
-                  <th
-                    key={idx}
-                    className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200"
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {logs.slice(0, 10).map((log, index) => (
-                <tr
-                  key={index}
-                  className={`border-b border-gray-100 dark:border-gray-700 
-                              hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
-                              ${index % 2 === 0 ? 'bg-white dark:bg-[#1b1b1b]' : 'bg-gray-50 dark:bg-[#222222]'}`}
-                >
-                  <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">
-                    {log.acao}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                    {log.entidade}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                    {log.entidade_id}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                    {log.usuario}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
-                    {new Date(log.criado_em).toLocaleString('pt-BR')}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => abrirModal(log.detalhes)}
-                      className="px-3 py-1 text-sm font-medium rounded-md 
-                                bg-blue-600 hover:bg-blue-700 
-                                text-white transition-colors"
-                    >
-                      Ver Detalhes
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Mensagem de Erro */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200
+                        dark:border-red-800 rounded-lg">
+            <p className="text-red-800 dark:text-red-300 text-sm">
+              ⚠️ Erro ao carregar logs: {error}
+            </p>
+          </div>
+        )}
 
-        {/* Paginação */}
-        <div className="mt-4">
-          {/* Desktop */}
-          <div className="hidden md:flex justify-between items-center w-full">
-            {/* Texto de registros */}
-            <div className="text-sm text-gray-600 dark:text-gray-300">
-              Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
+        {/* Loading Indicator */}
+        {loading && logsFiltrados.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600 dark:text-gray-300">Carregando logs...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Mensagem de Nenhum Resultado */}
+        {!loading && dadosPaginados.length === 0 && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <p className="text-gray-600 dark:text-gray-300 text-lg">
+                📭 Nenhum log encontrado
+              </p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
+                {filtros.busca
+                  ? 'Tente ajustar seus filtros de busca'
+                  : 'Não há logs registrados no sistema'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Tabela de Logs */}
+        {!loading && dadosPaginados.length > 0 && (
+          <>
+            <div className="overflow-x-auto overflow-y-auto rounded-lg max-h-screen-md border border-gray-200 dark:border-[#2a2a2a]">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-200 dark:bg-[#181818]">
+                    {[
+                      'Ação',
+                      'Entidade',
+                      'ID Entidade',
+                      'Usuário',
+                      'Data',
+                      'Detalhes',
+                    ].map((header, idx) => (
+                      <th
+                        key={idx}
+                        className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200"
+                      >
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {dadosPaginados.map((log, index) => (
+                    <tr
+                      key={log.id || index}
+                      className={`border-b border-gray-100 dark:border-gray-700
+                                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
+                                  ${index % 2 === 0 ? 'bg-white dark:bg-[#1b1b1b]' : 'bg-gray-50 dark:bg-[#222222]'}`}
+                    >
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">
+                        {log.acao}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
+                        {log.entidade}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
+                        {log.entidade_id}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
+                        {log.usuario}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 text-center">
+                        {new Date(log.criado_em).toLocaleString('pt-BR')}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => abrirModal(log.detalhes)}
+                          className="px-3 py-1 text-sm font-medium rounded-md
+                                    bg-blue-600 hover:bg-blue-700
+                                    text-white transition-colors"
+                        >
+                          Ver Detalhes
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
 
             {/* Paginação */}
-            <div className="flex gap-2">
-              {/* Botão Anterior */}
-              <button
-                disabled={PAGINA_ATUAL === 1}
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
-              >
-                Anterior
-              </button>
+            <div className="mt-4">
+              {/* Desktop */}
+              <div className="hidden md:flex justify-between items-center w-full">
+                {/* Texto de registros */}
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  Mostrando {INICIO} a {FIM} de {paginacao.totalRegistros} registros
+                </div>
 
-              {/* Números de página */}
-              <div className="flex gap-1">
-                {PAGES.map((page) => (
+                {/* Paginação */}
+                <div className="flex gap-2">
+                  {/* Botão Anterior */}
                   <button
-                    key={page}
-                    className={`px-3 py-1 border rounded-lg transition-colors ${
-                      PAGINA_ATUAL === page
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
-                    }`}
-                    aria-current={PAGINA_ATUAL === page ? 'page' : undefined}
+                    onClick={() => handlePageChange(paginacao.paginaAtual - 1)}
+                    disabled={paginacao.paginaAtual === 1}
+                    className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      border-gray-300 dark:border-gray-600
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-colors"
                   >
-                    {page}
+                    Anterior
                   </button>
-                ))}
+
+                  {/* Números de página */}
+                  <div className="flex gap-1">
+                    {PAGES.map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 border rounded-lg transition-colors ${
+                          paginacao.paginaAtual === page
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                        }`}
+                        aria-current={paginacao.paginaAtual === page ? 'page' : undefined}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Botão Próximo */}
+                  <button
+                    onClick={() => handlePageChange(paginacao.paginaAtual + 1)}
+                    disabled={paginacao.paginaAtual === paginacao.totalPaginas}
+                    className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      border-gray-300 dark:border-gray-600
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-colors"
+                  >
+                    Próximo
+                  </button>
+                </div>
               </div>
 
-              {/* Botão Próximo */}
-              <button
-                disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
-              >
-                Próximo
-              </button>
+              {/* Mobile */}
+              <div className="flex md:hidden flex-col items-center mt-2 gap-2 text-center">
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  Mostrando {INICIO} a {FIM} de {paginacao.totalRegistros} registros
+                </div>
+
+                <div className="flex justify-center gap-1">
+                  <button
+                    onClick={() => handlePageChange(paginacao.paginaAtual - 1)}
+                    disabled={paginacao.paginaAtual === 1}
+                    className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      border-gray-300 dark:border-gray-600
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-colors"
+                  >
+                    {'<'}
+                  </button>
+
+                  {PAGES.map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 border rounded-lg transition-colors text-sm ${
+                        paginacao.paginaAtual === page
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => handlePageChange(paginacao.paginaAtual + 1)}
+                    disabled={paginacao.paginaAtual === paginacao.totalPaginas}
+                    className="px-3 py-1 border rounded-lg
+                      bg-white dark:bg-[#1f1f1f]
+                      border-gray-300 dark:border-gray-600
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      transition-colors"
+                  >
+                    {'>'}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-
-          {/* Mobile */}
-          <div className="flex md:hidden flex-col items-center mt-2 gap-2 text-center">
-            <div className="text-sm text-gray-600 dark:text-gray-300">
-              Mostrando {INICIO} a {FIM} de {TOTAL_REGISTROS} registros
-            </div>
-
-            <div className="flex justify-center gap-1">
-              <button
-                disabled={PAGINA_ATUAL === 1}
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
-              >
-                {'<'}
-              </button>
-
-              <span
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  text-gray-700 dark:text-gray-300
-                  border-gray-300 dark:border-gray-600"
-              >
-                {PAGINA_ATUAL}
-              </span>
-
-              <button
-                disabled={PAGINA_ATUAL === TOTAL_PAGINAS}
-                className="px-3 py-1 border rounded-lg
-                  bg-white dark:bg-[#1f1f1f]
-                  border-gray-300 dark:border-gray-600
-                  text-gray-700 dark:text-gray-300
-                  hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  transition-colors"
-              >
-                {'>'}
-              </button>
-            </div>
-          </div>
-
-          {/* Texto inferior centralizado */}
-          <div className="mt-3 text-sm text-gray-600 dark:text-gray-300 text-center">
-            Exibindo os 10 registros mais recentes
-          </div>
-        </div>
+          </>
+        )}
       </div>
-
-      {/* Modal de Detalhes */}
-      {modalAberto && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50 transition-opacity">
-          <div className="bg-white dark:bg-[#1e1e1e] rounded-xl shadow-xl border border-gray-200 dark:border-[#2d2d2d] max-w-lg w-full mx-4 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">
-              Detalhes da Alteração
-            </h2>
-
-            <pre className="text-sm bg-gray-100 dark:bg-[#181818] text-gray-800 dark:text-gray-300 p-4 rounded-lg border border-gray-200 dark:border-[#2a2a2a] max-h-[300px] overflow-auto">
-              {JSON.stringify(detalheSelecionado, null, 2)}
-            </pre>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={fecharModal}
-                className="px-4 py-2 rounded-lg font-medium 
-                          bg-gray-300 hover:bg-gray-400 
-                          dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100 
-                          transition-colors"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

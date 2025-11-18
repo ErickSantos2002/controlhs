@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { TransferenciaAprovar, TransferenciaRejeitar } from '../types/transferencias.types';
+import type { LogCreate, FiltrosLog } from '../types/logs.types';
 
 const baseURL =
   import.meta.env.VITE_API_URL ||
@@ -588,13 +589,56 @@ export async function downloadAnexo(id: number, nomeOriginal?: string) {
 // 📜 LOGS
 // ========================================
 
-export async function listLogs() {
-  const { data } = await api.get('/logs/');
+/**
+ * Lista logs com suporte a filtros e paginação
+ * @param params - Parâmetros de filtros e paginação
+ * @returns Lista de logs
+ */
+export async function listLogs(params?: {
+  skip?: number;
+  limit?: number;
+  entidade?: string;
+  acao?: string;
+  usuario?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  busca?: string;
+}) {
+  const { data } = await api.get('/logs/', { params });
   return data;
 }
 
-export async function createLog(payload: any) {
+/**
+ * Busca um log específico por ID
+ * @param id - ID do log
+ * @returns Detalhes do log
+ */
+export async function getLog(id: number) {
+  const { data } = await api.get(`/logs/${id}`);
+  return data;
+}
+
+/**
+ * Cria um novo registro de log
+ * @param payload - Dados do log
+ * @returns Log criado
+ */
+export async function createLog(payload: LogCreate) {
   const { data } = await api.post('/logs/', payload);
+  return data;
+}
+
+/**
+ * Exporta logs em formato específico
+ * @param format - Formato de exportação (csv, json, pdf)
+ * @param filtros - Filtros a aplicar na exportação
+ * @returns Dados exportados
+ */
+export async function exportLogs(format: 'csv' | 'json' | 'pdf', filtros?: FiltrosLog) {
+  const { data } = await api.get('/logs/export', {
+    params: { format, ...filtros },
+    responseType: format === 'csv' || format === 'pdf' ? 'blob' : 'json',
+  });
   return data;
 }
 
