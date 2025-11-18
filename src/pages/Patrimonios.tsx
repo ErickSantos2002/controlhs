@@ -770,62 +770,114 @@ const PatrimoniosContent: React.FC = () => {
             {/* Paginação */}
             {totalPaginas > 1 && (
               <div className="mt-6 pt-4 px-6 pb-4 border-t border-gray-200 dark:border-[#2d2d2d]">
+                {/* Desktop */}
                 <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
+                  {/* Texto */}
                   <div>
-                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length}{' '}
-                    registros
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
                   </div>
-
+                  {/* Controles */}
                   <div className="flex gap-2">
+                    {/* Anterior */}
                     <button
-                      onClick={() =>
-                        setPaginaAtual((prev) => Math.max(1, prev - 1))
-                      }
+                      onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
                       disabled={paginaAtual === 1}
                       className="px-3 py-1 border rounded-lg
-                        bg-white/95 dark:bg-[#1e1e1e]/95
-                        border-gray-300 dark:border-[#3a3a3a]
+                        bg-white dark:bg-[#1f1f1f]
+                        border-gray-300 dark:border-gray-600
                         text-gray-700 dark:text-gray-300
-                        hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                        hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
                         disabled:opacity-50 disabled:cursor-not-allowed
                         transition-colors"
                     >
                       Anterior
                     </button>
 
+                    {/* Números */}
                     <div className="flex gap-1">
                       {paginasVisiveis.map((page) => (
                         <button
                           key={page}
                           onClick={() => setPaginaAtual(page)}
-                          className={`px-3 py-1 border rounded-lg transition-colors ${
-                            paginaAtual === page
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-white/95 dark:bg-[#1e1e1e]/95 border-gray-300 dark:border-[#3a3a3a] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]'
-                          }`}
+                          className={`px-3 py-1 border rounded-lg transition-colors
+                            ${
+                              paginaAtual === page
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                            }`}
                         >
                           {page}
                         </button>
                       ))}
                     </div>
 
+                    {/* Próximo */}
                     <button
                       onClick={() =>
-                        setPaginaAtual((prev) =>
-                          Math.min(totalPaginas, prev + 1),
-                        )
+                        setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))
                       }
                       disabled={paginaAtual === totalPaginas}
                       className="px-3 py-1 border rounded-lg
-                        bg-white/95 dark:bg-[#1e1e1e]/95
-                        border-gray-300 dark:border-[#3a3a3a]
+                        bg-white dark:bg-[#1f1f1f]
+                        border-gray-300 dark:border-gray-600
                         text-gray-700 dark:text-gray-300
-                        hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                        hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
                         disabled:opacity-50 disabled:cursor-not-allowed
                         transition-colors"
                     >
                       Próximo
                     </button>
+                  </div>
+                </div>
+
+                {/* MOBILE */}
+                <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-600 dark:text-gray-300">
+
+                  <div className="mb-2">
+                    Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length} registros
+                  </div>
+
+                  <div className="flex justify-center gap-2 items-center">
+
+                    <button
+                      onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
+                      disabled={paginaAtual === 1}
+                      className="px-3 py-1 border rounded-lg
+                        bg-white dark:bg-[#1f1f1f]
+                        border-gray-300 dark:border-gray-600
+                        text-gray-700 dark:text-gray-300
+                        hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        transition-colors"
+                    >
+                      {'<'}
+                    </button>
+
+                    <span
+                      className="px-3 py-1 border rounded-lg
+                        bg-white dark:bg-[#1f1f1f]
+                        text-gray-700 dark:text-gray-300
+                        border-gray-300 dark:border-gray-600"
+                    >
+                      {paginaAtual}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))
+                      }
+                      disabled={paginaAtual === totalPaginas}
+                      className="px-3 py-1 border rounded-lg
+                        bg-white dark:bg-[#1f1f1f]
+                        border-gray-300 dark:border-gray-600
+                        text-gray-700 dark:text-gray-300
+                        hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                        disabled:opacity-50 disabled:cursor-not-allowed
+                        transition-colors"
+                    >
+                      {'>'}
+                    </button>
+
                   </div>
                 </div>
               </div>

@@ -718,143 +718,143 @@ const InventariosContent: React.FC = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
-                <tr>
-                  {[
-                    "ID",
-                    "Título",
-                    "Tipo",
-                    "Status",
-                    "Responsável",
-                    "Data Início",
-                    "Ações",
-                  ].map((th) => (
-                    <th
-                      key={th}
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      {th}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
+  <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
+    <tr>
+      {[
+        "ID",
+        "Título",
+        "Tipo",
+        "Status",
+        "Responsável",
+        "Data Início",
+        "Ações",
+      ].map((th) => (
+        <th
+          key={th}
+          className="px-6 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider"
+        >
+          {th}
+        </th>
+      ))}
+    </tr>
+  </thead>
 
-              <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
-                {dadosPaginados.map((inv) => (
-                  <tr
-                    key={inv.id}
-                    className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
-                  >
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
-                      #{inv.id}
-                    </td>
+  <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
+    {dadosPaginados.map((inv) => (
+      <tr
+        key={inv.id}
+        className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
+      >
+        <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 text-center">
+          #{inv.id}
+        </td>
 
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                      <div className="font-medium">{inv.titulo}</div>
-                      {inv.descricao && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
-                          {inv.descricao}
-                        </div>
-                      )}
-                    </td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 text-center">
+          <div className="font-medium">{inv.titulo}</div>
+          {inv.descricao && (
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+              {inv.descricao}
+            </div>
+          )}
+        </td>
 
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                      {getTipoLabel(inv.tipo)}
-                    </td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 text-center">
+          {getTipoLabel(inv.tipo)}
+        </td>
 
-                    <td className="px-6 py-4 text-sm">
-                      {getStatusBadge(inv.status)}
-                    </td>
+        <td className="px-6 py-4 text-sm text-center">
+          {getStatusBadge(inv.status)}
+        </td>
 
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                      {getResponsavelNome(inv.responsavel_id)}
-                    </td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 text-center">
+          {getResponsavelNome(inv.responsavel_id)}
+        </td>
 
-                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
-                      {formatDate(inv.data_inicio)}
-                    </td>
+        <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100 text-center">
+          {formatDate(inv.data_inicio)}
+        </td>
 
-                    {/* Ações */}
-                    <td className="px-6 py-4 text-sm">
-                      <div className="flex items-center gap-2">
+        {/* Ações */}
+        <td className="px-6 py-4 text-sm text-center">
+          <div className="flex items-center justify-center gap-2">
 
-                        {canEdit && inv.status === "em_andamento" && (
-                          <button
-                            onClick={() => handleConferir(inv)}
-                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
-                            title="Conferir Itens"
-                          >
-                            <ClipboardCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
-                          </button>
-                        )}
+            {canEdit && inv.status === "em_andamento" && (
+              <button
+                onClick={() => handleConferir(inv)}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                title="Conferir Itens"
+              >
+                <ClipboardCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
+              </button>
+            )}
 
-                        {inv.status === "concluido" && (
-                          <button
-                            onClick={() => handleExportarPDF(inv)}
-                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
-                            title="Exportar PDF"
-                          >
-                            <FileDown className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                          </button>
-                        )}
+            {inv.status === "concluido" && (
+              <button
+                onClick={() => handleExportarPDF(inv)}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                title="Exportar PDF"
+              >
+                <FileDown className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+              </button>
+            )}
 
-                        <button
-                          onClick={() => handleView(inv)}
-                          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
-                          title="Visualizar"
-                        >
-                          <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        </button>
+            <button
+              onClick={() => handleView(inv)}
+              className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+              title="Visualizar"
+            >
+              <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </button>
 
-                        {canEdit && (
-                          <button
-                            onClick={() => handleEdit(inv)}
-                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
-                            title="Editar"
-                          >
-                            <Edit className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
-                          </button>
-                        )}
+            {canEdit && (
+              <button
+                onClick={() => handleEdit(inv)}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                title="Editar"
+              >
+                <Edit className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
+              </button>
+            )}
 
-                        {canDelete && (
-                          <button
-                            onClick={() => handleDeleteClick(inv)}
-                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
-                            title="Excluir"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
-                          </button>
-                        )}
+            {canDelete && (
+              <button
+                onClick={() => handleDeleteClick(inv)}
+                className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                title="Excluir"
+              >
+                <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+              </button>
+            )}
 
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
           </div>
         )}
 
         {/* Paginação */}
         {totalPaginas > 1 && (
           <div className="mt-6 pt-4 px-6 pb-4 border-t border-gray-200 dark:border-[#2d2d2d]">
-            <div className="hidden md:flex justify-between items-center text-sm text-gray-700 dark:text-gray-300">
 
+            {/* Desktop */}
+            <div className="hidden md:flex justify-between items-center text-sm text-gray-700 dark:text-gray-300">
               <span>
                 Mostrando {inicio} a {fim} de {inventariosFiltrados.length} registros
               </span>
-
               <div className="flex gap-2">
-
-                {/* Botão Anterior */}
+                {/* Anterior */}
                 <button
-                  onClick={() => setPaginaAtual(Math.max(1, paginaAtual - 1))}
+                  onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
                   disabled={paginaAtual === 1}
                   className="px-3 py-1 border rounded-lg
-                    bg-white/95 dark:bg-[#1e1e1e]/95
-                    border-gray-300 dark:border-[#3a3a3a]
+                    bg-white dark:bg-[#1f1f1f]
+                    border-gray-300 dark:border-gray-600
                     text-gray-700 dark:text-gray-300
-                    hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
                     disabled:opacity-50 disabled:cursor-not-allowed
                     transition-colors"
                 >
@@ -867,34 +867,80 @@ const InventariosContent: React.FC = () => {
                     <button
                       key={p}
                       onClick={() => setPaginaAtual(p)}
-                      className={`px-3 py-1 border rounded-lg transition-colors ${
-                        paginaAtual === p
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white/95 dark:bg-[#1e1e1e]/95 border-gray-300 dark:border-[#3a3a3a] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
-                      }`}
+                      className={`px-3 py-1 border rounded-lg transition-colors
+                        ${
+                          paginaAtual === p
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                        }`}
                     >
                       {p}
                     </button>
                   ))}
                 </div>
 
-                {/* Botão Próximo */}
+                {/* Próximo */}
                 <button
-                  onClick={() =>
-                    setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))
-                  }
+                  onClick={() => setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))}
                   disabled={paginaAtual === totalPaginas}
                   className="px-3 py-1 border rounded-lg
-                    bg-white/95 dark:bg-[#1e1e1e]/95
-                    border-gray-300 dark:border-[#3a3a3a]
+                    bg-white dark:bg-[#1f1f1f]
+                    border-gray-300 dark:border-gray-600
                     text-gray-700 dark:text-gray-300
-                    hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
                     disabled:opacity-50 disabled:cursor-not-allowed
                     transition-colors"
                 >
                   Próximo
                 </button>
+              </div>
+            </div>
 
+            {/* Mobile */}
+            <div className="flex flex-col md:hidden items-center mt-3 text-sm text-gray-700 dark:text-gray-300">
+
+              <div className="mb-2">
+                Mostrando {inicio} a {fim} de {inventariosFiltrados.length} registros
+              </div>
+
+              <div className="flex justify-center gap-2 items-center">
+
+                <button
+                  onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
+                  disabled={paginaAtual === 1}
+                  className="px-3 py-1 border rounded-lg
+                    bg-white dark:bg-[#1f1f1f]
+                    border-gray-300 dark:border-gray-600
+                    text-gray-700 dark:text-gray-300
+                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
+                >
+                  {'<'}
+                </button>
+
+                <span
+                  className="px-3 py-1 border rounded-lg
+                    bg-white dark:bg-[#1f1f1f]
+                    text-gray-700 dark:text-gray-300
+                    border-gray-300 dark:border-gray-600"
+                >
+                  {paginaAtual}
+                </span>
+
+                <button
+                  onClick={() => setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))}
+                  disabled={paginaAtual === totalPaginas}
+                  className="px-3 py-1 border rounded-lg
+                    bg-white dark:bg-[#1f1f1f]
+                    border-gray-300 dark:border-gray-600
+                    text-gray-700 dark:text-gray-300
+                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a]
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
+                >
+                  {'>'}
+                </button>
               </div>
             </div>
           </div>

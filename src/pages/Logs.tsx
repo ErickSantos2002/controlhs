@@ -321,12 +321,11 @@ const Logs: React.FC = () => {
             {/* Paginação */}
             <div className="mt-4">
               {/* Desktop */}
-              <div className="hidden md:flex justify-between items-center w-full">
+              <div className="hidden md:flex justify-between items-center w-full text-sm text-gray-700 dark:text-gray-300">
                 {/* Texto de registros */}
-                <div className="text-sm text-gray-600 dark:text-gray-300">
+                <div>
                   Mostrando {INICIO} a {FIM} de {paginacao.totalRegistros} registros
                 </div>
-
                 {/* Paginação */}
                 <div className="flex gap-2">
                   {/* Botão Anterior */}
@@ -344,17 +343,18 @@ const Logs: React.FC = () => {
                     Anterior
                   </button>
 
-                  {/* Números de página */}
+                  {/* Números */}
                   <div className="flex gap-1">
                     {PAGES.map((page) => (
                       <button
                         key={page}
                         onClick={() => handlePageChange(page)}
-                        className={`px-3 py-1 border rounded-lg transition-colors ${
-                          paginacao.paginaAtual === page
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
-                        }`}
+                        className={`px-3 py-1 border rounded-lg transition-colors
+                          ${
+                            paginacao.paginaAtual === page
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#2a2a2a]'
+                          }`}
                         aria-current={paginacao.paginaAtual === page ? 'page' : undefined}
                       >
                         {page}
@@ -362,7 +362,7 @@ const Logs: React.FC = () => {
                     ))}
                   </div>
 
-                  {/* Botão Próximo */}
+                  {/* Próximo */}
                   <button
                     onClick={() => handlePageChange(paginacao.paginaAtual + 1)}
                     disabled={paginacao.paginaAtual === paginacao.totalPaginas}
@@ -376,16 +376,22 @@ const Logs: React.FC = () => {
                   >
                     Próximo
                   </button>
+
                 </div>
               </div>
 
               {/* Mobile */}
-              <div className="flex md:hidden flex-col items-center mt-2 gap-2 text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-300">
+              <div className="flex md:hidden flex-col items-center mt-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
+
+                {/* Texto */}
+                <div>
                   Mostrando {INICIO} a {FIM} de {paginacao.totalRegistros} registros
                 </div>
 
-                <div className="flex justify-center gap-1">
+                {/* Paginação Mobile */}
+                <div className="flex justify-center gap-2 items-center">
+
+                  {/* < Anterior */}
                   <button
                     onClick={() => handlePageChange(paginacao.paginaAtual - 1)}
                     disabled={paginacao.paginaAtual === 1}
@@ -400,20 +406,23 @@ const Logs: React.FC = () => {
                     {'<'}
                   </button>
 
+                  {/* Página atual ou lista (caso queira manter múltiplas páginas no mobile) */}
                   {PAGES.map((page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 border rounded-lg transition-colors text-sm ${
-                        paginacao.paginaAtual === page
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
-                      }`}
+                      className={`px-3 py-1 border rounded-lg transition-colors text-sm
+                        ${
+                          paginacao.paginaAtual === page
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-white dark:bg-[#1f1f1f] border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                        }`}
                     >
                       {page}
                     </button>
                   ))}
 
+                  {/* > Próximo */}
                   <button
                     onClick={() => handlePageChange(paginacao.paginaAtual + 1)}
                     disabled={paginacao.paginaAtual === paginacao.totalPaginas}

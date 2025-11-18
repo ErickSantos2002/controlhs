@@ -791,93 +791,104 @@ const DashboardPatrimonio: React.FC = () => {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-gray-300 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#181818]">
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-200">
+                  <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
+                    <tr>
+                      <th
+                        className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider"
+                      >
                         Nome
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Categoria
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Responsável
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Localização
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Data de Aquisição
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Valor Atual
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Depreciação
                       </th>
-                      <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 dark:text-gray-200">
+
+                      <th className="px-4 py-3 text-center text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider">
                         Situação
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {dadosPaginados.map((bem, index) => {
-                      const depreciacao =
-                        (bem.valor_aquisicao || 0) - (bem.valor_atual || 0);
+
+                  <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
+                    {dadosPaginados.map((bem) => {
+                      const depreciacao = (bem.valor_aquisicao || 0) - (bem.valor_atual || 0);
+
                       return (
                         <tr
                           key={bem.id}
-                          className={`border-b border-gray-100 dark:border-gray-700 
-                                    hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors
-                                    ${index % 2 === 0 ? 'bg-white dark:bg-[#1b1b1b]' : 'bg-gray-50 dark:bg-[#222222]'}`}
+                          className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
                         >
                           <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                             {bem.nome}
+
                             {bem.numero_serie && (
                               <span className="block text-xs text-gray-500 dark:text-gray-400">
                                 SN: {bem.numero_serie}
                               </span>
                             )}
                           </td>
+
                           <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
                             {getNomeCategoria(bem.categoria_id)}
                           </td>
+
                           <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
                             {getNomeUsuario(bem.responsavel_id)}
                           </td>
+
                           <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
                             {getNomeSetor(bem.setor_id)}
                           </td>
+
                           <td className="px-4 py-3 text-sm text-center text-gray-700 dark:text-gray-300">
                             {bem.data_aquisicao
-                              ? new Date(bem.data_aquisicao).toLocaleDateString(
-                                  'pt-BR',
-                                )
-                              : 'N/A'}
+                              ? new Date(bem.data_aquisicao).toLocaleDateString("pt-BR")
+                              : "N/A"}
                           </td>
+
                           <td className="px-4 py-3 text-sm text-center font-semibold text-blue-600 dark:text-blue-400">
-                            {(bem.valor_atual || 0).toLocaleString('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL',
+                            {(bem.valor_atual || 0).toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
                             })}
                           </td>
+
                           <td className="px-4 py-3 text-sm text-center font-semibold text-yellow-600 dark:text-yellow-400">
-                            {(
-                              (bem.valor_aquisicao || 0) -
-                              (bem.valor_atual || 0)
-                            ).toLocaleString('pt-BR', {
-                              style: 'currency',
-                              currency: 'BRL',
+                            {depreciacao.toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
                             })}
                           </td>
+
                           <td className="px-4 py-3 text-center">
                             <span
                               className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full
                                 ${
-                                  bem.status === 'ativo'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400'
-                                    : bem.status === 'manutencao'
-                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400'
-                                      : 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400'
+                                  bem.status === "ativo"
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400"
+                                    : bem.status === "manutencao"
+                                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-400"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400"
                                 }`}
                             >
                               {getStatusDisplay(bem.status)}
@@ -892,7 +903,7 @@ const DashboardPatrimonio: React.FC = () => {
 
               {/* Paginação */}
               {totalPaginas > 1 && (
-                <div className="mt-6 pt-4 px-6 pb-4 border-gray-200 dark:border-[#2d2d2d]">
+                <div className="mt-6 pt-4 px-6 pb-4 border-t border-gray-200 dark:border-[#2d2d2d]">
                   {/* Desktop */}
                   <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
                     <div>
