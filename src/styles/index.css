@@ -65,6 +65,11 @@ body,
   :root {
     --chart-text: #000000;
     --chart-axis: #475569;
+
+    /* 🔔 Toast notifications - Light mode */
+    --toast-bg: #ffffff;
+    --toast-color: #1f2937;
+    --toast-border: #e5e7eb;
   }
   .dark {
     --chart-text: #e0e0e0;
@@ -75,6 +80,11 @@ body,
     --bg-secondary: #2a2a2a; /* cards */
     --text-primary: #d1d1d1; /* texto */
     --border-color: #3a3a3a; /* bordas */
+
+    /* 🔔 Toast notifications - Dark mode */
+    --toast-bg: #1e1e1e;
+    --toast-color: #d1d1d1;
+    --toast-border: #2d2d2d;
   }
 }
 

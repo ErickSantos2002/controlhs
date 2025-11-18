@@ -16,6 +16,7 @@ import type {
   LogPaginacao,
   LogsContextData,
 } from '../types/logs.types';
+import logger from '../utils/logger';
 
 // ========================================
 // CONTEXT & PROVIDER
@@ -73,9 +74,9 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       setUsuariosMap(map);
-      console.log('👥 Mapeamento de usuários criado:', Object.fromEntries(map));
+      logger.debug('👥 Mapeamento de usuários criado:', Object.fromEntries(map));
     } catch (err) {
-      console.error('Erro ao carregar usuários para logs:', err);
+      logger.error('Erro ao carregar usuários para logs:', err);
       // Não bloqueia o carregamento dos logs
     }
   }, []);
@@ -107,12 +108,12 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const data = await listLogs(params);
 
-      // 🔍 DEBUG: Log para ver estrutura dos dados
-      console.log('📋 Dados recebidos da API de logs:', data);
+      // 🔍 DEBUG: Log para ver estrutura dos dados (apenas em dev)
+      logger.debug('📋 Dados recebidos da API de logs:', data);
       if (Array.isArray(data) && data.length > 0) {
-        console.log('📋 Primeiro log (exemplo):', data[0]);
+        logger.debug('📋 Primeiro log (exemplo):', data[0]);
       } else if (data.logs && data.logs.length > 0) {
-        console.log('📋 Primeiro log (exemplo):', data.logs[0]);
+        logger.debug('📋 Primeiro log (exemplo):', data.logs[0]);
       }
 
       // 🔄 Função para normalizar os dados e mapear campo de usuário
@@ -176,7 +177,7 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setLastFetch(Date.now());
     } catch (err: any) {
-      console.error('Erro ao buscar logs:', err);
+      logger.error('Erro ao buscar logs:', err);
       setError(err.message || 'Erro ao carregar logs');
       setLogs([]);
     } finally {

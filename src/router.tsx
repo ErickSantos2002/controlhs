@@ -1,19 +1,31 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Patrimonios from './pages/Patrimonios';
-import Transferencias from './pages/Transferencias';
-import Baixas from './pages/Baixas';
-import Inventarios from './pages/Inventarios';
-import InventarioConferencia from './pages/InventarioConferencia';
-import NotFound from './pages/NotFound';
-import Logs from './pages/Logs';
-import CadastrosBasicos from './pages/CadastrosBasicos';
+// Lazy loading de páginas para melhor performance
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Patrimonios = lazy(() => import('./pages/Patrimonios'));
+const Transferencias = lazy(() => import('./pages/Transferencias'));
+const Baixas = lazy(() => import('./pages/Baixas'));
+const Inventarios = lazy(() => import('./pages/Inventarios'));
+const InventarioConferencia = lazy(() => import('./pages/InventarioConferencia'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const Logs = lazy(() => import('./pages/Logs'));
+const CadastrosBasicos = lazy(() => import('./pages/CadastrosBasicos'));
+const Bloqueio = lazy(() => import('./pages/Bloqueio'));
 
 import ProtectedRoute from './components/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
+
+// Loading Fallback Component
+const PageLoader: React.FC = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-[#0f0f0f] dark:to-[#1a1a1a]">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
+      <p className="mt-4 text-gray-600 dark:text-gray-300">Carregando...</p>
+    </div>
+  </div>
+);
 
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -34,10 +46,9 @@ const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({
   return <>{children}</>;
 };
 
-import Bloqueio from './pages/Bloqueio'; // importe o novo componente
-
 const AppRoutes: React.FC = () => (
-  <Routes>
+  <Suspense fallback={<PageLoader />}>
+    <Routes>
     <Route path="/login" element={<Login />} />
 
     <Route
@@ -116,7 +127,8 @@ const AppRoutes: React.FC = () => (
 
     <Route path="/" element={<Navigate to="/dashboard" />} />
     <Route path="*" element={<NotFound />} />
-  </Routes>
+    </Routes>
+  </Suspense>
 );
 
 export default AppRoutes;
