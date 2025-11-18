@@ -574,36 +574,57 @@ const InventariosContent: React.FC = () => {
 
 
       {/* Filtros */}
-      <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-          {/* Busca */}
-          <div className="lg:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Buscar
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                value={buscaLocal}
-                onChange={(e) => setBuscaLocal(e.target.value)}
-                placeholder="Título ou descrição..."
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] p-5 shadow-md mb-6 transition-colors">
+        {/* Linha de busca + botão limpar */}
+        <div className="flex flex-nowrap items-center gap-3 mb-4">
+          {/* Campo de Busca */}
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar sessão por título ou descrição..."
+              value={buscaLocal}
+              onChange={(e) => setBuscaLocal(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-[#3a3a3a]
+                placeholder-gray-400 dark:placeholder-gray-500
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                transition-all"
+            />
           </div>
 
+          {/* Botão Limpar */}
+          <button
+            onClick={limparFiltros}
+            title="Limpar filtros"
+            className="flex-shrink-0 flex items-center justify-center w-[48px] h-[42px]
+              rounded-lg border border-gray-300 dark:border-[#3a3a3a]
+              bg-white/95 dark:bg-[#2a2a2a]/95
+              text-gray-600 dark:text-gray-300
+              hover:bg-red-500 hover:text-white dark:hover:bg-red-600
+              transition-all duration-200 shadow-sm hover:shadow-md"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Filtros abaixo da linha */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-3 border-t border-gray-200 dark:border-[#2d2d2d]">
           {/* Status */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Status
             </label>
             <select
               value={filtros.status}
-              onChange={(e) =>
-                setFiltros({ ...filtros, status: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setFiltros({ ...filtros, status: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-[#3a3a3a]
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="todos">Todos</option>
               <option value="em_andamento">Em Andamento</option>
@@ -613,16 +634,18 @@ const InventariosContent: React.FC = () => {
           </div>
 
           {/* Tipo */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Tipo
             </label>
             <select
               value={filtros.tipo}
-              onChange={(e) =>
-                setFiltros({ ...filtros, tipo: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setFiltros({ ...filtros, tipo: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-[#3a3a3a]
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="todos">Todos</option>
               <option value="geral">Geral</option>
@@ -632,113 +655,100 @@ const InventariosContent: React.FC = () => {
           </div>
 
           {/* Responsável */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Responsável
             </label>
             <select
               value={filtros.responsavel_id}
-              onChange={(e) =>
-                setFiltros({ ...filtros, responsavel_id: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setFiltros({ ...filtros, responsavel_id: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-[#3a3a3a]
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="todos">Todos</option>
               {usuarios.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.username}
-                </option>
+                <option key={u.id} value={u.id}>{u.username}</option>
               ))}
             </select>
           </div>
 
           {/* Data Início */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="flex flex-col">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Data Início
             </label>
             <input
               type="date"
               value={filtros.data_inicio}
-              onChange={(e) =>
-                setFiltros({ ...filtros, data_inicio: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setFiltros({ ...filtros, data_inicio: e.target.value })}
+              className="w-full px-3 py-2 rounded-lg
+                bg-white/95 dark:bg-[#2a2a2a]/95
+                text-gray-900 dark:text-gray-100
+                border border-gray-300 dark:border-[#3a3a3a]
+                focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-        </div>
-
-        {/* Botões */}
-        <div className="flex gap-2 mt-4">
-          <button
-            onClick={limparFiltros}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            Limpar Filtros
-          </button>
         </div>
       </div>
 
       {/* Tabela */}
-      <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg overflow-hidden">
+      <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] shadow-md overflow-hidden transition-colors">
         {/* Cabeçalho da tabela */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-[#2d2d2d]">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            Mostrando {inicio} a {fim} de {inventariosFiltrados.length}{' '}
-            registros
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Mostrando {inicio} a {fim} de {inventariosFiltrados.length} registros
           </div>
         </div>
 
-        {/* Tabela */}
+        {/* Conteúdo da Tabela */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
           </div>
         ) : dadosPaginados.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <Package className="w-12 h-12 text-gray-400 mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-700 dark:text-gray-300">
               Nenhuma sessão de inventário encontrada
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-[#2a2a2a]">
+              <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Título
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Tipo
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Responsável
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Data Início
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Ações
-                  </th>
+                  {[
+                    "ID",
+                    "Título",
+                    "Tipo",
+                    "Status",
+                    "Responsável",
+                    "Data Início",
+                    "Ações",
+                  ].map((th) => (
+                    <th
+                      key={th}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      {th}
+                    </th>
+                  ))}
                 </tr>
               </thead>
+
               <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
                 {dadosPaginados.map((inv) => (
                   <tr
                     key={inv.id}
                     className="hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
                       #{inv.id}
                     </td>
+
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       <div className="font-medium">{inv.titulo}</div>
                       {inv.descricao && (
@@ -747,63 +757,75 @@ const InventariosContent: React.FC = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       {getTipoLabel(inv.tipo)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+
+                    <td className="px-6 py-4 text-sm">
                       {getStatusBadge(inv.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       {getResponsavelNome(inv.responsavel_id)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                       {formatDate(inv.data_inicio)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex gap-2">
-                        {canEdit && inv.status === 'em_andamento' && (
+
+                    {/* Ações */}
+                    <td className="px-6 py-4 text-sm">
+                      <div className="flex items-center gap-2">
+
+                        {canEdit && inv.status === "em_andamento" && (
                           <button
                             onClick={() => handleConferir(inv)}
-                            className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-colors"
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
                             title="Conferir Itens"
                           >
-                            <ClipboardCheck className="w-4 h-4" />
+                            <ClipboardCheck className="w-4 h-4 text-green-600 dark:text-green-400" />
                           </button>
                         )}
-                        {inv.status === 'concluido' && (
+
+                        {inv.status === "concluido" && (
                           <button
                             onClick={() => handleExportarPDF(inv)}
-                            className="p-1 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded transition-colors"
-                            title="Salvar como PDF"
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                            title="Exportar PDF"
                           >
-                            <FileDown className="w-4 h-4" />
+                            <FileDown className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                           </button>
                         )}
+
                         <button
                           onClick={() => handleView(inv)}
-                          className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
+                          className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
                           title="Visualizar"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </button>
+
                         {canEdit && (
                           <button
                             onClick={() => handleEdit(inv)}
-                            className="p-1 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded transition-colors"
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
                             title="Editar"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Edit className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                           </button>
                         )}
+
                         {canDelete && (
                           <button
                             onClick={() => handleDeleteClick(inv)}
-                            className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
                             title="Excluir"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
                           </button>
                         )}
+
                       </div>
                     </td>
                   </tr>
@@ -815,40 +837,66 @@ const InventariosContent: React.FC = () => {
 
         {/* Paginação */}
         {totalPaginas > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-[#2d2d2d]">
-            <button
-              onClick={() => setPaginaAtual((prev) => Math.max(1, prev - 1))}
-              disabled={paginaAtual === 1}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#2a2a2a] border border-gray-300 dark:border-[#2d2d2d] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Anterior
-            </button>
+          <div className="mt-6 pt-4 px-6 pb-4 border-t border-gray-200 dark:border-[#2d2d2d]">
+            <div className="hidden md:flex justify-between items-center text-sm text-gray-700 dark:text-gray-300">
 
-            <div className="hidden md:flex gap-2">
-              {paginasVisiveis.map((num) => (
+              <span>
+                Mostrando {inicio} a {fim} de {inventariosFiltrados.length} registros
+              </span>
+
+              <div className="flex gap-2">
+
+                {/* Botão Anterior */}
                 <button
-                  key={num}
-                  onClick={() => setPaginaAtual(num)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    paginaAtual === num
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-[#2a2a2a] border border-gray-300 dark:border-[#2d2d2d] hover:bg-gray-50 dark:hover:bg-gray-800'
-                  }`}
+                  onClick={() => setPaginaAtual(Math.max(1, paginaAtual - 1))}
+                  disabled={paginaAtual === 1}
+                  className="px-3 py-1 border rounded-lg
+                    bg-white/95 dark:bg-[#1e1e1e]/95
+                    border-gray-300 dark:border-[#3a3a3a]
+                    text-gray-700 dark:text-gray-300
+                    hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
                 >
-                  {num}
+                  Anterior
                 </button>
-              ))}
-            </div>
 
-            <button
-              onClick={() =>
-                setPaginaAtual((prev) => Math.min(totalPaginas, prev + 1))
-              }
-              disabled={paginaAtual === totalPaginas}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-[#2a2a2a] border border-gray-300 dark:border-[#2d2d2d] rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Próximo
-            </button>
+                {/* Números */}
+                <div className="flex gap-1">
+                  {paginasVisiveis.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPaginaAtual(p)}
+                      className={`px-3 py-1 border rounded-lg transition-colors ${
+                        paginaAtual === p
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white/95 dark:bg-[#1e1e1e]/95 border-gray-300 dark:border-[#3a3a3a] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Botão Próximo */}
+                <button
+                  onClick={() =>
+                    setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))
+                  }
+                  disabled={paginaAtual === totalPaginas}
+                  className="px-3 py-1 border rounded-lg
+                    bg-white/95 dark:bg-[#1e1e1e]/95
+                    border-gray-300 dark:border-[#3a3a3a]
+                    text-gray-700 dark:text-gray-300
+                    hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors"
+                >
+                  Próximo
+                </button>
+
+              </div>
+            </div>
           </div>
         )}
       </div>

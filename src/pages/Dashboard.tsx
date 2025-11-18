@@ -892,7 +892,7 @@ const DashboardPatrimonio: React.FC = () => {
 
               {/* Paginação */}
               {totalPaginas > 1 && (
-                <div className="mt-4">
+                <div className="mt-6 pt-4 px-6 pb-4 border-gray-200 dark:border-[#2d2d2d]">
                   {/* Desktop */}
                   <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
                     <div>

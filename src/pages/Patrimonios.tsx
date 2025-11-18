@@ -769,7 +769,7 @@ const PatrimoniosContent: React.FC = () => {
 
             {/* Paginação */}
             {totalPaginas > 1 && (
-              <div className="mt-4 px-4 pb-4">
+              <div className="mt-6 pt-4 px-6 pb-4 border-t border-gray-200 dark:border-[#2d2d2d]">
                 <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
                   <div>
                     Mostrando {inicio} a {fim} de {patrimoniosFiltrados.length}{' '}

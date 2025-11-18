@@ -92,8 +92,7 @@ const InventarioConferencia: React.FC = () => {
     } catch (err: any) {
       console.error('Erro ao carregar dados:', err);
       setError(
-        err.response?.data?.detail ||
-          'Erro ao carregar dados do inventário',
+        err.response?.data?.detail || 'Erro ao carregar dados do inventário',
       );
     } finally {
       setLoading(false);
@@ -117,9 +116,7 @@ const InventarioConferencia: React.FC = () => {
     if (buscaLocal) {
       const buscaLower = buscaLocal.toLowerCase();
       resultado = resultado.filter((item) => {
-        const patrimonio = patrimonios.find(
-          (p) => p.id === item.patrimonio_id,
-        );
+        const patrimonio = patrimonios.find((p) => p.id === item.patrimonio_id);
         return (
           patrimonio?.nome?.toLowerCase().includes(buscaLower) ||
           patrimonio?.numero_serie?.toLowerCase().includes(buscaLower)
@@ -186,9 +183,7 @@ const InventarioConferencia: React.FC = () => {
       handleCancelEdit();
     } catch (err: any) {
       console.error('Erro ao salvar item:', err);
-      alert(
-        err.response?.data?.detail || 'Erro ao salvar alterações do item',
-      );
+      alert(err.response?.data?.detail || 'Erro ao salvar alterações do item');
     } finally {
       setSavingItemId(null);
     }
@@ -207,9 +202,7 @@ const InventarioConferencia: React.FC = () => {
       navigate('/inventarios');
     } catch (err: any) {
       console.error('Erro ao finalizar inventário:', err);
-      alert(
-        err.response?.data?.detail || 'Erro ao finalizar inventário',
-      );
+      alert(err.response?.data?.detail || 'Erro ao finalizar inventário');
     } finally {
       setFinalizing(false);
       setShowFinalizarModal(false);
@@ -310,7 +303,6 @@ const InventarioConferencia: React.FC = () => {
     <div className="space-y-6 p-6">
       {/* Cabeçalho */}
       <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl shadow-md border border-gray-200 dark:border-[#2d2d2d] p-6 mb-6 transition-colors">
-
         {/* Botão Voltar */}
         <button
           onClick={() => navigate('/inventarios')}
@@ -321,7 +313,6 @@ const InventarioConferencia: React.FC = () => {
         </button>
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-
           {/* Título e descrição */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-[#facc15] tracking-tight">
@@ -338,7 +329,6 @@ const InventarioConferencia: React.FC = () => {
           {/* Botões de ação */}
           {canEdit && inventario.status === 'em_andamento' && (
             <div className="flex flex-wrap gap-2">
-
               {/* Cancelar */}
               <button
                 onClick={handleCancelar}
@@ -373,73 +363,88 @@ const InventarioConferencia: React.FC = () => {
       {/* Estatísticas */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+          {/* Total de Itens */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-700 dark:text-gray-400">
                   Total de Itens
                 </p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <p className="text-3xl font-semibold text-blue-600 dark:text-blue-400 mt-2 tracking-tight">
                   {stats.total_itens}
                 </p>
               </div>
-              <Package className="w-8 h-8 text-gray-600" />
+              <div className="bg-blue-100/70 dark:bg-blue-900/40 p-3 rounded-full">
+                <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+          {/* Encontrados */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-700 dark:text-gray-400">
                   Encontrados
                 </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-3xl font-semibold text-green-600 dark:text-green-400 mt-2 tracking-tight">
                   {stats.encontrados}
                 </p>
               </div>
-              <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className="bg-green-100/70 dark:bg-green-900/40 p-3 rounded-full">
+                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+          {/* Não Encontrados */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-700 dark:text-gray-400">
                   Não Encontrados
                 </p>
-                <p className="text-2xl font-bold text-red-600">
+                <p className="text-3xl font-semibold text-red-600 dark:text-red-400 mt-2 tracking-tight">
                   {stats.nao_encontrados}
                 </p>
               </div>
-              <XCircle className="w-8 h-8 text-red-600" />
+              <div className="bg-red-100/70 dark:bg-red-900/40 p-3 rounded-full">
+                <XCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+          {/* Divergências */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-700 dark:text-gray-400">
                   Divergências
                 </p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-3xl font-semibold text-orange-600 dark:text-orange-400 mt-2 tracking-tight">
                   {stats.divergencias}
                 </p>
               </div>
-              <AlertTriangle className="w-8 h-8 text-orange-600" />
+              <div className="bg-orange-100/70 dark:bg-orange-900/40 p-3 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+          {/* Conferidos */}
+          <div className="bg-white/95 dark:bg-[#1e1e1e]/95 border border-gray-200 dark:border-[#2d2d2d] rounded-xl shadow-md p-6 transition-colors">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-700 dark:text-gray-400">
                   Conferidos
                 </p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-3xl font-semibold text-blue-600 dark:text-blue-400 mt-2 tracking-tight">
                   {stats.conferidos}
                 </p>
               </div>
-              <CheckCircle className="w-8 h-8 text-blue-600" />
+              <div className="bg-blue-100/70 dark:bg-blue-900/40 p-3 rounded-full">
+                <CheckCircle className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
             </div>
           </div>
         </div>
@@ -508,7 +513,11 @@ const InventarioConferencia: React.FC = () => {
               return (
                 <div
                   key={item.id}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-[#2a2a2a] transition-colors"
+                  className={`p-6 transition-colors ${
+                    isEditing
+                      ? 'bg-blue-50/70 dark:bg-blue-900/20 border-l-4 border-blue-600/60'
+                      : 'hover:bg-gray-100 dark:hover:bg-[#333333]'
+                  }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -600,7 +609,8 @@ const InventarioConferencia: React.FC = () => {
                               disabled={
                                 !editingSituacao || savingItemId === item.id
                               }
-                              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg 
+               hover:bg-blue-700 transition-colors disabled:opacity-50"
                             >
                               {savingItemId === item.id ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -609,10 +619,15 @@ const InventarioConferencia: React.FC = () => {
                               )}
                               Salvar
                             </button>
+
                             <button
                               onClick={handleCancelEdit}
                               disabled={savingItemId === item.id}
-                              className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                              className="px-4 py-2 rounded-lg transition-colors
+               bg-red-100 dark:bg-red-900/30 
+               text-red-700 dark:text-red-300
+               hover:bg-red-200 dark:hover:bg-red-900/50 
+               disabled:opacity-50"
                             >
                               Cancelar
                             </button>
@@ -650,6 +665,7 @@ const InventarioConferencia: React.FC = () => {
               );
             })}
           </div>
+          
         )}
       </div>
 

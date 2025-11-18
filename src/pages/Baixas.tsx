@@ -452,24 +452,22 @@ const BaixasContent: React.FC = () => {
 
       {/* Tabela de Baixas */}
       <div className="bg-white/95 dark:bg-[#1e1e1e]/95 rounded-xl border border-gray-200 dark:border-[#2d2d2d] shadow-md overflow-hidden transition-colors">
+        {/* Estados: Carregando / Erro / Vazio */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" />
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-12">
             <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-            <p className="text-gray-900 dark:text-gray-100 font-medium">
-              Erro ao carregar dados
-            </p>
+            <p className="text-gray-900 dark:text-gray-100 font-medium">Erro ao carregar dados</p>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">{error}</p>
           </div>
         ) : dadosPaginados.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
             <TrendingDown className="w-12 h-12 text-gray-400 mb-4" />
-            <p className="text-gray-900 dark:text-gray-100 font-medium">
-              Nenhuma baixa encontrada
-            </p>
+            <p className="text-gray-900 dark:text-gray-100 font-medium">Nenhuma baixa encontrada</p>
+
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
               {baixasFiltradas.length === 0 &&
               filtros.busca === '' &&
@@ -480,22 +478,23 @@ const BaixasContent: React.FC = () => {
           </div>
         ) : (
           <>
+            {/* Tabela */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-[#2a2a2a] border-b border-gray-200 dark:border-[#2d2d2d]">
                   <tr>
                     <th
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
                       onClick={() => handleOrdenar('id')}
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-400 
+                      uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-[#333333] transition-colors"
                     >
                       <div className="flex items-center gap-1">
                         ID
                         {ordenacao.campo === 'id' &&
-                          (ordenacao.direcao === 'asc' ? (
-                            <ChevronUp className="w-4 h-4" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4" />
-                          ))}
+                          (ordenacao.direcao === 'asc'
+                            ? <ChevronUp className="w-4 h-4" />
+                            : <ChevronDown className="w-4 h-4" />
+                          )}
                       </div>
                     </th>
 
@@ -530,6 +529,7 @@ const BaixasContent: React.FC = () => {
                       <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-gray-100">
                         #{b.id}
                       </td>
+
                       <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                         {getPatrimonioNome(b.patrimonio_id)}
                       </td>
@@ -568,7 +568,7 @@ const BaixasContent: React.FC = () => {
                             <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                           </button>
 
-                          {b.status === 'pendente' && podeAprovar(b) && (
+                          {b.status === "pendente" && podeAprovar(b) && (
                             <button
                               onClick={() => handleAprovar(b)}
                               className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
@@ -587,30 +587,29 @@ const BaixasContent: React.FC = () => {
 
             {/* Paginação */}
             {totalPaginas > 1 && (
-              <div className="mt-4 px-4 pb-4">
-                <div className="hidden md:flex justify-between items-center text-sm text-gray-600 dark:text-gray-300">
-                  <div>
-                    Mostrando {inicio} a {fim} de {baixasFiltradas.length}{' '}
-                    registros
-                  </div>
+              <div className="mt-6 pt-4 px-6 pb-4 border-t border-gray-200 dark:border-[#2d2d2d]">
+                <div className="hidden md:flex justify-between items-center text-sm text-gray-700 dark:text-gray-300">
+
+                  <span>
+                    Mostrando {inicio} a {fim} de {baixasFiltradas.length} registros
+                  </span>
 
                   <div className="flex gap-2">
+                    {/* Anterior */}
                     <button
-                      onClick={() =>
-                        setPaginaAtual(Math.max(1, paginaAtual - 1))
-                      }
+                      onClick={() => setPaginaAtual(Math.max(1, paginaAtual - 1))}
                       disabled={paginaAtual === 1}
                       className="px-3 py-1 border rounded-lg
-                          bg-white/95 dark:bg-[#1e1e1e]/95
-                          border-gray-300 dark:border-[#3a3a3a]
-                          text-gray-700 dark:text-gray-300
-                          hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          transition-colors"
+                      bg-white/95 dark:bg-[#1e1e1e]/95
+                      border-gray-300 dark:border-[#3a3a3a]
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Anterior
                     </button>
 
+                    {/* Páginas */}
                     <div className="flex gap-1">
                       {paginasVisiveis.map((page) => (
                         <button
@@ -627,22 +626,21 @@ const BaixasContent: React.FC = () => {
                       ))}
                     </div>
 
+                    {/* Próximo */}
                     <button
-                      onClick={() =>
-                        setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))
-                      }
+                      onClick={() => setPaginaAtual(Math.min(totalPaginas, paginaAtual + 1))}
                       disabled={paginaAtual === totalPaginas}
                       className="px-3 py-1 border rounded-lg
-                          bg-white/95 dark:bg-[#1e1e1e]/95
-                          border-gray-300 dark:border-[#3a3a3a]
-                          text-gray-700 dark:text-gray-300
-                          hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
-                          disabled:opacity-50 disabled:cursor-not-allowed
-                          transition-colors"
+                      bg-white/95 dark:bg-[#1e1e1e]/95
+                      border-gray-300 dark:border-[#3a3a3a]
+                      text-gray-700 dark:text-gray-300
+                      hover:bg-gray-100 dark:hover:bg-[#2a2a2a]
+                      disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Próximo
                     </button>
                   </div>
+
                 </div>
               </div>
             )}
