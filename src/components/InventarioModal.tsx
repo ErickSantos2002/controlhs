@@ -5,6 +5,8 @@ import type {
   Inventario,
   InventarioCreate,
   InventarioUpdate,
+  TipoInventario,
+  StatusInventario,
 } from '../types/inventarios.types';
 
 interface InventarioModalProps {
@@ -22,14 +24,24 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
   inventario,
   onSuccess,
 }) => {
-  const { createInventario, updateInventario, patrimonios, usuarios } =
+  const { createInventario, updateInventario, usuarios, setores, categorias } =
     useInventario();
 
-  const [formData, setFormData] = useState<InventarioCreate>({
-    patrimonio_id: 0,
+  const [formData, setFormData] = useState<{
+    titulo: string;
+    descricao: string;
+    tipo: TipoInventario;
+    filtro_setor_id: number | null;
+    filtro_categoria_id: number | null;
+    responsavel_id: number | null;
+    status?: StatusInventario;
+  }>({
+    titulo: '',
+    descricao: '',
+    tipo: 'geral',
+    filtro_setor_id: null,
+    filtro_categoria_id: null,
     responsavel_id: null,
-    situacao: 'pendente',
-    observacoes: '',
   });
 
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -40,17 +52,22 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
   useEffect(() => {
     if (mode === 'edit' && inventario) {
       setFormData({
-        patrimonio_id: inventario.patrimonio_id,
+        titulo: inventario.titulo,
+        descricao: inventario.descricao || '',
+        tipo: inventario.tipo,
+        filtro_setor_id: inventario.filtro_setor_id || null,
+        filtro_categoria_id: inventario.filtro_categoria_id || null,
         responsavel_id: inventario.responsavel_id || null,
-        situacao: inventario.situacao,
-        observacoes: inventario.observacoes || '',
+        status: inventario.status,
       });
     } else {
       setFormData({
-        patrimonio_id: 0,
+        titulo: '',
+        descricao: '',
+        tipo: 'geral',
+        filtro_setor_id: null,
+        filtro_categoria_id: null,
         responsavel_id: null,
-        situacao: 'pendente',
-        observacoes: '',
       });
     }
     setErrors({});
@@ -61,12 +78,16 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
   const validate = (): boolean => {
     const newErrors: { [key: string]: string } = {};
 
-    if (!formData.patrimonio_id || formData.patrimonio_id === 0) {
-      newErrors.patrimonio_id = 'Patrimônio é obrigatório';
+    if (!formData.titulo.trim()) {
+      newErrors.titulo = 'Título é obrigatório';
     }
 
-    if (!formData.situacao) {
-      newErrors.situacao = 'Situação é obrigatória';
+    if (formData.tipo === 'por_setor' && !formData.filtro_setor_id) {
+      newErrors.filtro_setor_id = 'Selecione um setor';
+    }
+
+    if (formData.tipo === 'por_categoria' && !formData.filtro_categoria_id) {
+      newErrors.filtro_categoria_id = 'Selecione uma categoria';
     }
 
     setErrors(newErrors);
@@ -84,12 +105,25 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
 
     try {
       if (mode === 'create') {
-        await createInventario(formData);
+        const createData: InventarioCreate = {
+          titulo: formData.titulo.trim(),
+          descricao: formData.descricao.trim() || null,
+          tipo: formData.tipo,
+          filtro_setor_id:
+            formData.tipo === 'por_setor' ? formData.filtro_setor_id : null,
+          filtro_categoria_id:
+            formData.tipo === 'por_categoria'
+              ? formData.filtro_categoria_id
+              : null,
+          responsavel_id: formData.responsavel_id,
+        };
+        await createInventario(createData);
       } else if (mode === 'edit' && inventario) {
         const updateData: InventarioUpdate = {
-          situacao: formData.situacao,
-          observacoes: formData.observacoes,
+          titulo: formData.titulo.trim(),
+          descricao: formData.descricao.trim() || null,
           responsavel_id: formData.responsavel_id,
+          status: formData.status,
         };
         await updateInventario(inventario.id, updateData);
       }
@@ -97,15 +131,27 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
       onSuccess?.();
       onClose();
     } catch (err: any) {
-      console.error('Erro ao salvar inventário:', err);
+      console.error('Erro ao salvar sessão de inventário:', err);
       setSubmitError(
         err.response?.data?.detail ||
-          'Erro ao salvar registro. Tente novamente.',
+          'Erro ao salvar sessão. Tente novamente.',
       );
     } finally {
       setLoading(false);
     }
   };
+
+  // Limpar filtros quando tipo mudar
+  useEffect(() => {
+    if (mode === 'create') {
+      if (formData.tipo !== 'por_setor') {
+        setFormData((prev) => ({ ...prev, filtro_setor_id: null }));
+      }
+      if (formData.tipo !== 'por_categoria') {
+        setFormData((prev) => ({ ...prev, filtro_categoria_id: null }));
+      }
+    }
+  }, [formData.tipo, mode]);
 
   if (!isOpen) return null;
 
@@ -122,7 +168,7 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-[#2d2d2d]">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            {mode === 'create' ? 'Nova Verificação' : 'Editar Verificação'}
+            {mode === 'create' ? 'Nova Sessão de Inventário' : 'Editar Sessão'}
           </h2>
           <button
             onClick={onClose}
@@ -145,72 +191,175 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Patrimônio */}
-            <div className="md:col-span-2">
+          <div className="space-y-6">
+            {/* Título */}
+            <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Patrimônio <span className="text-red-500">*</span>
+                Título <span className="text-red-500">*</span>
               </label>
-              <select
-                value={formData.patrimonio_id}
+              <input
+                type="text"
+                value={formData.titulo}
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    patrimonio_id: parseInt(e.target.value),
-                  })
+                  setFormData({ ...formData, titulo: e.target.value })
                 }
-                disabled={mode === 'edit' || loading}
-                className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
-                  errors.patrimonio_id
+                disabled={loading}
+                placeholder="Ex: Inventário Anual 2024"
+                className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  errors.titulo
                     ? 'border-red-500'
                     : 'border-gray-300 dark:border-[#2d2d2d]'
                 }`}
-              >
-                <option value={0}>Selecione um patrimônio</option>
-                {patrimonios
-                  .filter((p) => p.status !== 'baixado')
-                  .map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.nome} {p.numero_serie ? `(${p.numero_serie})` : ''}
-                    </option>
-                  ))}
-              </select>
-              {errors.patrimonio_id && (
+              />
+              {errors.titulo && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {errors.patrimonio_id}
+                  {errors.titulo}
                 </p>
               )}
             </div>
 
-            {/* Situação */}
+            {/* Descrição */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Situação <span className="text-red-500">*</span>
+                Descrição
               </label>
-              <select
-                value={formData.situacao}
+              <textarea
+                value={formData.descricao}
                 onChange={(e) =>
-                  setFormData({ ...formData, situacao: e.target.value })
+                  setFormData({ ...formData, descricao: e.target.value })
                 }
                 disabled={loading}
-                className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.situacao
-                    ? 'border-red-500'
-                    : 'border-gray-300 dark:border-[#2d2d2d]'
-                }`}
-              >
-                <option value="pendente">Pendente</option>
-                <option value="conferido">Conferido</option>
-                <option value="encontrado">Encontrado</option>
-                <option value="nao_encontrado">Não Encontrado</option>
-                <option value="divergencia">Divergência</option>
-              </select>
-              {errors.situacao && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                  {errors.situacao}
-                </p>
-              )}
+                rows={3}
+                placeholder="Adicione detalhes sobre esta sessão de inventário..."
+                className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
             </div>
+
+            {/* Tipo (somente na criação) */}
+            {mode === 'create' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Tipo de Inventário
+                  </label>
+                  <select
+                    value={formData.tipo}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        tipo: e.target.value as TipoInventario,
+                      })
+                    }
+                    disabled={loading}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="geral">Geral (todos os patrimônios)</option>
+                    <option value="por_setor">Por Setor</option>
+                    <option value="por_categoria">Por Categoria</option>
+                  </select>
+                </div>
+
+                {/* Filtro de Setor */}
+                {formData.tipo === 'por_setor' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Setor <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.filtro_setor_id || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          filtro_setor_id: e.target.value
+                            ? parseInt(e.target.value)
+                            : null,
+                        })
+                      }
+                      disabled={loading}
+                      className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.filtro_setor_id
+                          ? 'border-red-500'
+                          : 'border-gray-300 dark:border-[#2d2d2d]'
+                      }`}
+                    >
+                      <option value="">Selecione um setor</option>
+                      {setores.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.nome}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.filtro_setor_id && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.filtro_setor_id}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Filtro de Categoria */}
+                {formData.tipo === 'por_categoria' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Categoria <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.filtro_categoria_id || ''}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          filtro_categoria_id: e.target.value
+                            ? parseInt(e.target.value)
+                            : null,
+                        })
+                      }
+                      disabled={loading}
+                      className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        errors.filtro_categoria_id
+                          ? 'border-red-500'
+                          : 'border-gray-300 dark:border-[#2d2d2d]'
+                      }`}
+                    >
+                      <option value="">Selecione uma categoria</option>
+                      {categorias.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.nome}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.filtro_categoria_id && (
+                      <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {errors.filtro_categoria_id}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Status (somente na edição) */}
+            {mode === 'edit' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Status
+                </label>
+                <select
+                  value={formData.status || 'em_andamento'}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      status: e.target.value as StatusInventario,
+                    })
+                  }
+                  disabled={loading}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="em_andamento">Em Andamento</option>
+                  <option value="concluido">Concluído</option>
+                  <option value="cancelado">Cancelado</option>
+                </select>
+              </div>
+            )}
 
             {/* Responsável */}
             <div>
@@ -238,23 +387,6 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
                 ))}
               </select>
             </div>
-
-            {/* Observações */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Observações
-              </label>
-              <textarea
-                value={formData.observacoes || ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, observacoes: e.target.value })
-                }
-                disabled={loading}
-                rows={4}
-                placeholder="Adicione observações sobre a verificação..."
-                className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              />
-            </div>
           </div>
 
           {/* Footer */}
@@ -280,7 +412,7 @@ const InventarioModal: React.FC<InventarioModalProps> = ({
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  {mode === 'create' ? 'Criar' : 'Salvar'}
+                  {mode === 'create' ? 'Criar Sessão' : 'Salvar Alterações'}
                 </>
               )}
             </button>

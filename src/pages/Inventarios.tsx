@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Plus,
-  Download,
   Search,
   Eye,
   Edit,
@@ -13,8 +12,9 @@ import {
   Package,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   Clock,
+  ClipboardCheck,
+  PlayCircle,
 } from 'lucide-react';
 import {
   InventarioProvider,
@@ -23,7 +23,7 @@ import {
 import InventarioModal from '../components/InventarioModal';
 import InventarioDetalhes from '../components/InventarioDetalhes';
 import { useAuth } from '../hooks/useAuth';
-import * as XLSX from 'xlsx';
+import { useNavigate } from 'react-router-dom';
 
 // ========================================
 // COMPONENTE INTERNO COM LÓGICA
@@ -31,11 +31,9 @@ import * as XLSX from 'xlsx';
 
 const InventariosContent: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const {
     inventariosFiltrados,
-    patrimonios,
-    categorias,
-    setores,
     usuarios,
     filtros,
     setFiltros,
@@ -74,8 +72,8 @@ const InventariosContent: React.FC = () => {
   // ========================================
 
   const userRole = user?.role?.toLowerCase() || '';
-  const canCreate = ['administrador', 'gestor', 'gerente'].includes(userRole);
-  const canEdit = ['administrador', 'gestor', 'gerente'].includes(userRole);
+  const canCreate = ['administrador', 'gerente'].includes(userRole);
+  const canEdit = ['administrador', 'gerente'].includes(userRole);
   const canDelete = userRole === 'administrador';
 
   // ========================================
@@ -95,7 +93,8 @@ const InventariosContent: React.FC = () => {
   useEffect(() => {
     setPaginaAtual(1);
   }, [
-    filtros.situacao,
+    filtros.status,
+    filtros.tipo,
     filtros.responsavel_id,
     filtros.data_inicio,
     filtros.data_fim,
@@ -155,16 +154,21 @@ const InventariosContent: React.FC = () => {
       await deleteInventario(showDeleteConfirm.id);
       setShowDeleteConfirm(null);
     } catch (err) {
-      console.error('Erro ao excluir registro de inventário:', err);
+      console.error('Erro ao excluir sessão de inventário:', err);
     } finally {
       setDeletingId(null);
     }
   };
 
+  const handleConferir = (inventario: any) => {
+    navigate(`/inventarios/${inventario.id}/conferencia`);
+  };
+
   const limparFiltros = () => {
     setFiltros({
       busca: '',
-      situacao: 'todos',
+      status: 'todos',
+      tipo: 'todos',
       responsavel_id: 'todos',
       data_inicio: '',
       data_fim: '',
@@ -172,93 +176,53 @@ const InventariosContent: React.FC = () => {
     setBuscaLocal('');
   };
 
-  const handleExportarExcel = () => {
-    if (inventariosFiltrados.length === 0) {
-      alert('Nenhum registro de inventário para exportar!');
-      return;
-    }
-
-    const dados = inventariosFiltrados.map((inv) => {
-      const patrimonio = patrimonios.find((p) => p.id === inv.patrimonio_id);
-      const responsavel = usuarios.find((u) => u.id === inv.responsavel_id);
-
-      return {
-        ID: inv.id,
-        'Patrimônio': patrimonio?.nome || 'N/A',
-        'Número de Série': patrimonio?.numero_serie || '-',
-        'Categoria': categorias.find((c) => c.id === patrimonio?.categoria_id)
-          ?.nome || '-',
-        'Setor': setores.find((s) => s.id === patrimonio?.setor_id)?.nome || '-',
-        'Situação': getSituacaoLabel(inv.situacao),
-        'Responsável': responsavel?.username || '-',
-        'Data Verificação': inv.data_verificacao
-          ? new Date(inv.data_verificacao).toLocaleDateString('pt-BR')
-          : '-',
-        'Observações': inv.observacoes || '-',
-      };
-    });
-
-    const ws = XLSX.utils.json_to_sheet(dados);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Inventários');
-
-    const fileName = `inventarios_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
-  };
-
   // ========================================
   // HELPERS
   // ========================================
 
-  const getPatrimonioNome = (id: number) =>
-    patrimonios.find((p) => p.id === id)?.nome || 'N/A';
-
   const getResponsavelNome = (id?: number | null) =>
     usuarios.find((u) => u.id === id)?.username || '-';
 
-  const getSituacaoLabel = (situacao: string) => {
+  const getTipoLabel = (tipo: string) => {
     const labels: { [key: string]: string } = {
-      encontrado: 'Encontrado',
-      nao_encontrado: 'Não Encontrado',
-      divergencia: 'Divergência',
-      conferido: 'Conferido',
-      pendente: 'Pendente',
+      geral: 'Geral',
+      por_setor: 'Por Setor',
+      por_categoria: 'Por Categoria',
     };
-    return labels[situacao] || situacao;
+    return labels[tipo] || tipo;
   };
 
-  const getSituacaoBadge = (situacao: string) => {
+  const getStatusLabel = (status: string) => {
+    const labels: { [key: string]: string } = {
+      em_andamento: 'Em Andamento',
+      concluido: 'Concluído',
+      cancelado: 'Cancelado',
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusBadge = (status: string) => {
     const configs: {
       [key: string]: { color: string; bgColor: string; icon: any };
     } = {
-      encontrado: {
+      em_andamento: {
+        color: 'text-blue-700 dark:text-blue-400',
+        bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+        icon: PlayCircle,
+      },
+      concluido: {
         color: 'text-green-700 dark:text-green-400',
         bgColor: 'bg-green-100 dark:bg-green-900/30',
         icon: CheckCircle,
       },
-      nao_encontrado: {
+      cancelado: {
         color: 'text-red-700 dark:text-red-400',
         bgColor: 'bg-red-100 dark:bg-red-900/30',
         icon: XCircle,
       },
-      divergencia: {
-        color: 'text-orange-700 dark:text-orange-400',
-        bgColor: 'bg-orange-100 dark:bg-orange-900/30',
-        icon: AlertTriangle,
-      },
-      conferido: {
-        color: 'text-blue-700 dark:text-blue-400',
-        bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-        icon: CheckCircle,
-      },
-      pendente: {
-        color: 'text-gray-700 dark:text-gray-400',
-        bgColor: 'bg-gray-100 dark:bg-gray-900/30',
-        icon: Clock,
-      },
     };
 
-    const config = configs[situacao] || configs.pendente;
+    const config = configs[status] || configs.em_andamento;
     const Icon = config.icon;
 
     return (
@@ -266,7 +230,7 @@ const InventariosContent: React.FC = () => {
         className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${config.bgColor} ${config.color}`}
       >
         <Icon className="w-3 h-3" />
-        {getSituacaoLabel(situacao)}
+        {getStatusLabel(status)}
       </span>
     );
   };
@@ -313,7 +277,7 @@ const InventariosContent: React.FC = () => {
             Inventário
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Gerenciamento de verificações patrimoniais
+            Gerenciamento de sessões de inventário patrimonial
           </p>
         </div>
         <div className="flex gap-2">
@@ -334,7 +298,7 @@ const InventariosContent: React.FC = () => {
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-4 h-4" />
-              Nova Verificação
+              Nova Sessão
             </button>
           )}
         </div>
@@ -346,13 +310,13 @@ const InventariosContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Total
+                Total de Sessões
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {kpis.total}
               </p>
             </div>
-            <Package className="w-8 h-8 text-blue-600" />
+            <Package className="w-8 h-8 text-gray-600" />
           </div>
         </div>
 
@@ -360,10 +324,24 @@ const InventariosContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Conferidos
+                Em Andamento
+              </p>
+              <p className="text-2xl font-bold text-blue-600">
+                {kpis.em_andamento}
+              </p>
+            </div>
+            <PlayCircle className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Concluídos
               </p>
               <p className="text-2xl font-bold text-green-600">
-                {kpis.conferidos}
+                {kpis.concluidos}
               </p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-600" />
@@ -374,58 +352,22 @@ const InventariosContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Não Encontrados
+                Cancelados
               </p>
               <p className="text-2xl font-bold text-red-600">
-                {kpis.naoEncontrados}
+                {kpis.cancelados}
               </p>
             </div>
             <XCircle className="w-8 h-8 text-red-600" />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                % Conferido
-              </p>
-              <p className="text-2xl font-bold text-blue-600">
-                {kpis.percentualConferido.toFixed(1)}%
-              </p>
-            </div>
-            <div className="text-blue-600">
-              <svg className="w-8 h-8" viewBox="0 0 36 36">
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="16"
-                  fill="none"
-                  stroke="#e5e7eb"
-                  strokeWidth="3"
-                />
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeDasharray={`${kpis.percentualConferido}, 100`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 18 18)"
-                />
-              </svg>
-            </div>
           </div>
         </div>
       </div>
 
       {/* Filtros */}
       <div className="bg-white dark:bg-[#1e1e1e] border border-gray-200 dark:border-[#2d2d2d] rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
           {/* Busca */}
-          <div>
+          <div className="lg:col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Buscar
             </label>
@@ -435,30 +377,47 @@ const InventariosContent: React.FC = () => {
                 type="text"
                 value={buscaLocal}
                 onChange={(e) => setBuscaLocal(e.target.value)}
-                placeholder="Nome do patrimônio..."
+                placeholder="Título ou descrição..."
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
-          {/* Situação */}
+          {/* Status */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Situação
+              Status
             </label>
             <select
-              value={filtros.situacao}
+              value={filtros.status}
               onChange={(e) =>
-                setFiltros({ ...filtros, situacao: e.target.value })
+                setFiltros({ ...filtros, status: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="todos">Todas</option>
-              <option value="pendente">Pendente</option>
-              <option value="conferido">Conferido</option>
-              <option value="encontrado">Encontrado</option>
-              <option value="nao_encontrado">Não Encontrado</option>
-              <option value="divergencia">Divergência</option>
+              <option value="todos">Todos</option>
+              <option value="em_andamento">Em Andamento</option>
+              <option value="concluido">Concluído</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+          </div>
+
+          {/* Tipo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Tipo
+            </label>
+            <select
+              value={filtros.tipo}
+              onChange={(e) =>
+                setFiltros({ ...filtros, tipo: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="todos">Todos</option>
+              <option value="geral">Geral</option>
+              <option value="por_setor">Por Setor</option>
+              <option value="por_categoria">Por Categoria</option>
             </select>
           </div>
 
@@ -497,21 +456,6 @@ const InventariosContent: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-
-          {/* Data Fim */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Data Fim
-            </label>
-            <input
-              type="date"
-              value={filtros.data_fim}
-              onChange={(e) =>
-                setFiltros({ ...filtros, data_fim: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 dark:border-[#2d2d2d] rounded-lg bg-white dark:bg-[#2a2a2a] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
         </div>
 
         {/* Botões */}
@@ -522,13 +466,6 @@ const InventariosContent: React.FC = () => {
           >
             <X className="w-4 h-4" />
             Limpar Filtros
-          </button>
-          <button
-            onClick={handleExportarExcel}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <Download className="w-4 h-4" />
-            Exportar Excel
           </button>
         </div>
       </div>
@@ -552,7 +489,7 @@ const InventariosContent: React.FC = () => {
           <div className="flex flex-col items-center justify-center py-12">
             <Package className="w-12 h-12 text-gray-400 mb-4" />
             <p className="text-gray-600 dark:text-gray-400">
-              Nenhum registro encontrado
+              Nenhuma sessão de inventário encontrada
             </p>
           </div>
         ) : (
@@ -564,16 +501,19 @@ const InventariosContent: React.FC = () => {
                     ID
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Patrimônio
+                    Título
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Situação
+                    Tipo
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Responsável
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Data Verificação
+                    Data Início
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Ações
@@ -589,20 +529,37 @@ const InventariosContent: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
                       #{inv.id}
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                      <div className="font-medium">{inv.titulo}</div>
+                      {inv.descricao && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-1">
+                          {inv.descricao}
+                        </div>
+                      )}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {getPatrimonioNome(inv.patrimonio_id)}
+                      {getTipoLabel(inv.tipo)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {getSituacaoBadge(inv.situacao)}
+                      {getStatusBadge(inv.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                       {getResponsavelNome(inv.responsavel_id)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                      {formatDate(inv.data_verificacao)}
+                      {formatDate(inv.data_inicio)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex gap-2">
+                        {canEdit && inv.status === 'em_andamento' && (
+                          <button
+                            onClick={() => handleConferir(inv)}
+                            className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-colors"
+                            title="Conferir Itens"
+                          >
+                            <ClipboardCheck className="w-4 h-4" />
+                          </button>
+                        )}
                         <button
                           onClick={() => handleView(inv)}
                           className="p-1 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors"
@@ -717,9 +674,13 @@ const InventariosContent: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
               Confirmar Exclusão
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Tem certeza que deseja excluir este registro de inventário? Esta
-              ação não pode ser desfeita.
+            <p className="text-gray-600 dark:text-gray-400 mb-2">
+              Tem certeza que deseja excluir a sessão de inventário "
+              {showDeleteConfirm.titulo}"?
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mb-6">
+              Esta ação não pode ser desfeita e todos os itens associados serão
+              removidos.
             </p>
             <div className="flex gap-3 justify-end">
               <button

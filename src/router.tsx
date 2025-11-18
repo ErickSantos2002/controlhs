@@ -7,6 +7,7 @@ import Patrimonios from './pages/Patrimonios';
 import Transferencias from './pages/Transferencias';
 import Baixas from './pages/Baixas';
 import Inventarios from './pages/Inventarios';
+import InventarioConferencia from './pages/InventarioConferencia';
 import NotFound from './pages/NotFound';
 import Logs from './pages/Logs';
 import CadastrosBasicos from './pages/CadastrosBasicos';
@@ -80,6 +81,15 @@ const AppRoutes: React.FC = () => (
       element={
         <ProtectedRoute>
           <Inventarios />
+        </ProtectedRoute>
+      }
+    />
+
+    <Route
+      path="/inventarios/:id/conferencia"
+      element={
+        <ProtectedRoute>
+          <InventarioConferencia />
         </ProtectedRoute>
       }
     />
