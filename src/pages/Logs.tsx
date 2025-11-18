@@ -54,34 +54,12 @@ const Logs: React.FC = () => {
   }, [buscaLocal]);
 
   // ========================================
-  // PAGINAÇÃO LOCAL
+  // PAGINAÇÃO SERVER-SIDE
   // ========================================
 
-  const dadosPaginados = useMemo(() => {
-    const inicio = (paginacao.paginaAtual - 1) * paginacao.itensPorPagina;
-    const fim = inicio + paginacao.itensPorPagina;
-    return logsFiltrados.slice(inicio, fim);
-  }, [logsFiltrados, paginacao.paginaAtual, paginacao.itensPorPagina]);
-
-  // Atualiza total de páginas baseado nos logs filtrados
-  useEffect(() => {
-    const totalPaginas = Math.ceil(logsFiltrados.length / paginacao.itensPorPagina);
-    const totalRegistros = logsFiltrados.length;
-
-    if (totalPaginas !== paginacao.totalPaginas || totalRegistros !== paginacao.totalRegistros) {
-      setPaginacao({
-        totalPaginas: Math.max(1, totalPaginas),
-        totalRegistros
-      });
-    }
-  }, [logsFiltrados.length, paginacao.itensPorPagina]);
-
-  // Garante que página atual não ultrapasse total de páginas
-  useEffect(() => {
-    if (paginacao.paginaAtual > paginacao.totalPaginas && paginacao.totalPaginas > 0) {
-      setPaginacao({ paginaAtual: paginacao.totalPaginas });
-    }
-  }, [paginacao.totalPaginas]);
+  // 🎯 Com paginação server-side, não precisamos paginar localmente
+  // Os logs já vêm na página correta do backend
+  const dadosPaginados = logsFiltrados;
 
   // ========================================
   // CÁLCULOS DE PAGINAÇÃO

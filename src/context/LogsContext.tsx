@@ -110,11 +110,6 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // 🔍 DEBUG: Log para ver estrutura dos dados (apenas em dev)
       logger.debug('📋 Dados recebidos da API de logs:', data);
-      if (Array.isArray(data) && data.length > 0) {
-        logger.debug('📋 Primeiro log (exemplo):', data[0]);
-      } else if (data.logs && data.logs.length > 0) {
-        logger.debug('📋 Primeiro log (exemplo):', data.logs[0]);
-      }
 
       // 🔄 Função para normalizar os dados e mapear campo de usuário
       const normalizarLogs = (logs: any[]): Log[] => {
@@ -149,8 +144,19 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
         });
       };
 
-      // Verifica se a API retorna um objeto com logs ou array direto
-      if (Array.isArray(data)) {
+      // ✅ Nova estrutura de resposta com paginação server-side
+      // { total: number, pagina: number, limite: number, logs: Log[] }
+      if (data && typeof data === 'object' && 'logs' in data && Array.isArray(data.logs)) {
+        const logsNormalizados = normalizarLogs(data.logs);
+        setLogs(logsNormalizados);
+        setPaginacaoState(prev => ({
+          ...prev,
+          totalRegistros: data.total || 0,
+          totalPaginas: Math.ceil((data.total || 0) / prev.itensPorPagina),
+        }));
+        logger.debug(`✅ Carregados ${data.logs.length} logs de ${data.total} total`);
+      } else if (Array.isArray(data)) {
+        // Fallback para formato antigo (array direto)
         const logsNormalizados = normalizarLogs(data);
         setLogs(logsNormalizados);
         setPaginacaoState(prev => ({
@@ -158,21 +164,16 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
           totalRegistros: data.length,
           totalPaginas: Math.ceil(data.length / prev.itensPorPagina),
         }));
-      } else if (data.logs && Array.isArray(data.logs)) {
-        const logsNormalizados = normalizarLogs(data.logs);
-        setLogs(logsNormalizados);
-        setPaginacaoState(prev => ({
-          ...prev,
-          totalRegistros: data.total || data.logs.length,
-          totalPaginas: Math.ceil((data.total || data.logs.length) / prev.itensPorPagina),
-        }));
+        logger.warn('⚠️ API retornou array direto (formato antigo)');
       } else {
         setLogs([]);
-        setPaginacaoState(prev => ({
-          ...prev,
+        setPaginacaoState({
+          paginaAtual: 1,
+          itensPorPagina: 10,
           totalRegistros: 0,
           totalPaginas: 1,
-        }));
+        });
+        logger.warn('⚠️ Resposta da API não contém logs');
       }
 
       setLastFetch(Date.now());
@@ -216,55 +217,12 @@ export const LogsProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [carregarUsuarios]);
 
   // ========================================
-  // FILTROS APLICADOS LOCALMENTE
+  // LOGS JÁ FILTRADOS PELO BACKEND (SERVER-SIDE)
   // ========================================
 
-  const logsFiltrados = useMemo(() => {
-    let resultado = [...logs];
-
-    // Filtro de busca local (complementar ao da API)
-    if (filtros.busca) {
-      const termo = filtros.busca.toLowerCase();
-      resultado = resultado.filter(
-        log =>
-          log.acao.toLowerCase().includes(termo) ||
-          log.entidade.toLowerCase().includes(termo) ||
-          log.usuario.toLowerCase().includes(termo) ||
-          log.entidade_id.toString().includes(termo)
-      );
-    }
-
-    // Filtro por entidade
-    if (filtros.entidade && filtros.entidade !== 'todas') {
-      resultado = resultado.filter(log => log.entidade === filtros.entidade);
-    }
-
-    // Filtro por ação
-    if (filtros.acao && filtros.acao !== 'todas') {
-      resultado = resultado.filter(log => log.acao === filtros.acao);
-    }
-
-    // Filtro por usuário
-    if (filtros.usuario && filtros.usuario !== 'todos') {
-      resultado = resultado.filter(log => log.usuario === filtros.usuario);
-    }
-
-    // Filtro por data de início
-    if (filtros.dataInicio) {
-      resultado = resultado.filter(
-        log => new Date(log.criado_em) >= new Date(filtros.dataInicio!)
-      );
-    }
-
-    // Filtro por data de fim
-    if (filtros.dataFim) {
-      resultado = resultado.filter(
-        log => new Date(log.criado_em) <= new Date(filtros.dataFim!)
-      );
-    }
-
-    return resultado;
-  }, [logs, filtros]);
+  // 🎯 Com paginação server-side, os logs já vêm filtrados do backend
+  // Não precisamos aplicar filtros localmente
+  const logsFiltrados = useMemo(() => logs, [logs]);
 
   // ========================================
   // FUNÇÃO PARA ATUALIZAR PAGINAÇÃO
