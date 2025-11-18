@@ -316,20 +316,26 @@ export async function rejeitarBaixa(id: number, payload: any) {
 }
 
 // ========================================
-// 📦 INVENTÁRIOS
+// 📦 INVENTÁRIOS (Nova Estrutura - Sessões + Itens)
 // ========================================
 
 /**
- * Lista todos os registros de inventário
+ * Lista todas as sessões de inventário com filtros opcionais
+ * @param statusFilter - Filtrar por status (em_andamento | concluido | cancelado)
+ * @param tipoFilter - Filtrar por tipo (geral | por_setor | por_categoria)
  * @returns Lista de inventários
  */
-export async function listInventarios() {
-  const { data } = await api.get('/inventarios/');
+export async function listInventarios(statusFilter?: string, tipoFilter?: string) {
+  const params: any = {};
+  if (statusFilter) params.status_filter = statusFilter;
+  if (tipoFilter) params.tipo_filter = tipoFilter;
+
+  const { data } = await api.get('/inventarios/', { params });
   return data;
 }
 
 /**
- * Cria um novo registro de inventário
+ * Cria uma nova sessão de inventário
  * @param payload - Dados do inventário
  * @returns Inventário criado
  */
@@ -339,9 +345,9 @@ export async function createInventario(payload: any) {
 }
 
 /**
- * Obtém um inventário específico
+ * Obtém detalhes de uma sessão de inventário incluindo todos os itens
  * @param id - ID do inventário
- * @returns Dados do inventário
+ * @returns Inventário com itens
  */
 export async function getInventario(id: number) {
   const { data } = await api.get(`/inventarios/${id}`);
@@ -349,7 +355,7 @@ export async function getInventario(id: number) {
 }
 
 /**
- * Atualiza informações de um inventário
+ * Atualiza informações de uma sessão de inventário
  * @param id - ID do inventário
  * @param payload - Dados a atualizar
  * @returns Inventário atualizado
@@ -360,11 +366,106 @@ export async function updateInventario(id: number, payload: any) {
 }
 
 /**
- * Remove um registro de inventário
+ * Remove uma sessão de inventário e todos os seus itens
  * @param id - ID do inventário
  */
 export async function deleteInventario(id: number) {
   await api.delete(`/inventarios/${id}`);
+}
+
+/**
+ * Lista todos os itens de uma sessão de inventário
+ * @param inventarioId - ID do inventário
+ * @param situacaoFilter - Filtrar por situação (encontrado | nao_encontrado | divergencia | conferido)
+ * @returns Lista de itens
+ */
+export async function listItensInventario(inventarioId: number, situacaoFilter?: string) {
+  const params: any = {};
+  if (situacaoFilter) params.situacao_filter = situacaoFilter;
+
+  const { data } = await api.get(`/inventarios/${inventarioId}/itens`, { params });
+  return data;
+}
+
+/**
+ * Adiciona um único patrimônio à sessão de inventário
+ * @param inventarioId - ID do inventário
+ * @param payload - Dados do item
+ * @returns Item criado
+ */
+export async function adicionarItemInventario(inventarioId: number, payload: any) {
+  const { data } = await api.post(`/inventarios/${inventarioId}/itens`, payload);
+  return data;
+}
+
+/**
+ * Adiciona múltiplos patrimônios de uma vez ao inventário
+ * Útil para iniciar um inventário com base em filtros
+ * @param inventarioId - ID do inventário
+ * @param payload - Lista de IDs de patrimônios
+ * @returns Lista de itens criados
+ */
+export async function adicionarItensBulkInventario(inventarioId: number, payload: any) {
+  const { data } = await api.post(`/inventarios/${inventarioId}/itens/bulk`, payload);
+  return data;
+}
+
+/**
+ * Atualiza um item do inventário (usado para marcar como conferido)
+ * Registra automaticamente quem conferiu e quando
+ * @param inventarioId - ID do inventário
+ * @param itemId - ID do item
+ * @param payload - Dados a atualizar (situação, observações)
+ * @returns Item atualizado
+ */
+export async function atualizarItemInventario(
+  inventarioId: number,
+  itemId: number,
+  payload: any
+) {
+  const { data } = await api.put(`/inventarios/${inventarioId}/itens/${itemId}`, payload);
+  return data;
+}
+
+/**
+ * Remove um item do inventário
+ * @param inventarioId - ID do inventário
+ * @param itemId - ID do item
+ */
+export async function removerItemInventario(inventarioId: number, itemId: number) {
+  await api.delete(`/inventarios/${inventarioId}/itens/${itemId}`);
+}
+
+/**
+ * Finaliza uma sessão de inventário
+ * Marca o inventário como concluído e registra a data de conclusão
+ * @param inventarioId - ID do inventário
+ * @param payload - Observações finais (opcional)
+ * @returns Inventário atualizado
+ */
+export async function finalizarInventario(inventarioId: number, payload?: any) {
+  const { data } = await api.post(`/inventarios/${inventarioId}/finalizar`, payload || {});
+  return data;
+}
+
+/**
+ * Cancela uma sessão de inventário
+ * @param inventarioId - ID do inventário
+ * @returns Inventário atualizado
+ */
+export async function cancelarInventario(inventarioId: number) {
+  const { data } = await api.post(`/inventarios/${inventarioId}/cancelar`);
+  return data;
+}
+
+/**
+ * Obtém estatísticas sobre o progresso do inventário
+ * @param inventarioId - ID do inventário
+ * @returns Estatísticas (total, conferidos, pendentes, etc)
+ */
+export async function getEstatisticasInventario(inventarioId: number) {
+  const { data } = await api.get(`/inventarios/${inventarioId}/estatisticas`);
+  return data;
 }
 
 // ========================================

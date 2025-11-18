@@ -11,10 +11,9 @@ import {
   createInventario as apiCreateInventario,
   updateInventario as apiUpdateInventario,
   deleteInventario as apiDeleteInventario,
-  listPatrimonios,
-  listCategorias,
-  listSetores,
   listUsuarios,
+  listSetores,
+  listCategorias,
 } from '../services/controlapi';
 import type {
   Inventario,
@@ -22,14 +21,8 @@ import type {
   InventarioUpdate,
   FiltrosInventario,
   InventariosKPIs,
-  SituacaoInventario,
 } from '../types/inventarios.types';
-import type {
-  Patrimonio,
-  Categoria,
-  Setor,
-  Usuario,
-} from '../types/patrimonios.types';
+import type { Usuario, Setor, Categoria } from '../types/patrimonios.types';
 
 // ========================================
 // CONTEXT DATA TYPE
@@ -38,10 +31,9 @@ import type {
 interface InventarioContextData {
   // Dados
   inventarios: Inventario[];
-  patrimonios: Patrimonio[];
-  categorias: Categoria[];
-  setores: Setor[];
   usuarios: Usuario[];
+  setores: Setor[];
+  categorias: Categoria[];
 
   // Estados
   loading: boolean;
@@ -85,10 +77,9 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
   // ========================================
 
   const [inventarios, setInventarios] = useState<Inventario[]>([]);
-  const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [setores, setSetores] = useState<Setor[]>([]);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [setores, setSetores] = useState<Setor[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetch, setLastFetch] = useState<number>(0);
@@ -99,7 +90,8 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [filtros, setFiltros] = useState<FiltrosInventario>({
     busca: '',
-    situacao: 'todos',
+    status: 'todos',
+    tipo: 'todos',
     responsavel_id: 'todos',
     data_inicio: '',
     data_fim: '',
@@ -122,25 +114,18 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
 
       try {
         // Busca dados em paralelo para melhor performance
-        const [
-          inventariosData,
-          patrimoniosData,
-          categoriasData,
-          setoresData,
-          usuariosData,
-        ] = await Promise.all([
-          listInventarios(),
-          listPatrimonios(),
-          listCategorias(),
-          listSetores(),
-          listUsuarios(),
-        ]);
+        const [inventariosData, usuariosData, setoresData, categoriasData] =
+          await Promise.all([
+            listInventarios(),
+            listUsuarios(),
+            listSetores(),
+            listCategorias(),
+          ]);
 
         setInventarios(inventariosData || []);
-        setPatrimonios(patrimoniosData || []);
-        setCategorias(categoriasData || []);
-        setSetores(setoresData || []);
         setUsuarios(usuariosData || []);
+        setSetores(setoresData || []);
+        setCategorias(categoriasData || []);
         setLastFetch(now);
       } catch (err: any) {
         console.error('Erro ao carregar dados:', err);
@@ -171,13 +156,14 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
         setError(null);
 
         const novoInventario = await apiCreateInventario(data);
-        setInventarios((prev) => [...prev, novoInventario]);
+        setInventarios((prev) => [novoInventario, ...prev]);
 
-        console.log('Registro de inventário criado com sucesso!');
+        console.log('Sessão de inventário criada com sucesso!');
       } catch (err: any) {
-        console.error('Erro ao criar registro de inventário:', err);
+        console.error('Erro ao criar sessão de inventário:', err);
         setError(
-          err.response?.data?.detail || 'Erro ao criar registro de inventário',
+          err.response?.data?.detail ||
+            'Erro ao criar sessão de inventário',
         );
         throw err;
       } finally {
@@ -198,12 +184,12 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
           prev.map((inv) => (inv.id === id ? inventarioAtualizado : inv)),
         );
 
-        console.log('Registro de inventário atualizado com sucesso!');
+        console.log('Sessão de inventário atualizada com sucesso!');
       } catch (err: any) {
-        console.error('Erro ao atualizar registro de inventário:', err);
+        console.error('Erro ao atualizar sessão de inventário:', err);
         setError(
           err.response?.data?.detail ||
-            'Erro ao atualizar registro de inventário',
+            'Erro ao atualizar sessão de inventário',
         );
         throw err;
       } finally {
@@ -221,11 +207,11 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
       await apiDeleteInventario(id);
       setInventarios((prev) => prev.filter((inv) => inv.id !== id));
 
-      console.log('Registro de inventário excluído com sucesso!');
+      console.log('Sessão de inventário excluída com sucesso!');
     } catch (err: any) {
-      console.error('Erro ao excluir registro de inventário:', err);
+      console.error('Erro ao excluir sessão de inventário:', err);
       setError(
-        err.response?.data?.detail || 'Erro ao excluir registro de inventário',
+        err.response?.data?.detail || 'Erro ao excluir sessão de inventário',
       );
       throw err;
     } finally {
@@ -244,22 +230,24 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
   const inventariosFiltrados = useMemo(() => {
     let resultado = [...inventarios];
 
-    // Filtro de busca (busca no patrimônio)
+    // Filtro de busca (título ou descrição)
     if (filtros.busca) {
       const buscaLower = filtros.busca.toLowerCase();
-      resultado = resultado.filter((inv) => {
-        const patrimonio = patrimonios.find((p) => p.id === inv.patrimonio_id);
-        return (
-          patrimonio?.nome?.toLowerCase().includes(buscaLower) ||
-          patrimonio?.numero_serie?.toLowerCase().includes(buscaLower) ||
-          inv.observacoes?.toLowerCase().includes(buscaLower)
-        );
-      });
+      resultado = resultado.filter(
+        (inv) =>
+          inv.titulo?.toLowerCase().includes(buscaLower) ||
+          inv.descricao?.toLowerCase().includes(buscaLower),
+      );
     }
 
-    // Filtro de situação
-    if (filtros.situacao && filtros.situacao !== 'todos') {
-      resultado = resultado.filter((inv) => inv.situacao === filtros.situacao);
+    // Filtro de status
+    if (filtros.status && filtros.status !== 'todos') {
+      resultado = resultado.filter((inv) => inv.status === filtros.status);
+    }
+
+    // Filtro de tipo
+    if (filtros.tipo && filtros.tipo !== 'todos') {
+      resultado = resultado.filter((inv) => inv.tipo === filtros.tipo);
     }
 
     // Filtro de responsável
@@ -272,23 +260,23 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
     // Filtro de data início
     if (filtros.data_inicio) {
       resultado = resultado.filter((inv) => {
-        const dataVerificacao = inv.data_verificacao || inv.criado_em;
-        if (!dataVerificacao) return false;
-        return new Date(dataVerificacao) >= new Date(filtros.data_inicio);
+        const dataInicio = inv.data_inicio;
+        if (!dataInicio) return false;
+        return new Date(dataInicio) >= new Date(filtros.data_inicio);
       });
     }
 
     // Filtro de data fim
     if (filtros.data_fim) {
       resultado = resultado.filter((inv) => {
-        const dataVerificacao = inv.data_verificacao || inv.criado_em;
-        if (!dataVerificacao) return false;
-        return new Date(dataVerificacao) <= new Date(filtros.data_fim);
+        const dataFim = inv.data_fim || inv.data_inicio;
+        if (!dataFim) return false;
+        return new Date(dataFim) <= new Date(filtros.data_fim);
       });
     }
 
     return resultado;
-  }, [inventarios, patrimonios, filtros]);
+  }, [inventarios, filtros]);
 
   // ========================================
   // KPIS
@@ -296,32 +284,21 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const kpis = useMemo((): InventariosKPIs => {
     const total = inventariosFiltrados.length;
-    const encontrados = inventariosFiltrados.filter(
-      (inv) => inv.situacao === 'encontrado' || inv.situacao === 'conferido',
+    const em_andamento = inventariosFiltrados.filter(
+      (inv) => inv.status === 'em_andamento',
     ).length;
-    const naoEncontrados = inventariosFiltrados.filter(
-      (inv) => inv.situacao === 'nao_encontrado',
+    const concluidos = inventariosFiltrados.filter(
+      (inv) => inv.status === 'concluido',
     ).length;
-    const divergencias = inventariosFiltrados.filter(
-      (inv) => inv.situacao === 'divergencia',
+    const cancelados = inventariosFiltrados.filter(
+      (inv) => inv.status === 'cancelado',
     ).length;
-    const conferidos = inventariosFiltrados.filter(
-      (inv) => inv.situacao === 'conferido',
-    ).length;
-    const pendentes = inventariosFiltrados.filter(
-      (inv) => inv.situacao === 'pendente',
-    ).length;
-
-    const percentualConferido = total > 0 ? (conferidos / total) * 100 : 0;
 
     return {
       total,
-      encontrados,
-      naoEncontrados,
-      divergencias,
-      conferidos,
-      pendentes,
-      percentualConferido,
+      em_andamento,
+      concluidos,
+      cancelados,
     };
   }, [inventariosFiltrados]);
 
@@ -331,10 +308,9 @@ export const InventarioProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const value: InventarioContextData = {
     inventarios,
-    patrimonios,
-    categorias,
-    setores,
     usuarios,
+    setores,
+    categorias,
     loading,
     error,
     filtros,
