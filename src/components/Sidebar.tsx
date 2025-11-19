@@ -60,7 +60,7 @@ const Sidebar: React.FC = () => {
       to: '/baixas',
       icon: (isActive: boolean) => (
         <img
-          src={`https://img.icons8.com/?size=100&id=12064&format=png&color=${getColor(isActive)}`}
+          src={`https://img.icons8.com/?size=100&id=7746&format=png&color=${getColor(isActive)}`}
           alt="Baixas"
           className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'}
             dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
@@ -72,7 +72,7 @@ const Sidebar: React.FC = () => {
       to: '/inventarios',
       icon: (isActive: boolean) => (
         <img
-          src={`https://img.icons8.com/?size=100&id=87&format=png&color=${getColor(isActive)}`}
+          src={`https://img.icons8.com/?size=100&id=8372&format=png&color=${getColor(isActive)}`}
           alt="Inventário"
           className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'}
             dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
@@ -84,7 +84,7 @@ const Sidebar: React.FC = () => {
       to: '/cadastros',
       icon: (isActive: boolean) => (
         <img
-          src={`https://img.icons8.com/?size=100&id=P1YG1sk94HiB&format=png&color=${getColor(isActive)}`}
+          src={`https://img.icons8.com/?size=100&id=59718&format=png&color=${getColor(isActive)}`}
           alt="Cadastros"
           className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'}
             dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
@@ -99,8 +99,9 @@ const Sidebar: React.FC = () => {
             icon: (isActive: boolean) => (
               <img
                 src={`https://img.icons8.com/?size=100&id=2969&format=png&color=${getColor(isActive)}`}
-                alt="Configurações"
-                className={iconBaseClass}
+                alt="Cadastros"
+                className={`${iconBaseClass} ${isActive ? 'opacity-100' : 'opacity-70'}
+                  dark:filter dark:brightness-0 dark:invert transition-all duration-200`}
               />
             ),
           },

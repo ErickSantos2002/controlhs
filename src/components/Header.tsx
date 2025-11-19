@@ -3,16 +3,18 @@ import { useAuth } from '../hooks/useAuth';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import logo from '../assets/HS2.ico';
-import ModalTrocarSenha from '../components/ModalTrocarSenha'; // 🔹 certifique-se de ajustar o caminho
+import ModalTrocarSenha from '../components/ModalTrocarSenha';
+
 
 const Header: React.FC = () => {
   const { user, logout } = useAuth();
+  const location = useLocation(); // ✅ Antes de usar
   const { darkMode, toggleDarkMode } = useTheme();
+
   const [menuVisivel, setMenuVisivel] = useState(false);
   const [menuAnimado, setMenuAnimado] = useState(false);
-  const [modalSenhaAberta, setModalSenhaAberta] = useState(false); // 🔹 novo estado
+  const [modalSenhaAberta, setModalSenhaAberta] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   if (location.pathname === '/login') return null;
@@ -55,6 +57,106 @@ const Header: React.FC = () => {
     console.log('Nova senha:', novaSenha);
     // 🔹 Aqui você pode adicionar a lógica para atualizar a senha via API
   };
+
+  const iconBaseClass = 'w-5 h-5 mr-2 transition-colors';
+
+  const getColor = (isActive: boolean, darkMode: boolean) => {
+    if (darkMode) {
+      return 'D1D1D1'; // ícones claros no modo escuro
+    }
+    return isActive ? '1E3A8A' : '1D4ED8'; // azul escuro / azul vivo
+  };
+
+  const mobileMenuItems = [
+    {
+      label: 'Dashboard',
+      to: '/dashboard',
+      icon: (active: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=udjU_YS4lMXL&format=png&color=${getColor(active, darkMode)}`}
+          className={iconBaseClass}
+          alt="Dashboard"
+        />
+      ),
+    },
+    {
+      label: 'Patrimônios',
+      to: '/patrimonios',
+      icon: (active: boolean) => (
+        <img
+          src="https://img.icons8.com/?size=100&id=f6XnJbAyvoWg&format=png"
+          className={`${iconBaseClass} ${active ? 'opacity-100' : 'opacity-70'} 
+                      dark:filter dark:brightness-0 dark:invert`}
+          alt="Patrimônios"
+        />
+      ),
+    },
+    {
+      label: 'Transferências',
+      to: '/transferencias',
+      icon: (active: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=P1YG1sk94HiB&format=png&color=${getColor(active, darkMode)}`}
+          className={`${iconBaseClass} ${active ? 'opacity-100' : 'opacity-70'}
+                      dark:filter dark:brightness-0 dark:invert`}
+          alt="Transferências"
+        />
+      ),
+    },
+    {
+      label: 'Baixas',
+      to: '/baixas',
+      icon: (active: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=7746&format=png&color=${getColor(active, darkMode)}`}
+          className={`${iconBaseClass} ${active ? 'opacity-100' : 'opacity-70'}
+                      dark:filter dark:brightness-0 dark:invert`}
+          alt="Baixas"
+        />
+      ),
+    },
+    {
+      label: 'Inventário',
+      to: '/inventarios',
+      icon: (active: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=8372&format=png&color=${getColor(active, darkMode)}`}
+          className={`${iconBaseClass} ${active ? 'opacity-100' : 'opacity-70'}
+                      dark:filter dark:brightness-0 dark:invert`}
+          alt="Inventário"
+        />
+      ),
+    },
+    {
+      label: 'Cadastros',
+      to: '/cadastros',
+      icon: (active: boolean) => (
+        <img
+          src={`https://img.icons8.com/?size=100&id=59718&format=png&color=${getColor(active, darkMode)}`}
+          className={`${iconBaseClass} ${active ? 'opacity-100' : 'opacity-70'}
+                      dark:filter dark:brightness-0 dark:invert`}
+          alt="Cadastros"
+        />
+      ),
+    },
+    ...(user?.role === 'Administrador'
+      ? [
+          {
+            label: 'Log de Auditoria',
+            to: '/logs',
+            icon: (active: boolean) => (
+              <img
+                src={`https://img.icons8.com/?size=100&id=2969&format=png&color=${getColor(active, darkMode)}`}
+                className={`${iconBaseClass} ${active ? 'opacity-100' : 'opacity-70'}
+                            dark:filter dark:brightness-0 dark:invert`}
+                alt="Log"
+              />
+            ),
+          },
+        ]
+      : []),
+  ];
+
 
   return (
     <>
@@ -145,22 +247,26 @@ const Header: React.FC = () => {
 
             {/* Navegação */}
             <nav className="flex flex-col gap-4">
-              <Link
-                to="/dashboard"
-                onClick={fecharMenu}
-                className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-              >
-                Dashboard
-              </Link>
-              {user?.role === 'Administrador' && (
-                <Link
-                  to="/logs"
-                  onClick={fecharMenu}
-                  className="text-gray-700 dark:text-gray-200 font-medium hover:text-blue-600 dark:hover:text-lightGray transition"
-                >
-                  Logs de Auditoria
-                </Link>
-              )}
+              {mobileMenuItems.map((item) => {
+                const active = location.pathname === item.to;
+
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={fecharMenu}
+                    className={`flex items-center font-medium transition px-2 py-1 rounded-md
+                      ${active
+                        ? "text-blue-700 dark:text-blue-400 bg-gray-200 dark:bg-accentGray/40"
+                        : "text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400"
+                      }
+                    `}
+                  >
+                    {item.icon(active)}
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Rodapé do menu mobile */}
