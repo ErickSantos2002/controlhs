@@ -23,7 +23,6 @@ import {
   removerItemInventario,
   finalizarInventario,
   cancelarInventario,
-  listPatrimonios,
 } from '../services/controlapi';
 import type {
   InventarioComItens,
@@ -31,7 +30,6 @@ import type {
   InventarioStats,
   SituacaoItem,
 } from '../types/inventarios.types';
-import type { Patrimonio } from '../types/patrimonios.types';
 import { useAuth } from '../hooks/useAuth';
 
 // ========================================
@@ -49,7 +47,6 @@ const InventarioConferencia: React.FC = () => {
 
   const [inventario, setInventario] = useState<InventarioComItens | null>(null);
   const [stats, setStats] = useState<InventarioStats | null>(null);
-  const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [buscaLocal, setBuscaLocal] = useState('');
@@ -80,15 +77,13 @@ const InventarioConferencia: React.FC = () => {
     setError(null);
 
     try {
-      const [invData, statsData, patData] = await Promise.all([
+      const [invData, statsData] = await Promise.all([
         getInventario(parseInt(id)),
         getEstatisticasInventario(parseInt(id)),
-        listPatrimonios(),
       ]);
 
       setInventario(invData);
       setStats(statsData);
-      setPatrimonios(patData || []);
     } catch (err: any) {
       console.error('Erro ao carregar dados:', err);
       setError(
@@ -116,10 +111,9 @@ const InventarioConferencia: React.FC = () => {
     if (buscaLocal) {
       const buscaLower = buscaLocal.toLowerCase();
       resultado = resultado.filter((item) => {
-        const patrimonio = patrimonios.find((p) => p.id === item.patrimonio_id);
         return (
-          patrimonio?.nome?.toLowerCase().includes(buscaLower) ||
-          patrimonio?.numero_serie?.toLowerCase().includes(buscaLower)
+          item.patrimonio?.nome?.toLowerCase().includes(buscaLower) ||
+          item.patrimonio?.numero_serie?.toLowerCase().includes(buscaLower)
         );
       });
     }
@@ -130,7 +124,7 @@ const InventarioConferencia: React.FC = () => {
     }
 
     return resultado;
-  }, [inventario, buscaLocal, filtroSituacao, patrimonios]);
+  }, [inventario, buscaLocal, filtroSituacao]);
 
   // ========================================
   // HANDLERS
@@ -226,10 +220,6 @@ const InventarioConferencia: React.FC = () => {
   // ========================================
   // HELPERS
   // ========================================
-
-  const getPatrimonioInfo = (patrimonioId: number) => {
-    return patrimonios.find((p) => p.id === patrimonioId);
-  };
 
   const getSituacaoLabel = (situacao: string) => {
     const labels: { [key: string]: string } = {
@@ -506,7 +496,6 @@ const InventarioConferencia: React.FC = () => {
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
             {itensFiltrados.map((item) => {
-              const patrimonio = getPatrimonioInfo(item.patrimonio_id);
               const Icon = getSituacaoIcon(item.situacao);
               const isEditing = editingItemId === item.id;
 
@@ -523,7 +512,7 @@ const InventarioConferencia: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                          {patrimonio?.nome || 'N/A'}
+                          {item.patrimonio?.nome || 'N/A'}
                         </h3>
                         <Icon
                           className={`w-5 h-5 ${getSituacaoColor(item.situacao)}`}
@@ -536,7 +525,7 @@ const InventarioConferencia: React.FC = () => {
                             Número de Série
                           </p>
                           <p className="font-medium text-gray-900 dark:text-gray-100">
-                            {patrimonio?.numero_serie || '-'}
+                            {item.patrimonio?.numero_serie || '-'}
                           </p>
                         </div>
                         <div>

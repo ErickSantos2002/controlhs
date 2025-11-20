@@ -18,14 +18,12 @@ import { useInventario } from '../context/InventarioContext';
 import {
   getInventario,
   getEstatisticasInventario,
-  listPatrimonios,
 } from '../services/controlapi';
 import type {
   Inventario,
   InventarioComItens,
   InventarioStats,
 } from '../types/inventarios.types';
-import type { Patrimonio } from '../types/patrimonios.types';
 import { useAuth } from '../hooks/useAuth';
 
 interface InventarioDetalhesProps {
@@ -46,7 +44,6 @@ const InventarioDetalhes: React.FC<InventarioDetalhesProps> = ({
   const [inventarioCompleto, setInventarioCompleto] =
     useState<InventarioComItens | null>(null);
   const [stats, setStats] = useState<InventarioStats | null>(null);
-  const [patrimonios, setPatrimonios] = useState<Patrimonio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,15 +60,13 @@ const InventarioDetalhes: React.FC<InventarioDetalhesProps> = ({
       setError(null);
 
       try {
-        const [invData, statsData, patData] = await Promise.all([
+        const [invData, statsData] = await Promise.all([
           getInventario(inventario.id),
           getEstatisticasInventario(inventario.id),
-          listPatrimonios(),
         ]);
 
         setInventarioCompleto(invData);
         setStats(statsData);
-        setPatrimonios(patData || []);
       } catch (err: any) {
         console.error('Erro ao carregar detalhes:', err);
         setError(
@@ -154,10 +149,6 @@ const InventarioDetalhes: React.FC<InventarioDetalhesProps> = ({
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-
-  const getPatrimonioInfo = (patrimonioId: number) => {
-    return patrimonios.find((p) => p.id === patrimonioId);
   };
 
   const StatusInfo = getStatusIcon(inventario.status);
@@ -393,19 +384,16 @@ const InventarioDetalhes: React.FC<InventarioDetalhesProps> = ({
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-[#2d2d2d]">
                         {inventarioCompleto.itens.map((item) => {
-                          const patrimonio = getPatrimonioInfo(
-                            item.patrimonio_id,
-                          );
                           return (
                             <tr
                               key={item.id}
                               className="hover:bg-gray-100 dark:hover:bg-[#2d2d2d]"
                             >
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                {patrimonio?.nome || 'N/A'}
+                                {item.patrimonio?.nome || 'N/A'}
                               </td>
                               <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                {patrimonio?.numero_serie || '-'}
+                                {item.patrimonio?.numero_serie || '-'}
                               </td>
                               <td className="px-4 py-3 text-sm">
                                 <span

@@ -84,6 +84,16 @@ export interface InventarioFinalizar {
 // ========================================
 
 /**
+ * Dados simplificados do patrimônio retornados pela API
+ */
+export interface PatrimonioSimples {
+  id: number;
+  nome: string;
+  numero_serie?: string | null;
+  descricao?: string | null;
+}
+
+/**
  * Representa um item dentro de uma sessão de inventário
  */
 export interface ItemInventario {
@@ -96,6 +106,7 @@ export interface ItemInventario {
   data_conferencia?: string | null;
   criado_em: string;
   atualizado_em: string;
+  patrimonio?: PatrimonioSimples | null; // Objeto patrimônio já vem da API
 }
 
 /**
