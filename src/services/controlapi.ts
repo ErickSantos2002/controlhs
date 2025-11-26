@@ -487,7 +487,7 @@ export async function getEstatisticasInventario(inventarioId: number) {
  * await listAnexos(1);
  */
 export async function listAnexos(patrimonioId?: number) {
-  const params = patrimonioId ? { patrimonio_id: patrimonioId } : {};
+  const params = patrimonioId ? { patrimonio_id: Number(patrimonioId) } : {};
   const { data } = await api.get('/anexos/', { params });
   return data;
 }
