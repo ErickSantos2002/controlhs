@@ -57,13 +57,13 @@ const AnexosSection: React.FC<AnexosSectionProps> = ({
 
   const anexosCount = anexos.filter((a) => {
     if (patrimonioId && baixaId) {
-      return a.patrimonio_id === patrimonioId && a.baixa_id === baixaId;
+      return Number(a.patrimonio_id) === Number(patrimonioId) && Number(a.baixa_id) === Number(baixaId);
     }
     if (patrimonioId) {
-      return a.patrimonio_id === patrimonioId;
+      return Number(a.patrimonio_id) === Number(patrimonioId);
     }
     if (baixaId) {
-      return a.baixa_id === baixaId;
+      return Number(a.baixa_id) === Number(baixaId);
     }
     return false;
   }).length;

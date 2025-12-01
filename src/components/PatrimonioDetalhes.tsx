@@ -15,7 +15,6 @@ import {
   Info,
 } from 'lucide-react';
 import { usePatrimonios } from '../context/PatrimoniosContext';
-import { AnexosProvider } from '../context/AnexosContext';
 import AnexosSection from './AnexosSection';
 import type {
   Patrimonio,
@@ -358,9 +357,7 @@ const PatrimonioDetalhes: React.FC<PatrimonioDetalhesProps> = ({
 
             {/* Seção: Anexos */}
             <div className="mb-6">
-              <AnexosProvider>
-                <AnexosSection patrimonioId={patrimonio.id} />
-              </AnexosProvider>
+              <AnexosSection patrimonioId={Number(patrimonio.id)} />
             </div>
           </div>
 

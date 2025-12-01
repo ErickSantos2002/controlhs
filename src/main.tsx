@@ -13,6 +13,7 @@ import { PatrimoniosProvider } from './context/PatrimoniosContext';
 import { CadastrosProvider } from './context/CadastrosContext';
 import { InventarioProvider } from './context/InventarioContext';
 import { LogsProvider } from './context/LogsContext';
+import { AnexosProvider } from './context/AnexosContext';
 import './styles/index.css'; // Importa o Tailwind e estilos globais
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -22,17 +23,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <AuthProvider>
           <TransferenciasProvider>
             <PatrimoniosProvider>
-              <CadastrosProvider>
-                <InventarioProvider>
-                  <DashboardProvider>
-                    <LogsProvider>
-                      <BrowserRouter>
-                        <App />
-                      </BrowserRouter>
-                    </LogsProvider>
-                  </DashboardProvider>
-                </InventarioProvider>
-              </CadastrosProvider>
+              <AnexosProvider>
+                <CadastrosProvider>
+                  <InventarioProvider>
+                    <DashboardProvider>
+                      <LogsProvider>
+                        <BrowserRouter>
+                          <App />
+                        </BrowserRouter>
+                      </LogsProvider>
+                    </DashboardProvider>
+                  </InventarioProvider>
+                </CadastrosProvider>
+              </AnexosProvider>
             </PatrimoniosProvider>
           </TransferenciasProvider>
         </AuthProvider>
