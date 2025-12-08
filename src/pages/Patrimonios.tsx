@@ -16,6 +16,7 @@ import {
   Package,
   TrendingUp,
   DollarSign,
+  Barcode,
 } from 'lucide-react';
 import {
   PatrimoniosProvider,
@@ -25,6 +26,8 @@ import PatrimonioModal from '../components/PatrimonioModal';
 import PatrimonioDetalhes from '../components/PatrimonioDetalhes';
 import { useAuth } from '../hooks/useAuth';
 import * as XLSX from 'xlsx';
+import JsBarcode from 'jsbarcode';
+import logoHS2 from '../assets/HS2.ico';
 import type {
   Patrimonio,
   FiltrosPatrimonio,
@@ -201,6 +204,95 @@ const PatrimoniosContent: React.FC = () => {
       console.error('Erro ao excluir patrimônio:', err);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleGenerateBarcode = (patrimonio: Patrimonio) => {
+    try {
+      // Canvas temporário para gerar o código de barras
+      const tempCanvas = document.createElement('canvas');
+      JsBarcode(tempCanvas, patrimonio.id.toString(), {
+        format: 'CODE128',
+        width: 2,
+        height: 80,
+        displayValue: false,
+        margin: 0,
+      });
+
+      // Canvas final para o adesivo (formato retangular)
+      const finalCanvas = document.createElement('canvas');
+      const ctx = finalCanvas.getContext('2d');
+      if (!ctx) return;
+
+      // Dimensões do adesivo
+      const width = 500;
+      const height = 150;
+      finalCanvas.width = width;
+      finalCanvas.height = height;
+
+      // Fundo branco
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+
+      // Carrega o logo
+      const logo = new Image();
+      logo.src = logoHS2;
+
+      logo.onload = () => {
+        // Desenha o logo à esquerda (quadrado)
+        const logoSize = 100;
+        const logoX = 15;
+        const logoY = (height - logoSize) / 2;
+        ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+
+        // Linha divisória vertical
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(135, 10);
+        ctx.lineTo(135, height - 10);
+        ctx.stroke();
+
+        // Desenha o código de barras à direita (centralizado)
+        const barcodeX = 155;
+        const barcodeY = 20;
+        const barcodeWidth = 300;
+        const barcodeHeight = 80;
+        ctx.drawImage(tempCanvas, barcodeX, barcodeY, barcodeWidth, barcodeHeight);
+
+        // Texto: ID (abaixo do código de barras)
+        ctx.fillStyle = '#1f2937';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`ID: ${patrimonio.id}`, barcodeX + barcodeWidth / 2, barcodeY + barcodeHeight + 25);
+
+        // Borda ao redor do adesivo
+        ctx.strokeStyle = '#d1d5db';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(1, 1, width - 2, height - 2);
+
+        // Download da imagem
+        finalCanvas.toBlob((blob) => {
+          if (blob) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `adesivo_patrimonio_${patrimonio.id}_${patrimonio.nome.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }
+        });
+      };
+
+      logo.onerror = () => {
+        console.error('Erro ao carregar logo');
+        alert('Erro ao carregar o logo da empresa. Tente novamente.');
+      };
+    } catch (err) {
+      console.error('Erro ao gerar código de barras:', err);
+      alert('Erro ao gerar código de barras. Tente novamente.');
     }
   };
 
@@ -733,6 +825,14 @@ const PatrimoniosContent: React.FC = () => {
                             title="Visualizar"
                           >
                             <Eye className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          </button>
+
+                          <button
+                            onClick={() => handleGenerateBarcode(patrimonio)}
+                            className="p-1 rounded hover:bg-gray-100 dark:hover:bg-[#3a3a3a] transition-colors"
+                            title="Gerar Código de Barras"
+                          >
+                            <Barcode className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                           </button>
 
                           {canEdit && (
